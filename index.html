@@ -1,4 +1,3 @@
-в
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -54,7 +53,7 @@
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
       border-radius: 12px;
-      padding: 8px 6px;
+      padding: 8px 5px;
       text-align: center;
     }
 
@@ -65,9 +64,12 @@
     }
 
     .stat-value {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--accent-gold);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .stat-value.cyan { color: var(--accent-cyan); }
@@ -336,7 +338,7 @@
     }
 
     .rock-info {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #fde68a;
       text-align: center;
@@ -373,7 +375,7 @@
       color: #fef08a;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
       z-index: 6;
-      max-width: 240px;
+      max-width: 260px;
       text-align: center;
       animation: floatUp 0.8s ease-out forwards;
     }
@@ -463,7 +465,7 @@
     .inv-sub { font-size: 12px; color: var(--text-muted); }
 
     .inv-right { display: flex; align-items: center; gap: 8px; }
-    .inv-count { font-weight: 700; font-size: 14px; min-width: 44px; text-align: right; }
+    .inv-count { font-weight: 700; font-size: 13px; min-width: 66px; text-align: right; }
 
     .sell-btn {
       background: rgba(34, 197, 94, 0.16);
@@ -561,7 +563,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">ГЛУБИНА</div>
-        <div class="stat-value cyan" id="depthVal">0 м</div>
+        <div class="stat-value cyan" id="depthVal">0.0 м</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">АВТО/СЕК</div>
@@ -569,7 +571,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">СКЛАД</div>
-        <div class="stat-value green" id="storageVal">0/50</div>
+        <div class="stat-value green" id="storageVal">0/500 кг</div>
       </div>
     </div>
 
@@ -602,29 +604,22 @@
 
           <div class="drill-assembly" id="drillAssembly">
             <svg width="128" height="172" viewBox="0 0 128 172" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Опора и поршень -->
               <rect x="48" y="0" width="32" height="16" rx="4" fill="#334155" stroke="#64748b" stroke-width="2"/>
               <rect x="55" y="14" width="18" height="14" fill="#94a3b8"/>
 
-              <!-- Боковые резцы (появляются со 2-го тира) -->
               <g id="sideCutters" opacity="0">
                 <polygon points="24,44 10,56 24,62" fill="#f59e0b" stroke="#fde68a" stroke-width="1.5"/>
                 <polygon points="104,44 118,56 104,62" fill="#f59e0b" stroke="#fde68a" stroke-width="1.5"/>
               </g>
 
-              <!-- Корпус двигателя бура -->
               <rect id="drillBody" x="28" y="26" width="72" height="38" rx="10" fill="#ea580c" stroke="#fdba74" stroke-width="2.5"/>
               <line x1="38" y1="34" x2="90" y2="34" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
               <line x1="38" y1="43" x2="90" y2="43" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
               <line x1="38" y1="52" x2="90" y2="52" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
 
-              <!-- Турбо-кольцо (появляется с 3-го тира) -->
               <rect id="turboRing" x="34" y="64" width="60" height="12" rx="4" fill="#475569" stroke="#cbd5e1" stroke-width="1.5"/>
-
-              <!-- Конус бура -->
               <polygon id="drillCone" points="38,76 90,76 64,158" fill="#94a3b8" stroke="#e2e8f0" stroke-width="2"/>
 
-              <!-- Спиральные витки шнека -->
               <g class="augur-blades">
                 <path d="M39 84 L89 94 L85 102 L41 92 Z" fill="#334155"/>
                 <path d="M43 102 L84 112 L80 120 L46 110 Z" fill="#334155"/>
@@ -632,7 +627,6 @@
                 <path d="M55 137 L71 143 L67 150 L57 144 Z" fill="#1e293b"/>
               </g>
 
-              <!-- Искрящийся наконечник -->
               <polygon points="59,145 69,145 64,162" fill="#fef08a"/>
               <circle class="tip-glow" cx="64" cy="158" r="12" fill="#f97316"/>
             </svg>
@@ -640,7 +634,7 @@
 
           <div class="rock-bed" id="rockBed">
             <div class="rock-crater"></div>
-            <div class="rock-info" id="rockSurface">Удар: 8 | Сбор: ×1.00 | Склад: 0/50</div>
+            <div class="rock-info" id="rockSurface">Удар: 8 | Сбор: ×1.00 | Склад: 0/500 кг</div>
           </div>
         </div>
 
@@ -648,7 +642,7 @@
       </div>
 
       <div class="footer-bar">
-        <span class="hint">При 100% склада бур перегревается и ломается</span>
+        <span class="hint">Добыча идёт в кг и тоннах с ростом до тыс. и млн т</span>
         <button class="small-btn" id="resetBtn">Сброс</button>
       </div>
     </div>
@@ -678,23 +672,92 @@
       window.Telegram.WebApp.expand();
     }
 
-    const STORAGE_KEY = "burenie_clicker_save_v5";
+    const STORAGE_KEY = "burenie_clicker_save_v7";
 
+    // Вес хранится в килограммах (кг):
+    // 1 000 кг = 1 т | 1 000 000 кг = 1 тыс. т | 1 000 000 000 кг = 1 млн т
     const RESOURCES = [
-      { id: "dirt", name: "Земля", icon: "🟫", value: 1 },
-      { id: "stone", name: "Камень", icon: "🪨", value: 3 },
-      { id: "coal", name: "Уголь", icon: "⬛", value: 7 },
-      { id: "iron", name: "Железная руда", icon: "⛓️", value: 16 },
-      { id: "gold", name: "Золотая руда", icon: "🪙", value: 35 }
+      { id: "dirt", name: "Земля", icon: "🟫", coinsPerTon: 12 },
+      { id: "stone", name: "Камень", icon: "🪨", coinsPerTon: 28 },
+      { id: "coal", name: "Уголь", icon: "⬛", coinsPerTon: 65 },
+      { id: "iron", name: "Железная руда", icon: "⛓️", coinsPerTon: 140 },
+      { id: "gold", name: "Золотая руда", icon: "🪙", coinsPerTon: 320 }
     ];
 
     const LAYERS = [
-      { name: "Верхняя земля", baseHp: 60, depthStep: 10, drops: [{ id: "dirt", min: 2, max: 4 }, { id: "stone", min: 0, max: 1 }] },
-      { name: "Плотный грунт и камень", baseHp: 150, depthStep: 15, drops: [{ id: "dirt", min: 1, max: 3 }, { id: "stone", min: 2, max: 5 }] },
-      { name: "Угольный пласт", baseHp: 340, depthStep: 20, drops: [{ id: "stone", min: 2, max: 4 }, { id: "coal", min: 2, max: 5 }] },
-      { name: "Рудная жила", baseHp: 750, depthStep: 25, drops: [{ id: "coal", min: 2, max: 4 }, { id: "iron", min: 2, max: 5 }] },
-      { name: "Глубинный горизонт", baseHp: 1600, depthStep: 35, drops: [{ id: "iron", min: 2, max: 5 }, { id: "gold", min: 1, max: 4 }] }
+      {
+        name: "Верхняя земля",
+        baseHp: 60,
+        depthStep: 10,
+        baseKgPerHit: 25,
+        pool: [
+          { id: "dirt", weight: 0.8, mult: 1.2 },
+          { id: "stone", weight: 0.2, mult: 0.9 }
+        ]
+      },
+      {
+        name: "Плотный грунт и камень",
+        baseHp: 150,
+        depthStep: 15,
+        baseKgPerHit: 60,
+        pool: [
+          { id: "dirt", weight: 0.4, mult: 1.0 },
+          { id: "stone", weight: 0.6, mult: 1.1 }
+        ]
+      },
+      {
+        name: "Угольный пласт",
+        baseHp: 340,
+        depthStep: 20,
+        baseKgPerHit: 140,
+        pool: [
+          { id: "stone", weight: 0.4, mult: 0.95 },
+          { id: "coal", weight: 0.6, mult: 1.15 }
+        ]
+      },
+      {
+        name: "Рудная жила",
+        baseHp: 750,
+        depthStep: 25,
+        baseKgPerHit: 320,
+        pool: [
+          { id: "coal", weight: 0.35, mult: 1.0 },
+          { id: "iron", weight: 0.65, mult: 1.2 }
+        ]
+      },
+      {
+        name: "Глубинный горизонт",
+        baseHp: 1600,
+        depthStep: 35,
+        baseKgPerHit: 750,
+        pool: [
+          { id: "iron", weight: 0.5, mult: 1.1 },
+          { id: "gold", weight: 0.5, mult: 1.25 }
+        ]
+      }
     ];
+
+    function formatMass(kg) {
+      const abs = Math.abs(kg);
+      if (abs >= 1e9) {
+        return `${(kg / 1e9).toFixed(2).replace(/\.00$/, "")} млн т`;
+      }
+      if (abs >= 1e6) {
+        return `${(kg / 1e6).toFixed(2).replace(/\.00$/, "")} тыс. т`;
+      }
+      if (abs >= 1000) {
+        return `${(kg / 1000).toFixed(2).replace(/\.00$/, "")} т`;
+      }
+      return `${Math.round(kg).toLocaleString("ru-RU")} кг`;
+    }
+
+    function formatCoins(amount) {
+      const abs = Math.abs(amount);
+      if (abs >= 1e9) return `${(amount / 1e9).toFixed(2)} млрд`;
+      if (abs >= 1e6) return `${(amount / 1e6).toFixed(2)} млн`;
+      if (abs >= 1e4) return `${(amount / 1e3).toFixed(1)} тыс.`;
+      return Math.floor(amount).toLocaleString("ru-RU");
+    }
 
     function defaultState() {
       return {
@@ -753,22 +816,22 @@
     }
 
     function getTierMultiplier(tier) {
-      return Math.pow(1.85, tier - 1);
+      return Math.pow(1.95, tier - 1);
     }
 
-    function getStorageCapacity() {
+    function getStorageCapacityKg() {
       const s = state.modules.storage;
-      const baseCap = 50 + (s.level - 1) * 25;
-      const tierMult = Math.pow(1.9, s.tier - 1);
+      const baseCap = 500 + (s.level - 1) * 350;
+      const tierMult = Math.pow(3.2, s.tier - 1);
       return Math.round(baseCap * tierMult);
     }
 
-    function getUsedStorage() {
+    function getUsedStorageKg() {
       return Object.values(state.inventory).reduce((sum, n) => sum + (n || 0), 0);
     }
 
     function isStorageFull() {
-      return getUsedStorage() >= getStorageCapacity();
+      return getUsedStorageKg() >= getStorageCapacityKg();
     }
 
     function isDrillBroken() {
@@ -795,23 +858,23 @@
 
     function getSellBonusMult() {
       const s = state.modules.storage;
-      return 1 + (s.tier - 1) * 0.15 + (s.level - 1) * 0.02;
+      return 1 + (s.tier - 1) * 0.2 + (s.level - 1) * 0.03;
     }
 
     function getDrillPower() {
       const m = state.modules.drill;
-      return (8 + (m.level - 1) * 5) * getTierMultiplier(m.tier);
+      return (10 + (m.level - 1) * 7) * getTierMultiplier(m.tier);
     }
 
     function getCollectorBonus() {
       const m = state.modules.collector;
-      return 1 + (m.level - 1) * 0.25 + (m.tier - 1) * 0.65;
+      return 1 + (m.level - 1) * 0.35 + (m.tier - 1) * 1.1;
     }
 
     function getAutoDps() {
       const m = state.modules.collector;
       const d = state.modules.drill;
-      const baseAuto = (m.level - 1) * 3 + (m.tier - 1) * 14 + (d.tier - 1) * 6;
+      const baseAuto = (m.level - 1) * 4 + (m.tier - 1) * 18 + (d.tier - 1) * 8;
       if (isDrillBroken() || state.overheated) return 0;
       const heatFactor = state.heat > 75 ? 0.6 : 1;
       return baseAuto * heatFactor;
@@ -862,6 +925,43 @@
       }
     }
 
+    function pickResourceFromPool(pool) {
+      const r = Math.random();
+      let acc = 0;
+      for (const item of pool) {
+        acc += item.weight;
+        if (r <= acc) return item;
+      }
+      return pool[pool.length - 1];
+    }
+
+    function giveMassResources(totalKgWanted) {
+      if (totalKgWanted <= 0) return { text: "", icons: [] };
+      const cfg = getCurrentLayerConfig();
+      const cap = getStorageCapacityKg();
+      let freeSpace = Math.max(0, cap - getUsedStorageKg());
+
+      const chosen = pickResourceFromPool(cfg.pool);
+      const rawKg = Math.max(1, Math.round(totalKgWanted * chosen.mult * (0.8 + Math.random() * 0.45)));
+      const takenKg = Math.min(rawKg, freeSpace);
+      const overflowed = takenKg < rawKg;
+
+      if (takenKg > 0) {
+        state.inventory[chosen.id] = (state.inventory[chosen.id] || 0) + takenKg;
+      }
+
+      const resObj = RESOURCES.find((r) => r.id === chosen.id);
+      const icon = resObj ? resObj.icon : "🪨";
+
+      if (takenKg <= 0 && overflowed) {
+        return { text: "Склад 100%! 🔥", icons: ["🔥", "⚠️"] };
+      }
+      if (overflowed) {
+        return { text: `+${formatMass(takenKg)} ${icon} (склад 100%)`, icons: [icon] };
+      }
+      return { text: `+${formatMass(takenKg)} ${icon}`, icons: [icon] };
+    }
+
     function updateDrillStyle() {
       const tier = state.modules.drill.tier;
       const body = document.getElementById("drillBody");
@@ -893,7 +993,7 @@
       }
     }
 
-    function spawnVisuals(labelText) {
+    function spawnVisuals(labelText, oreIcons) {
       const stage = document.getElementById("drillStage");
       const rect = stage.getBoundingClientRect();
       const tipX = rect.width * 0.5;
@@ -914,12 +1014,14 @@
       void bed.offsetWidth;
       bed.classList.add("hit");
 
-      const debrisIcons = isDrillBroken() ? ["💥", "🔥", "⚠️"] : ["🪨", "🟫", "🔸", "✨", "🪨"];
+      const defaultIcons = isDrillBroken() ? ["💥", "🔥", "⚠️"] : ["🪨", "🟫", "🔸", "✨"];
+      const debrisIcons = oreIcons && oreIcons.length ? [...oreIcons, ...defaultIcons] : defaultIcons;
+
       for (let i = 0; i < 6; i++) {
         const d = document.createElement("div");
         d.className = "falling-debris";
         d.textContent = debrisIcons[Math.floor(Math.random() * debrisIcons.length)];
-        d.style.fontSize = `${11 + Math.floor(Math.random() * 6)}px`;
+        d.style.fontSize = `${12 + Math.floor(Math.random() * 6)}px`;
 
         const fromCeiling = i < 2;
         const startX = fromCeiling
@@ -950,51 +1052,17 @@
       }
     }
 
-    function collectLayerLoot() {
-      const cfg = getCurrentLayerConfig();
-      const bonus = getCollectorBonus();
-      const cap = getStorageCapacity();
-      let freeSpace = Math.max(0, cap - getUsedStorage());
-      const summary = [];
-      let overflowed = false;
-
-      cfg.drops.forEach((drop) => {
-        const raw = drop.min + Math.floor(Math.random() * (drop.max - drop.min + 1));
-        const wanted = Math.round(raw * bonus);
-        if (wanted <= 0) return;
-
-        const taken = Math.min(wanted, freeSpace);
-        if (taken < wanted) overflowed = true;
-
-        if (taken > 0) {
-          state.inventory[drop.id] = (state.inventory[drop.id] || 0) + taken;
-          freeSpace -= taken;
-          const resObj = RESOURCES.find((r) => r.id === drop.id);
-          if (resObj) summary.push(`+${taken} ${resObj.icon}`);
-        }
-      });
-
-      state.depth += cfg.depthStep;
-      state.layerIndex += 1;
-      syncLayerHpMax();
-      state.layerHp = state.layerMaxHp;
-
-      if (overflowed && summary.length === 0) return "Склад 100%! Бур греется!";
-      if (overflowed) return `${summary.join(" ")} (склад 100%!)`;
-      return summary.join(" ");
-    }
-
     function applyDamage(amount, isManual) {
       if (isDrillBroken()) {
         if (isManual) {
-          spawnVisuals(`🛠️ Ремонт: ${getRepairRemainingSec().toFixed(1)} сек`);
+          spawnVisuals(`🛠️ Ремонт: ${getRepairRemainingSec().toFixed(1)} сек`, ["🛠️"]);
           render();
         }
         return;
       }
 
       if (isManual && state.overheated) {
-        spawnVisuals("🔥 ПЕРЕГРЕВ!");
+        spawnVisuals("🔥 ПЕРЕГРЕВ!", ["🔥"]);
         render();
         return;
       }
@@ -1010,7 +1078,7 @@
       if (state.heat >= 100) {
         if (fullBeforeHit) {
           breakDrill();
-          spawnVisuals(`💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`);
+          spawnVisuals(`💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`, ["💥", "🔥"]);
           saveState();
           render();
           return;
@@ -1021,16 +1089,38 @@
 
       const heatPenalty = state.heat > 75 && !state.overheated ? 0.75 : 1;
       const dmg = Math.max(1, Math.round(amount * heatPenalty));
+      const actualDmg = Math.min(state.layerHp, dmg);
       state.layerHp -= dmg;
 
-      let lootLabel = fullBeforeHit ? `-${dmg} 🔥` : `-${dmg}`;
+      const cfg = getCurrentLayerConfig();
+      const depthGain = (actualDmg / Math.max(1, state.layerMaxHp)) * cfg.depthStep;
+      state.depth = Number((state.depth + depthGain).toFixed(1));
+
+      const layerScale = Math.pow(1.45, state.layerIndex);
+      const collectorMult = getCollectorBonus();
+      let kgToMine = cfg.baseKgPerHit * layerScale * collectorMult * (isManual ? 1 : 0.45);
+
+      let layerCleared = false;
       if (state.layerHp <= 0) {
-        const lootText = collectLayerLoot();
-        lootLabel = lootText ? `Слой пройден! ${lootText}` : "Слой пройден!";
+        layerCleared = true;
+        kgToMine *= 1.8;
+        state.layerIndex += 1;
+        syncLayerHpMax();
+        state.layerHp = state.layerMaxHp;
       }
 
-      if (isManual || Math.random() < 0.45) {
-        spawnVisuals(lootLabel);
+      const dropRes = giveMassResources(kgToMine);
+      let labelText = "";
+      if (layerCleared) {
+        labelText = dropRes.text ? `Слой пройден! ${dropRes.text}` : "Слой пройден!";
+      } else if (dropRes.text) {
+        labelText = `-${dmg} | ${dropRes.text}`;
+      } else if (isManual) {
+        labelText = fullBeforeHit ? `-${dmg} 🔥` : `-${dmg}`;
+      }
+
+      if (isManual || layerCleared || dropRes.text || Math.random() < 0.35) {
+        spawnVisuals(labelText, dropRes.icons);
       }
 
       saveState();
@@ -1039,19 +1129,19 @@
 
     function render() {
       const cfg = getCurrentLayerConfig();
-      const used = getUsedStorage();
-      const cap = getStorageCapacity();
+      const usedKg = getUsedStorageKg();
+      const capKg = getStorageCapacityKg();
       const full = isStorageFull();
       const broken = isDrillBroken();
 
       updateDrillStyle();
 
-      document.getElementById("coinsVal").textContent = Math.floor(state.coins).toLocaleString("ru-RU");
-      document.getElementById("depthVal").textContent = `${state.depth} м`;
+      document.getElementById("coinsVal").textContent = formatCoins(state.coins);
+      document.getElementById("depthVal").textContent = `${state.depth.toFixed(1)} м`;
       document.getElementById("dpsVal").textContent = getAutoDps().toFixed(1).replace(/\.0$/, "");
 
       const storageEl = document.getElementById("storageVal");
-      storageEl.textContent = `${used}/${cap}`;
+      storageEl.textContent = `${formatMass(usedKg)}/${formatMass(capKg)}`;
       storageEl.className = full ? "stat-value red" : "stat-value green";
 
       document.getElementById("layerName").textContent = `Слой ${state.layerIndex + 1}: ${cfg.name}`;
@@ -1097,14 +1187,14 @@
         warn.textContent = "Склад заполнен на 100%! Заберите руду в инвентаре, иначе бур сломается.";
         rock.textContent = state.overheated
           ? "Ждите охлаждения мотора..."
-          : `ОПАСНОСТЬ ПОЛОМКИ! Склад: ${used}/${cap}`;
+          : `ОПАСНОСТЬ ПОЛОМКИ! Склад: ${formatMass(usedKg)}/${formatMass(capKg)}`;
         drillBtn.disabled = state.overheated;
         drillBtn.textContent = state.overheated ? "🔥 ОХЛАЖДЕНИЕ МОТОРА..." : "⚠️ БУРИТЬ (СКЛАД ПОЛОН!)";
       } else {
         warn.classList.add("hidden");
         rock.textContent = state.overheated
           ? "Ждите охлаждения мотора..."
-          : `Удар: ${Math.round(getDrillPower())} | Сбор: ×${getCollectorBonus().toFixed(2)} | Склад: ${used}/${cap}`;
+          : `Удар: ${Math.round(getDrillPower())} | Сбор: ×${getCollectorBonus().toFixed(2)} | ${formatMass(usedKg)}/${formatMass(capKg)}`;
         drillBtn.disabled = state.overheated;
         drillBtn.textContent = state.overheated ? "🔥 ОХЛАЖДЕНИЕ МОТОРА..." : "⛏️ БУРИТЬ ПОРОДУ";
       }
@@ -1113,24 +1203,37 @@
       renderModules();
     }
 
+    function calcResourceCoins(res, kgAmount) {
+      const pricePerTon = res.coinsPerTon * getSellBonusMult();
+      return Math.max(1, Math.round((kgAmount / 1000) * pricePerTon));
+    }
+
     function renderInventory() {
-      const used = getUsedStorage();
-      const cap = getStorageCapacity();
+      const usedKg = getUsedStorageKg();
+      const capKg = getStorageCapacityKg();
       const bonusPct = Math.round((getSellBonusMult() - 1) * 100);
 
+      let totalPotentialCoins = 0;
+      RESOURCES.forEach((res) => {
+        const kg = state.inventory[res.id] || 0;
+        if (kg > 0) totalPotentialCoins += calcResourceCoins(res, kg);
+      });
+
       document.getElementById("invSummary").innerHTML = `
-        <span>Заполнено: <strong>${used} / ${cap}</strong></span>
-        <span>Наценка склада: <strong>+${bonusPct}%</strong></span>
+        <span>Склад: <strong>${formatMass(usedKg)} / ${formatMass(capKg)}</strong></span>
+        <span>Наценка: <strong>+${bonusPct}%</strong> | Сумма: <strong>${formatCoins(totalPotentialCoins)}</strong></span>
       `;
 
-      document.getElementById("sellAllEverythingBtn").disabled = used <= 0;
+      document.getElementById("sellAllEverythingBtn").disabled = usedKg <= 0;
 
       const container = document.getElementById("inventoryList");
       container.innerHTML = "";
 
       RESOURCES.forEach((res) => {
-        const count = state.inventory[res.id] || 0;
-        const unitPrice = Math.max(res.value, Math.round(res.value * getSellBonusMult()));
+        const kg = state.inventory[res.id] || 0;
+        const unitTonPrice = Math.round(res.coinsPerTon * getSellBonusMult());
+        const payout = kg > 0 ? calcResourceCoins(res, kg) : 0;
+
         const row = document.createElement("div");
         row.className = "inv-item";
         row.innerHTML = `
@@ -1138,17 +1241,17 @@
             <div class="inv-icon">${res.icon}</div>
             <div>
               <div class="inv-title">${res.name}</div>
-              <div class="inv-sub">Цена продажи: ${unitPrice} монет/шт</div>
+              <div class="inv-sub">Цена: ${unitTonPrice} монет / т${kg > 0 ? ` • Выплата: ${formatCoins(payout)}` : ""}</div>
             </div>
           </div>
           <div class="inv-right">
-            <div class="inv-count">${count}</div>
-            <button class="sell-btn" ${count <= 0 ? "disabled" : ""}>Забрать</button>
+            <div class="inv-count">${formatMass(kg)}</div>
+            <button class="sell-btn" ${kg <= 0 ? "disabled" : ""}>Забрать</button>
           </div>
         `;
         row.querySelector(".sell-btn").addEventListener("click", () => {
-          if (count <= 0) return;
-          state.coins += count * unitPrice;
+          if (kg <= 0) return;
+          state.coins += calcResourceCoins(res, kg);
           state.inventory[res.id] = 0;
           saveState();
           render();
@@ -1180,7 +1283,7 @@
         {
           key: "storage",
           title: "🗄️ Хранилище на буре",
-          desc: `Вместимость: ${getStorageCapacity()} ед. | Наценка продажи: +${Math.round((getSellBonusMult() - 1) * 100)}%.`
+          desc: `Вместимость: ${formatMass(getStorageCapacityKg())} | Наценка продажи: +${Math.round((getSellBonusMult() - 1) * 100)}%.`
         }
       ];
 
@@ -1201,10 +1304,10 @@
           <div class="module-desc">${def.desc}</div>
           <div class="module-actions">
             <button class="upg-btn lvl" ${canBuyLvl ? "" : "disabled"}>
-              Улучшить ур.<br/>(${lvlCost} монет)
+              Улучшить ур.<br/>(${formatCoins(lvlCost)} монет)
             </button>
             <button class="upg-btn tier" ${canBuyTier ? "" : "disabled"}>
-              Тир ${mod.tier + 1} (с ${tierInfo.reqLevel} ур.)<br/>(${tierInfo.cost} монет)
+              Тир ${mod.tier + 1} (с ${tierInfo.reqLevel} ур.)<br/>(${formatCoins(tierInfo.cost)} монет)
             </button>
           </div>
         `;
@@ -1232,10 +1335,9 @@
     document.getElementById("sellAllEverythingBtn").addEventListener("click", () => {
       let totalCoins = 0;
       RESOURCES.forEach((res) => {
-        const count = state.inventory[res.id] || 0;
-        if (count > 0) {
-          const unitPrice = Math.max(res.value, Math.round(res.value * getSellBonusMult()));
-          totalCoins += count * unitPrice;
+        const kg = state.inventory[res.id] || 0;
+        if (kg > 0) {
+          totalCoins += calcResourceCoins(res, kg);
           state.inventory[res.id] = 0;
         }
       });
