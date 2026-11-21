@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -16,7 +15,6 @@
     body { margin:0; padding:0 0 84px; font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--txt); }
     .app { max-width:520px; margin:0 auto; }
 
-    /* Верхняя панель */
     .top-bar {
       position:sticky; top:0; z-index:20;
       background:linear-gradient(180deg,#3b1d12 0%,#23130d 100%);
@@ -37,7 +35,6 @@
     }
     .odometer .unit { background:#166534; color:#bbf7d0; border-color:#22c55e; }
 
-    /* Тахометр оборотов как на скриншоте справа под глубиной */
     .rpm-gauge {
       display:flex; align-items:center; gap:6px; background:#1f2937d9;
       border:1px solid #4b5563; border-radius:999px; padding:2px 4px 2px 10px;
@@ -48,9 +45,7 @@
       background:conic-gradient(#38bdf8 0deg 140deg, #f59e0b 140deg 230deg, #ef4444 230deg 280deg, #334155 280deg 360deg);
       border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center;
     }
-    .rpm-dial::after {
-      content:""; width:8px; height:8px; border-radius:50%; background:#1e293b;
-    }
+    .rpm-dial::after { content:""; width:8px; height:8px; border-radius:50%; background:#1e293b; }
 
     .warn {
       background:#0284c733; border:1px solid #38bdf888; color:#bae6fd;
@@ -58,7 +53,6 @@
     }
     .hidden { display:none!important; }
 
-    /* Шахта как на скриншоте */
     .mine-view {
       position:relative; min-height:440px; overflow:hidden;
       border-left:14px solid #9a3412; border-right:14px solid #9a3412;
@@ -75,24 +69,28 @@
     .rig-area {
       position:relative; margin:auto 0; display:flex; flex-direction:column; align-items:center; z-index:3;
     }
-    .rig-svg { width:240px; height:190px; }
-    .rig-svg.spin { animation:mineShake .13s infinite alternate; }
-    @keyframes mineShake {
-      0% { transform:translateY(0) rotate(-1deg); }
-      100% { transform:translateY(6px) rotate(1deg); }
+    .rig-svg { width:240px; height:210px; overflow:visible; }
+    .rig-body { transition:transform .18s ease-out; }
+    .rig-svg.spin .rig-body { animation:bodyDrop 1.05s cubic-bezier(.22,.85,.36,1) infinite; }
+    @keyframes bodyDrop {
+      0% { transform:translateY(0px); }
+      55% { transform:translateY(14px); }
+      75% { transform:translateY(10px); }
+      100% { transform:translateY(0px); }
     }
-    .auger { transform-box:fill-box; transform-origin:center; }
-    .rig-svg.spin .auger { animation:augerSpin .14s linear infinite; }
-    @keyframes augerSpin {
-      0% { transform:translateY(0); }
-      100% { transform:translateY(5px); }
+    .auger-shaft { transform-box:fill-box; transform-origin:top center; }
+    .rig-svg.spin .auger-shaft { animation:augerExtend 1.05s cubic-bezier(.35,.05,.75,.95) infinite; }
+    @keyframes augerExtend {
+      0% { transform:translateY(0px) scaleY(1); }
+      55% { transform:translateY(18px) scaleY(1.22); }
+      72% { transform:translateY(12px) scaleY(1.12); }
+      100% { transform:translateY(0px) scaleY(1); }
     }
     .mine-info {
       background:#00000099; border:1px solid #ffffff24; border-radius:999px;
-      padding:4px 12px; font-size:11px; font-weight:700; color:#fde68a; margin-top:4px;
+      padding:4px 12px; font-size:11px; font-weight:700; color:#fde68a; margin-top:8px;
     }
 
-    /* Падающая руда/порода в шахте */
     .falling-ore {
       position:absolute; pointer-events:none; font-size:14px; z-index:2;
       animation:oreDrop 1.1s linear forwards;
@@ -102,10 +100,7 @@
       100% { opacity:0; transform:translateY(340px) rotate(220deg); }
     }
 
-    /* Колба энергии + кнопка справа как на скриншоте */
-    .energy-dock {
-      display:flex; align-items:center; gap:0; margin-top:8px; z-index:5;
-    }
+    .energy-dock { display:flex; align-items:center; gap:0; margin-top:8px; z-index:5; }
     .tube-pipe {
       width:14px; height:14px; background:#ea580c; border:2px solid #1e293b;
       border-radius:3px 0 0 3px; flex-shrink:0;
@@ -146,7 +141,6 @@
       border:3px solid #fdba74; box-shadow:inset 0 0 0 3px #c2410c;
     }
 
-    /* Детали / Склад / Буры */
     .blueprint {
       padding:12px 10px 14px; background-color:#f8fafc; color:#0f172a;
       background-image:
@@ -166,7 +160,10 @@
     .part-btn {
       width:100%; border:none; border-radius:6px; padding:6px 2px;
       background:linear-gradient(180deg,#4ade80,#16a34a); color:#052e16;
-      font-size:10px; font-weight:900; cursor:pointer;
+      font-size:9px; font-weight:900; cursor:pointer; line-height:1.15;
+    }
+    .part-btn.res-mode {
+      background:linear-gradient(180deg,#38bdf8,#0284c7); color:#041b29;
     }
     .part-btn:disabled { opacity:.35; cursor:not-allowed; }
 
@@ -242,24 +239,25 @@
       <div class="warn hidden" id="warnBox"></div>
     </div>
 
-    <!-- Вкладка 1: Шахта с колбой энергии и кнопкой заряда -->
     <div id="p-mine">
       <div class="mine-view" id="mineStage">
         <div class="rig-area">
-          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M80 62 H42 V112 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
-            <path d="M160 62 H198 V112 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
-            <rect x="34" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
-            <rect x="172" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
-            <rect x="82" y="24" width="76" height="62" rx="5" fill="#6ee7b7" stroke="#1e293b" stroke-width="2.5"/>
-            <circle cx="104" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
-            <circle cx="136" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
-            <rect x="94" y="86" width="52" height="24" fill="#475569" stroke="#1e293b" stroke-width="2.5"/>
-            <g class="auger">
-              <rect x="115" y="110" width="10" height="22" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
-              <polygon points="104,132 136,132 120,182" fill="#cbd5e1" stroke="#1e293b" stroke-width="2.5"/>
-              <line x1="107" y1="145" x2="133" y2="152" stroke="#1e293b" stroke-width="4"/>
-              <line x1="110" y1="160" x2="130" y2="166" stroke="#1e293b" stroke-width="4"/>
+          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="rig-body">
+              <path d="M80 62 H42 V112 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
+              <path d="M160 62 H198 V112 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
+              <rect x="34" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
+              <rect x="172" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
+              <rect x="82" y="24" width="76" height="62" rx="5" fill="#6ee7b7" stroke="#1e293b" stroke-width="2.5"/>
+              <circle cx="104" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+              <circle cx="136" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+              <rect x="94" y="86" width="52" height="24" fill="#475569" stroke="#1e293b" stroke-width="2.5"/>
+            </g>
+            <g class="auger-shaft">
+              <rect x="115" y="110" width="10" height="24" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+              <polygon points="104,134 136,134 120,186" fill="#cbd5e1" stroke="#1e293b" stroke-width="2.5"/>
+              <line x1="107" y1="147" x2="133" y2="154" stroke="#1e293b" stroke-width="4"/>
+              <line x1="110" y1="162" x2="130" y2="168" stroke="#1e293b" stroke-width="4"/>
             </g>
           </svg>
           <div class="mine-info" id="mineInfo">Верхняя земля • ~23 кг/сек</div>
@@ -279,7 +277,6 @@
       </div>
     </div>
 
-    <!-- Вкладка 2: Детали и схема #БУРИЛО -->
     <div class="hidden" id="p-rig">
       <div class="blueprint">
         <div class="bp-title">#БУРИЛО</div>
@@ -289,7 +286,6 @@
       <div class="rst-row"><button class="rst" id="resetBtn">Сброс прогресса</button></div>
     </div>
 
-    <!-- Вкладка 3: Склад -->
     <div class="hidden" id="p-stor">
       <div class="stor-head">
         <div>
@@ -301,7 +297,6 @@
       <div class="stor-list" id="storList"></div>
     </div>
 
-    <!-- Вкладка 4: Буры и рецепты -->
     <div class="hidden" id="p-drills">
       <div class="drills-wrap" id="drillsList"></div>
     </div>
@@ -318,7 +313,7 @@
 
   <script>
     if (window.Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); }
-    const KEY = "burilo_tube_v4";
+    const KEY = "burilo_drop_v5";
 
     const RES = [
       { id: "dirt", name: "Земля", icon: "🟫", perTon: 12, desc: "Верхний рыхлый слой породы." },
@@ -392,7 +387,19 @@
     const sellMult = () => 1 + (st.parts.storage.lvl - 1) * 0.05;
     const bucketMult = () => 1 + (st.parts.buckets.lvl - 1) * 0.35 + (st.parts.drill.lvl - 1) * 0.15;
 
-    const partCost = (k) => Math.round(({ motor: 25, battery: 25, drill: 30, buckets: 35, storage: 20 }[k] || 25) * Math.pow(1.45, st.parts[k].lvl - 1));
+    // До 3 уровня — монеты; с 3 уровня — ресурс зависит от текущего уровня детали
+    function partUpgradeReq(k) {
+      const lvl = st.parts[k].lvl;
+      const baseCoin = { motor: 25, battery: 25, drill: 30, buckets: 35, storage: 20 }[k] || 25;
+      if (lvl < 3) {
+        return { type: "coins", cost: Math.round(baseCoin * Math.pow(1.5, lvl - 1)) };
+      }
+      const resId = lvl >= 11 ? "gold" : lvl >= 9 ? "iron" : lvl >= 7 ? "coal" : lvl >= 5 ? "stone" : "dirt";
+      const resObj = RES.find((r) => r.id === resId);
+      const kg = Math.round(120 * Math.pow(1.45, lvl - 3));
+      return { type: "res", res: resObj, kg };
+    }
+
     const resCoins = (r, kg) => Math.max(1, Math.round((kg / 1000) * r.perTon * sellMult()));
 
     function horizon() {
@@ -469,11 +476,31 @@
       const strip = document.getElementById("partsStrip");
       strip.innerHTML = "";
       defs.forEach(([k, ico, label]) => {
-        const p = st.parts[k], cost = partCost(k);
+        const p = st.parts[k], req = partUpgradeReq(k);
+        let canUp = false, btnHtml = "";
+        if (req.type === "coins") {
+          canUp = st.coins >= req.cost;
+          btnHtml = `▲ ${fmtCoins(req.cost)} 🪙`;
+        } else {
+          const have = st.inv[req.res.id] || 0;
+          canUp = have >= req.kg;
+          btnHtml = `${req.res.icon} ${fmtMass(req.kg)}`;
+        }
         const col = document.createElement("div");
         col.className = "part-col";
-        col.innerHTML = `<div class="part-ico">${ico}</div><div class="part-lvl" style="background:${p.col}">${p.lvl}</div><div class="part-name">${label}</div><button class="part-btn" ${st.coins >= cost ? "" : "disabled"}>▲ ${fmtCoins(cost)}</button>`;
-        col.querySelector("button").onclick = () => { if (st.coins < cost) return; st.coins -= cost; p.lvl += 1; save(); render(); };
+        col.innerHTML = `<div class="part-ico">${ico}</div><div class="part-lvl" style="background:${p.col}">${p.lvl}</div><div class="part-name">${label}</div><button class="part-btn ${req.type === "res" ? "res-mode" : ""}" ${canUp ? "" : "disabled"}>${btnHtml}</button>`;
+        col.querySelector("button").onclick = () => {
+          if (req.type === "coins") {
+            if (st.coins < req.cost) return;
+            st.coins -= req.cost;
+          } else {
+            if ((st.inv[req.res.id] || 0) < req.kg) return;
+            st.inv[req.res.id] -= req.kg;
+          }
+          p.lvl += 1;
+          save();
+          render();
+        };
         strip.appendChild(col);
       });
 
