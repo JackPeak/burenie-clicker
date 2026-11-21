@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -28,7 +29,7 @@
 
     body {
       margin: 0;
-      padding: 10px 12px 84px;
+      padding: 10px 12px 136px;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: radial-gradient(circle at top, #1a202c 0%, var(--bg-dark) 65%);
       color: var(--text-main);
@@ -77,21 +78,59 @@
     .stat-value.green { color: var(--accent-green); }
     .stat-value.red { color: var(--accent-red); }
 
-    .bottom-nav {
+    .bottom-dock {
       position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
       z-index: 30;
-      background: rgba(18, 22, 30, 0.96);
+      background: rgba(18, 22, 30, 0.97);
       backdrop-filter: blur(10px);
       border-top: 1px solid var(--panel-border);
       padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     }
 
-    .bottom-nav-inner {
+    .bottom-dock-inner {
       max-width: 520px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .power-slider-box {
+      background: var(--panel-bg-2);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 7px 10px;
+    }
+
+    .power-slider-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .power-slider-title {
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .power-slider-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    input[type="range"].power-range {
+      width: 100%;
+      accent-color: var(--accent-orange);
+      cursor: pointer;
+      margin: 2px 0 0;
+    }
+
+    .bottom-nav-inner {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
@@ -210,7 +249,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      height: 245px;
+      height: 255px;
       border-radius: 12px;
       background:
         radial-gradient(circle at 50% 48%, rgba(245, 158, 11, 0.12), transparent 60%),
@@ -372,44 +411,6 @@
     @keyframes floatUp {
       0% { opacity: 1; transform: translate(-50%, 0); }
       100% { opacity: 0; transform: translate(-50%, -44px); }
-    }
-
-    .action-row {
-      display: grid;
-      grid-template-columns: 1.25fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .main-drill-btn, .charge-btn {
-      padding: 12px 10px;
-      border: none;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      line-height: 1.2;
-    }
-
-    .main-drill-btn {
-      background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
-    }
-
-    .charge-btn {
-      background: linear-gradient(180deg, #06b6d4 0%, #0284c7 100%);
-      color: #04121a;
-      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.28);
-    }
-
-    .main-drill-btn:active, .charge-btn:active { transform: scale(0.97); }
-
-    .main-drill-btn:disabled {
-      background: #374151;
-      color: #9ca3af;
-      box-shadow: none;
-      cursor: not-allowed;
     }
 
     .inv-summary {
@@ -582,12 +583,12 @@
     <div class="panel" id="tab-drill">
       <div class="drill-arena" id="drillArena">
         <div class="layer-header">
-          <span class="layer-name" id="layerName">Горизонт 1: Верхняя земля</span>
+          <span class="layer-name" id="layerName">Горизонт: Верхняя земля</span>
           <span class="rig-style-tag" id="rigStyleTag">Стиль: Шнек I</span>
         </div>
 
         <div class="bar-row">
-          <span id="batteryLabel">Аккумулятор: 4.0 ч работы</span>
+          <span id="batteryLabel">Батарея: 4.0 / 4.0 ч</span>
           <span id="batteryPctText">100%</span>
         </div>
         <div class="bar-wrap">
@@ -639,18 +640,13 @@
 
           <div class="rock-bed" id="rockBed">
             <div class="rock-crater"></div>
-            <div class="rock-info" id="rockSurface">Добыча за удар: ~45 кг | Склад: 0/5 т</div>
+            <div class="rock-info" id="rockSurface">Добыча: ~45 кг/тик | Склад: 0/5 т</div>
           </div>
-        </div>
-
-        <div class="action-row">
-          <button class="main-drill-btn" id="mainDrillBtn">⛏️ БУРИТЬ</button>
-          <button class="charge-btn" id="chargeBtn">⚡ НАБРАТЬ ЭНЕРГИЮ</button>
         </div>
       </div>
 
       <div class="footer-bar">
-        <span class="hint">Тапайте «Набрать энергию» для заряда батареи; мощный мотор ест быстрее</span>
+        <span class="hint">Тап по сцене подзаряжает батарею; при наличии заряда бур работает сам</span>
         <button class="small-btn" id="resetBtn">Сброс</button>
       </div>
     </div>
@@ -666,11 +662,21 @@
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <button class="tab-btn active" data-tab="drill">⛏️ Бурение</button>
-      <button class="tab-btn" data-tab="inventory">🎒 Инвентарь</button>
-      <button class="tab-btn" data-tab="modules">⚙️ Модули</button>
+  <div class="bottom-dock">
+    <div class="bottom-dock-inner">
+      <div class="power-slider-box">
+        <div class="power-slider-top">
+          <span class="power-slider-title">Мощность бура: <span id="powerPctVal">100%</span></span>
+          <span class="power-slider-sub" id="powerHeatHint">Нагрев: ×1.00 | Расход АКБ: 100%</span>
+        </div>
+        <input type="range" class="power-range" id="powerSlider" min="20" max="100" step="5" value="100" />
+      </div>
+
+      <div class="bottom-nav-inner">
+        <button class="tab-btn active" data-tab="drill">⛏️ Бурение</button>
+        <button class="tab-btn" data-tab="inventory">🎒 Инвентарь</button>
+        <button class="tab-btn" data-tab="modules">⚙️ Модули</button>
+      </div>
     </div>
   </div>
 
@@ -680,9 +686,8 @@
       window.Telegram.WebApp.expand();
     }
 
-    const STORAGE_KEY = "burenie_clicker_save_v8";
+    const STORAGE_KEY = "burenie_clicker_save_v9";
 
-    // Вес в килограммах: 1 000 кг = 1 т | 1 000 000 кг = 1 тыс. т | 1 000 000 000 кг = 1 млн т
     const RESOURCES = [
       { id: "dirt", name: "Земля", icon: "🟫", coinsPerTon: 12 },
       { id: "stone", name: "Камень", icon: "🪨", coinsPerTon: 28 },
@@ -695,8 +700,8 @@
       {
         minDepth: 0,
         name: "Верхняя земля",
-        depthPerHit: 0.4,
-        baseKgPerHit: 45,
+        depthPerSec: 0.8,
+        baseKgPerSec: 90,
         pool: [
           { id: "dirt", weight: 0.8, mult: 1.1 },
           { id: "stone", weight: 0.2, mult: 0.9 }
@@ -705,8 +710,8 @@
       {
         minDepth: 80,
         name: "Плотный грунт и камень",
-        depthPerHit: 0.35,
-        baseKgPerHit: 110,
+        depthPerSec: 0.7,
+        baseKgPerSec: 220,
         pool: [
           { id: "dirt", weight: 0.4, mult: 1.0 },
           { id: "stone", weight: 0.6, mult: 1.1 }
@@ -715,8 +720,8 @@
       {
         minDepth: 220,
         name: "Угольный пласт",
-        depthPerHit: 0.3,
-        baseKgPerHit: 260,
+        depthPerSec: 0.6,
+        baseKgPerSec: 520,
         pool: [
           { id: "stone", weight: 0.4, mult: 0.95 },
           { id: "coal", weight: 0.6, mult: 1.15 }
@@ -725,8 +730,8 @@
       {
         minDepth: 450,
         name: "Рудная жила",
-        depthPerHit: 0.25,
-        baseKgPerHit: 620,
+        depthPerSec: 0.5,
+        baseKgPerSec: 1240,
         pool: [
           { id: "coal", weight: 0.35, mult: 1.0 },
           { id: "iron", weight: 0.65, mult: 1.2 }
@@ -735,8 +740,8 @@
       {
         minDepth: 800,
         name: "Глубинный горизонт",
-        depthPerHit: 0.2,
-        baseKgPerHit: 1450,
+        depthPerSec: 0.4,
+        baseKgPerSec: 2900,
         pool: [
           { id: "iron", weight: 0.5, mult: 1.1 },
           { id: "gold", weight: 0.5, mult: 1.25 }
@@ -764,7 +769,8 @@
       return {
         coins: 0,
         depth: 0,
-        energy: 4.0, // в рабочих часах (при батарее 1 и моторе 1 максимум 4.0 ч)
+        energy: 4.0,
+        powerSetting: 100,
         heat: 0,
         overheated: false,
         brokenUntil: 0,
@@ -776,11 +782,11 @@
           gold: 0
         },
         modules: {
-          drill: { level: 1, tier: 1 },     // Бур + мотор (мощность и расход энергии)
-          collector: { level: 1, tier: 1 }, // Сборник руды
-          cooler: { level: 1, tier: 1 },    // Охлаждение
-          storage: { level: 1, tier: 1 },   // Хранилище на буре
-          battery: { level: 1, tier: 1 }    // Батарея / аккумулятор
+          drill: { level: 1, tier: 1 },
+          collector: { level: 1, tier: 1 },
+          cooler: { level: 1, tier: 1 },
+          storage: { level: 1, tier: 1 },
+          battery: { level: 1, tier: 1 }
         }
       };
     }
@@ -793,9 +799,13 @@
         if (!raw) return defaultState();
         const parsed = JSON.parse(raw);
         const base = defaultState();
+        const pSetting = typeof parsed.powerSetting === "number"
+          ? Math.max(20, Math.min(100, parsed.powerSetting))
+          : 100;
         return {
           ...base,
           ...parsed,
+          powerSetting: pSetting,
           inventory: { ...base.inventory, ...(parsed.inventory || {}) },
           modules: {
             drill: { ...base.modules.drill, ...(parsed.modules && parsed.modules.drill) },
@@ -820,22 +830,20 @@
       return Math.pow(1.95, tier - 1);
     }
 
-    // Ёмкость аккумулятора в "часах работы базового мотора 1 ур."
-    // Батарея 1 ур / 1 тир = 4.0 ч
+    function getPowerRatio() {
+      return (state.powerSetting || 100) / 100;
+    }
+
     function getBatteryCapacityHours() {
       const b = state.modules.battery;
       return 4 * Math.pow(1.45, b.level - 1) * Math.pow(1.8, b.tier - 1);
     }
 
-    // Во сколько раз мощнее мотор относительно базового 1 ур / 1 тир:
-    // Мотор 1 ур -> 1.0x (при батарее 1 ур = 4 ч работы)
-    // Мотор 2 ур -> 2.0x (при батарее 1 ур = 2 ч работы)
     function getMotorPowerFactor() {
       const d = state.modules.drill;
       return Math.pow(2, d.level - 1) * Math.pow(1.6, d.tier - 1);
     }
 
-    // Доступное время работы в часах с учётом текущего мотора
     function getRemainingWorkHours() {
       return state.energy / Math.max(0.1, getMotorPowerFactor());
     }
@@ -844,20 +852,20 @@
       return getBatteryCapacityHours() / Math.max(0.1, getMotorPowerFactor());
     }
 
-    // Расход энергии за один удар буром (в условных рабочих часах)
-    function getEnergyCostPerHit() {
-      const baseCostPerHit = 0.025; // при 1.0x мотора: 4.0 / 0.025 = 160 активных ударов на 4 ч
-      return baseCostPerHit * getMotorPowerFactor();
+    // Расход батареи идёт как на 100% мощности мотора, даже если ползунок ниже 100%
+    function getEnergyDrainPerSec() {
+      const baseDrainPerSec = 4.0 / (4 * 3600);
+      return baseDrainPerSec * getMotorPowerFactor();
     }
 
     function getChargePerTap() {
       const b = state.modules.battery;
-      return (0.14 + (b.level - 1) * 0.05) * Math.pow(1.5, b.tier - 1);
+      return (0.15 + (b.level - 1) * 0.05) * Math.pow(1.5, b.tier - 1);
     }
 
     function getStorageCapacityKg() {
       const s = state.modules.storage;
-      const baseCap = 5000 + (s.level - 1) * 2500; // старт 5 т
+      const baseCap = 5000 + (s.level - 1) * 2500;
       const tierMult = Math.pow(3.5, s.tier - 1);
       return Math.round(baseCap * tierMult);
     }
@@ -902,18 +910,21 @@
       return 1 + (m.level - 1) * 0.3 + (m.tier - 1) * 0.9;
     }
 
-    function getHeatPerHit() {
+    // Постепенный нагрев при работе мотора + усиленный нагрев при полном складе
+    // Снижение ползунка мощности уменьшает нагрев
+    function getHeatGainPerSec() {
       const c = state.modules.cooler;
       const coolReduction = Math.max(0.25, 1 - (c.level - 1) * 0.08 - (c.tier - 1) * 0.22);
-      const motorHeatMult = 1 + (state.modules.drill.level - 1) * 0.12;
-      const baseHeat = 6.5 * coolReduction * motorHeatMult;
-      return isStorageFull() ? Math.max(14, baseHeat * 2.5) : baseHeat;
+      const motorHeatMult = 1 + (state.modules.drill.level - 1) * 0.14;
+      const powerRatio = getPowerRatio();
+      const baseHeatPerSec = 1.6 * coolReduction * motorHeatMult * powerRatio;
+      return isStorageFull() ? Math.max(4.2, baseHeatPerSec * 3.0) : baseHeatPerSec;
     }
 
     function getCoolingPerSec() {
       const c = state.modules.cooler;
-      const baseCool = 9 + (c.level - 1) * 4 + (c.tier - 1) * 12;
-      return isStorageFull() && !isDrillBroken() ? baseCool * 0.25 : baseCool;
+      const baseCool = 6 + (c.level - 1) * 3 + (c.tier - 1) * 9;
+      return isStorageFull() && !isDrillBroken() ? baseCool * 0.2 : baseCool;
     }
 
     function getLevelUpgradeCost(key) {
@@ -959,7 +970,7 @@
       const freeSpace = Math.max(0, cap - getUsedStorageKg());
 
       const chosen = pickResourceFromPool(horizon.pool);
-      const rawKg = Math.max(1, Math.round(totalKgWanted * chosen.mult * (0.8 + Math.random() * 0.45)));
+      const rawKg = Math.max(1, Math.round(totalKgWanted * chosen.mult * (0.85 + Math.random() * 0.35)));
       const takenKg = Math.min(rawKg, freeSpace);
       const overflowed = takenKg < rawKg;
 
@@ -1010,7 +1021,7 @@
       }
     }
 
-    function spawnVisuals(labelText, oreIcons) {
+    function spawnVisuals(labelText, oreIcons, animateDrill) {
       const stage = document.getElementById("drillStage");
       const rect = stage.getBoundingClientRect();
       const tipX = rect.width * 0.5;
@@ -1019,28 +1030,30 @@
       const assembly = document.getElementById("drillAssembly");
       const bed = document.getElementById("rockBed");
 
-      if (!isDrillBroken()) {
+      if (animateDrill && !isDrillBroken()) {
         assembly.classList.add("drilling");
         clearTimeout(window._drillAnimTimer);
         window._drillAnimTimer = setTimeout(() => {
           assembly.classList.remove("drilling");
-        }, 280);
+        }, 260);
       }
 
-      bed.classList.remove("hit");
-      void bed.offsetWidth;
-      bed.classList.add("hit");
+      if (animateDrill) {
+        bed.classList.remove("hit");
+        void bed.offsetWidth;
+        bed.classList.add("hit");
+      }
 
       const defaultIcons = isDrillBroken() ? ["💥", "🔥", "⚠️"] : ["🪨", "🟫", "🔸", "✨"];
       const debrisIcons = oreIcons && oreIcons.length ? [...oreIcons, ...defaultIcons] : defaultIcons;
 
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 4; i++) {
         const d = document.createElement("div");
         d.className = "falling-debris";
         d.textContent = debrisIcons[Math.floor(Math.random() * debrisIcons.length)];
-        d.style.fontSize = `${12 + Math.floor(Math.random() * 6)}px`;
+        d.style.fontSize = `${12 + Math.floor(Math.random() * 5)}px`;
 
-        const fromCeiling = i < 2;
+        const fromCeiling = i === 0;
         const startX = fromCeiling
           ? rect.width * (0.2 + Math.random() * 0.6)
           : tipX + (Math.random() - 0.5) * 34;
@@ -1048,8 +1061,8 @@
 
         d.style.left = `${startX}px`;
         d.style.top = `${startY}px`;
-        d.style.setProperty("--dx", `${(Math.random() - 0.5) * 95}px`);
-        d.style.setProperty("--peakY", fromCeiling ? "10px" : `${-14 - Math.random() * 24}px`);
+        d.style.setProperty("--dx", `${(Math.random() - 0.5) * 90}px`);
+        d.style.setProperty("--peakY", fromCeiling ? "10px" : `${-14 - Math.random() * 22}px`);
         d.style.setProperty("--fallY", `${fromCeiling ? 190 : 88}px`);
         d.style.setProperty("--rot", `${(Math.random() - 0.5) * 320}deg`);
         d.style.setProperty("--dur", `${0.55 + Math.random() * 0.35}s`);
@@ -1072,68 +1085,12 @@
     function chargeBatteryTap() {
       const cap = getBatteryCapacityHours();
       if (state.energy >= cap) {
-        spawnVisuals("⚡ АКБ 100%", ["⚡"]);
+        spawnVisuals("⚡ АКБ 100%", ["⚡"], false);
         render();
         return;
       }
       state.energy = Math.min(cap, state.energy + getChargePerTap());
-      spawnVisuals(`⚡ +${getChargePerTap().toFixed(2)} ч`, ["⚡", "🔋"]);
-      saveState();
-      render();
-    }
-
-    function performDrillHit() {
-      if (isDrillBroken()) {
-        spawnVisuals(`🛠️ Ремонт: ${getRepairRemainingSec().toFixed(1)} сек`, ["🛠️"]);
-        render();
-        return;
-      }
-
-      if (state.overheated) {
-        spawnVisuals("🔥 ПЕРЕГРЕВ!", ["🔥"]);
-        render();
-        return;
-      }
-
-      const cost = getEnergyCostPerHit();
-      if (state.energy < cost) {
-        spawnVisuals("🔋 НЕТ ЗАРЯДА! Тапай заряд", ["🔋", "⚡"]);
-        render();
-        return;
-      }
-
-      state.energy = Math.max(0, state.energy - cost);
-
-      const fullBeforeHit = isStorageFull();
-      state.heat = Math.min(100, state.heat + getHeatPerHit());
-
-      if (state.heat >= 100) {
-        if (fullBeforeHit) {
-          breakDrill();
-          spawnVisuals(`💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`, ["💥", "🔥"]);
-          saveState();
-          render();
-          return;
-        } else {
-          state.overheated = true;
-        }
-      }
-
-      const horizon = getCurrentHorizon();
-      const heatPenalty = state.heat > 75 && !state.overheated ? 0.75 : 1;
-      const motorFactor = getMotorPowerFactor();
-
-      state.depth = Number((state.depth + horizon.depthPerHit * heatPenalty).toFixed(1));
-
-      const depthBonusScale = 1 + state.depth / 250;
-      const kgToMine = horizon.baseKgPerHit * motorFactor * getCollectorBonus() * depthBonusScale * heatPenalty;
-      const dropRes = giveMassResources(kgToMine);
-
-      const labelText = dropRes.text
-        ? `+${(horizon.depthPerHit * heatPenalty).toFixed(1)}м | ${dropRes.text}`
-        : `+${(horizon.depthPerHit * heatPenalty).toFixed(1)}м`;
-
-      spawnVisuals(labelText, dropRes.icons);
+      spawnVisuals(`⚡ +${getChargePerTap().toFixed(2)} ч`, ["⚡", "🔋"], false);
       saveState();
       render();
     }
@@ -1150,6 +1107,7 @@
       const remHours = getRemainingWorkHours();
       const maxMotorHours = getMaxWorkHoursForCurrentMotor();
       const pctCharge = Math.max(0, Math.min(100, (state.energy / Math.max(0.01, capHours)) * 100));
+      const powerRatio = getPowerRatio();
 
       updateDrillStyle();
 
@@ -1176,45 +1134,47 @@
       } else if (state.overheated) {
         document.getElementById("heatStatus").textContent = "Мотор перегрет! Охлаждение...";
       } else if (full) {
-        document.getElementById("heatStatus").textContent = "Склад 100%! Бур сильно греется!";
+        document.getElementById("heatStatus").textContent = "Склад 100%! Быстрый нагрев мотора!";
       } else if (heatPct > 75) {
-        document.getElementById("heatStatus").textContent = "Высокая температура (урон снижен)";
+        document.getElementById("heatStatus").textContent = "Высокая температура (добыча снижена)";
       } else {
         document.getElementById("heatStatus").textContent = "Температура мотора: Норма";
       }
+
+      document.getElementById("powerSlider").value = String(state.powerSetting);
+      document.getElementById("powerPctVal").textContent = `${state.powerSetting}%`;
+      document.getElementById("powerHeatHint").textContent =
+        `Нагрев: ×${powerRatio.toFixed(2)} | Расход АКБ: 100%`;
 
       const arena = document.getElementById("drillArena");
       const assembly = document.getElementById("drillAssembly");
       const rock = document.getElementById("rockSurface");
       const warn = document.getElementById("warningBanner");
-      const drillBtn = document.getElementById("mainDrillBtn");
 
       arena.classList.toggle("broken-state", broken);
       assembly.classList.toggle("broken", broken);
-      if (broken) assembly.classList.remove("drilling");
 
-      const approxHitKg = horizon.baseKgPerHit * getMotorPowerFactor() * getCollectorBonus() * (1 + state.depth / 250);
-      rock.textContent = `За удар: ~${formatMass(approxHitKg)} | Склад: ${formatMass(usedKg)}/${formatMass(capKg)}`;
+      const canRun = !broken && !state.overheated && state.energy > 0;
+      if (canRun) {
+        assembly.classList.add("drilling");
+      } else {
+        assembly.classList.remove("drilling");
+      }
+
+      const approxKgSec = horizon.baseKgPerSec * getMotorPowerFactor() * getCollectorBonus() * powerRatio * (1 + state.depth / 250);
+      rock.textContent = `Добыча: ~${formatMass(approxKgSec)}/сек | Склад: ${formatMass(usedKg)}/${formatMass(capKg)}`;
 
       if (broken) {
         warn.classList.remove("hidden");
-        warn.textContent = `Бур заклинило из-за переполненного склада! Ремонт: ${getRepairRemainingSec().toFixed(1)} сек.`;
-        drillBtn.disabled = true;
-        drillBtn.textContent = `🛠️ РЕМОНТ (${getRepairRemainingSec().toFixed(1)}с)`;
-      } else if (state.energy < getEnergyCostPerHit()) {
+        warn.textContent = `Бур заклинило из-за переполненного склада и перегрева! Ремонт: ${getRepairRemainingSec().toFixed(1)} сек.`;
+      } else if (state.energy <= 0) {
         warn.classList.remove("hidden");
-        warn.textContent = "Аккумулятор разряжен! Нажмите «Набрать энергию» для продолжения бурения.";
-        drillBtn.disabled = true;
-        drillBtn.textContent = "🔋 НЕТ ЭНЕРГИИ";
+        warn.textContent = "Батарея разряжена — бурение остановлено. Тапайте по экрану для подзарядки.";
       } else if (full) {
         warn.classList.remove("hidden");
-        warn.textContent = "Склад заполнен на 100%! Заберите руду в инвентаре, иначе бур сломается.";
-        drillBtn.disabled = state.overheated;
-        drillBtn.textContent = state.overheated ? "🔥 ОХЛАЖДЕНИЕ..." : "⚠️ БУРИТЬ (СКЛАД 100%)";
+        warn.textContent = "Склад заполнен на 100%! Мотор греется сильнее — заберите руду в инвентаре.";
       } else {
         warn.classList.add("hidden");
-        drillBtn.disabled = state.overheated;
-        drillBtn.textContent = state.overheated ? "🔥 ОХЛАЖДЕНИЕ..." : "⛏️ БУРИТЬ";
       }
 
       renderInventory();
@@ -1296,12 +1256,12 @@
         {
           key: "collector",
           title: "📦 Сборник руды",
-          desc: `Множитель добычи: ×${getCollectorBonus().toFixed(2)}. Увеличивает массу породы и руды за удар.`
+          desc: `Множитель добычи: ×${getCollectorBonus().toFixed(2)}. Увеличивает массу породы и руды.`
         },
         {
           key: "cooler",
           title: "❄️ Мотор охлаждения",
-          desc: `Нагрев за удар: +${getHeatPerHit().toFixed(1)}% | Охлаждение: ${getCoolingPerSec().toFixed(0)}%/сек.`
+          desc: `Нагрев при работе: +${getHeatGainPerSec().toFixed(1)}%/сек | Охлаждение: ${getCoolingPerSec().toFixed(0)}%/сек.`
         },
         {
           key: "storage",
@@ -1355,6 +1315,12 @@
       });
     }
 
+    document.getElementById("powerSlider").addEventListener("input", (e) => {
+      state.powerSetting = Number(e.target.value);
+      saveState();
+      render();
+    });
+
     document.getElementById("sellAllEverythingBtn").addEventListener("click", () => {
       let totalCoins = 0;
       RESOURCES.forEach((res) => {
@@ -1383,14 +1349,6 @@
     });
 
     document.getElementById("drillStage").addEventListener("click", () => {
-      performDrillHit();
-    });
-
-    document.getElementById("mainDrillBtn").addEventListener("click", () => {
-      performDrillHit();
-    });
-
-    document.getElementById("chargeBtn").addEventListener("click", () => {
       chargeBatteryTap();
     });
 
@@ -1400,15 +1358,19 @@
       render();
     });
 
+    let tickCounter = 0;
+
     setInterval(() => {
-      let changed = false;
+      const dt = 0.25;
+      tickCounter += 1;
 
       if (state.brokenUntil > 0 && Date.now() >= state.brokenUntil) {
         state.brokenUntil = 0;
         state.overheated = false;
         state.heat = 0;
         saveState();
-        changed = true;
+        render();
+        return;
       }
 
       if (isDrillBroken()) {
@@ -1416,17 +1378,53 @@
         return;
       }
 
-      if (state.heat > 0) {
-        state.heat = Math.max(0, state.heat - getCoolingPerSec() * 0.25);
+      const canDrill = !state.overheated && state.energy > 0;
+      const fullBeforeTick = isStorageFull();
+
+      if (canDrill) {
+        // Расход батареи идёт как на 100% мощности мотора
+        state.energy = Math.max(0, state.energy - getEnergyDrainPerSec() * dt);
+        // Нагрев при работе мотора, быстрее при полном складе
+        state.heat = Math.min(100, state.heat + getHeatGainPerSec() * dt);
+
+        if (state.heat >= 100) {
+          if (fullBeforeTick) {
+            breakDrill();
+            spawnVisuals(`💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`, ["💥", "🔥"], false);
+            saveState();
+            render();
+            return;
+          } else {
+            state.overheated = true;
+          }
+        }
+      } else if (state.heat > 0) {
+        state.heat = Math.max(0, state.heat - getCoolingPerSec() * dt);
         if (state.overheated && state.heat <= 20) {
           state.overheated = false;
         }
-        changed = true;
       }
 
-      if (changed) {
-        render();
+      if (!state.overheated && state.energy > 0) {
+        const horizon = getCurrentHorizon();
+        const powerRatio = getPowerRatio();
+        const heatPenalty = state.heat > 75 ? 0.75 : 1;
+        const depthGain = horizon.depthPerSec * powerRatio * heatPenalty * dt;
+        state.depth = Number((state.depth + depthGain).toFixed(1));
+
+        const depthBonusScale = 1 + state.depth / 250;
+        const kgGain = horizon.baseKgPerSec * getMotorPowerFactor() * getCollectorBonus() * powerRatio * depthBonusScale * heatPenalty * dt;
+        const dropRes = giveMassResources(kgGain);
+
+        if (tickCounter % 4 === 0 && dropRes.text) {
+          spawnVisuals(dropRes.text, dropRes.icons, false);
+        }
       }
+
+      if (tickCounter % 4 === 0) {
+        saveState();
+      }
+      render();
     }, 250);
 
     render();
