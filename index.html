@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Глубинный Проходчик</title>
+  <title>Глубинный Кликер</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #181412;
-      --panel: #241d19;
-      --border: #443831;
+      --bg: #141210;
+      --panel: #221d1a;
+      --panel-2: #2c2521;
+      --border: #463b34;
       --text: #faf7f5;
-      --muted: #b5aba4;
+      --muted: #b8aea6;
       --gold: #f59e0b;
       --orange: #ea580c;
       --cyan: #38bdf8;
@@ -36,710 +37,345 @@
     }
 
     body {
-      padding-bottom: 88px;
+      padding-bottom: 84px;
     }
 
     .app {
       max-width: 520px;
       margin: 0 auto;
       min-height: 100vh;
-      background: #1d1714;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.65);
+      background: #191512;
+      box-shadow: 0 0 36px rgba(0, 0, 0, 0.65);
     }
 
     .hidden {
       display: none !important;
     }
 
-    /* Верхняя HUD-панель */
-    .top-bar {
+    /* Верхняя панель */
+    .top-hud {
       position: sticky;
       top: 0;
-      z-index: 25;
-      background: linear-gradient(180deg, #3b1d12 0%, #22120c 100%);
-      border-bottom: 2px solid #592e1d;
-      padding: 8px 10px;
+      z-index: 20;
+      background: linear-gradient(180deg, #2d2118 0%, #1c1510 100%);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 12px;
     }
 
-    .hud-top {
+    .hud-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
     }
 
-    .hud-pill {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.52);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 9px;
-      padding: 5px 10px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .hud-sub {
-      margin-top: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .odometer {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .odometer .digit {
-      background: #111827;
-      color: #fde047;
-      border: 1px solid #4b5563;
-      border-radius: 4px;
-      padding: 2px 5px;
-      font-size: 12px;
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-      min-width: 18px;
-      text-align: center;
-    }
-
-    .odometer .digit.lead {
-      color: #fbbf24;
-    }
-
-    .odometer .unit {
-      background: #166534;
-      color: #dcfce7;
-      border: 1px solid #22c55e;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 11px;
-      font-weight: 900;
-      margin-left: 2px;
-    }
-
-    /* Общий уровень установки в кружке под глубиной */
-    .rig-level-badge {
+    .stat-chip {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #1f2937;
-      border: 1px solid #4b5563;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .energy-wrap {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .energy-track {
+      position: relative;
+      flex: 1;
+      height: 22px;
+      background: #0f172a;
+      border: 2px solid #334155;
       border-radius: 999px;
-      padding: 2px 3px 2px 10px;
+      overflow: hidden;
     }
 
-    .rig-level-num {
-      font-size: 11px;
-      font-weight: 900;
-      color: #f8fafc;
-      font-variant-numeric: tabular-nums;
+    .energy-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      transition: width 0.14s ease-out;
     }
 
-    .rig-level-dial {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: conic-gradient(
-        #38bdf8 0deg 130deg,
-        #f59e0b 130deg 225deg,
-        #ef4444 225deg 280deg,
-        #334155 280deg 360deg
-      );
-      border: 2px solid #e5e7eb;
+    .energy-label {
+      position: absolute;
+      inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
-    }
-
-    .rig-level-dial::after {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #0f172a;
-    }
-
-    .status-banner {
-      margin-top: 6px;
-      padding: 6px 8px;
-      border-radius: 7px;
       font-size: 11px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .refill-btn {
+      background: linear-gradient(180deg, #fb923c, #ea580c);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #9a3412;
+      white-space: nowrap;
+    }
+
+    .refill-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #9a3412;
+    }
+
+    .alert-box {
+      margin-top: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: 800;
       text-align: center;
     }
 
-    .status-banner.energy-low {
-      background: rgba(2, 132, 199, 0.24);
-      border: 1px solid rgba(56, 189, 248, 0.65);
+    .alert-box.warn {
+      background: rgba(2, 132, 199, 0.22);
+      border: 1px solid rgba(56, 189, 248, 0.6);
       color: #bae6fd;
     }
 
-    .status-banner.stor-full {
-      background: rgba(220, 38, 38, 0.25);
+    .alert-box.full {
+      background: rgba(220, 38, 38, 0.24);
       border: 1px solid rgba(248, 113, 113, 0.7);
       color: #fecaca;
     }
 
-    /* Шахта: пройденный ствол сверху, работа в сплошной породе снизу */
-    .mine-stage {
-      position: relative;
-      min-height: 465px;
-      overflow: hidden;
-      border-left: 14px solid #9a3412;
-      border-right: 14px solid #9a3412;
-      background:
-        radial-gradient(circle at 20% 16%, rgba(0, 0, 0, 0.42) 0 11px, transparent 12px),
-        radial-gradient(circle at 78% 24%, rgba(148, 163, 184, 0.28) 0 9px, transparent 10px),
-        radial-gradient(circle at 35% 38%, rgba(245, 158, 11, 0.22) 0 8px, transparent 9px),
-        radial-gradient(circle at 84% 48%, rgba(0, 0, 0, 0.45) 0 12px, transparent 13px),
-        repeating-linear-gradient(24deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 28px),
-        repeating-linear-gradient(-32deg, rgba(0, 0, 0, 0.2) 0 2px, transparent 2px 34px),
-        linear-gradient(180deg, #4b2013 0%, #3b170d 55%, #2b1008 100%);
+    /* Главный экран кликера */
+    .clicker-screen {
+      padding: 14px 12px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 12px 10px 10px;
+      align-items: center;
+      gap: 12px;
     }
 
-    .shaft-scroll {
-      position: absolute;
-      inset: 0 0 118px 0;
-      pointer-events: none;
-      z-index: 1;
-      overflow: hidden;
-    }
-
-    .rock-vein {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 120px;
-      opacity: 0.48;
-      background:
-        radial-gradient(circle at 18% 30%, #78716c 0 7px, transparent 8px),
-        radial-gradient(circle at 76% 45%, #57534e 0 8px, transparent 9px),
-        radial-gradient(circle at 52% 72%, #a16207 0 6px, transparent 7px);
-      animation: shaftMove 4.5s linear infinite;
-      animation-play-state: paused;
-    }
-
-    .mine-stage.active .rock-vein {
-      animation-play-state: running;
-    }
-
-    @keyframes shaftMove {
-      0% { transform: translateY(-120px); }
-      100% { transform: translateY(360px); }
-    }
-
-    /* Сплошной пласт породы внизу, в который уходит и долбит бур */
-    .solid-bedrock {
-      position: absolute;
-      left: -14px;
-      right: -14px;
-      bottom: 54px;
-      height: 132px;
-      z-index: 2;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 15% 32%, rgba(28, 10, 4, 0.72) 0 14px, transparent 15px),
-        radial-gradient(circle at 38% 58%, rgba(120, 53, 15, 0.45) 0 18px, transparent 19px),
-        radial-gradient(circle at 68% 38%, rgba(28, 10, 4, 0.72) 0 16px, transparent 17px),
-        radial-gradient(circle at 86% 64%, rgba(69, 26, 3, 0.65) 0 15px, transparent 16px),
-        repeating-linear-gradient(12deg, rgba(0, 0, 0, 0.25) 0 3px, transparent 3px 22px),
-        linear-gradient(180deg, rgba(58, 22, 11, 0) 0%, #4a1d0f 24%, #361309 68%, #220b05 100%);
-      border-top: 2px solid rgba(154, 52, 18, 0.55);
-    }
-
-    .crater-glow {
-      position: absolute;
-      left: 50%;
-      top: -12px;
-      width: 110px;
-      height: 28px;
-      transform: translateX(-50%);
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(251, 146, 60, 0.35) 0%, rgba(28, 10, 4, 0.85) 65%, transparent 100%);
-      opacity: 0.35;
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .mine-stage.active .crater-glow {
-      opacity: 1;
-      animation: craterPulse 0.45s ease-in-out infinite alternate;
-    }
-
-    @keyframes craterPulse {
-      0% { transform: translateX(-50%) scale(0.95); }
-      100% { transform: translateX(-50%) scale(1.14); }
-    }
-
-    /* Сундук в шахте */
-    .chest-drop {
-      position: absolute;
-      left: 50%;
-      top: 76px;
-      transform: translateX(-50%);
-      z-index: 6;
-      background: linear-gradient(180deg, #475569, #1e293b);
-      border: 2px solid #94a3b8;
+    .vein-card {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 8px 14px;
+      padding: 10px 12px;
+    }
+
+    .vein-top {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.65);
-      animation: chestBob 1.3s ease-in-out infinite;
-    }
-
-    @keyframes chestBob {
-      0%, 100% { transform: translate(-50%, 0); }
-      50% { transform: translate(-50%, -6px); }
-    }
-
-    .chest-drop-title {
       font-size: 12px;
-      font-weight: 900;
-      color: #fde68a;
-    }
-
-    .chest-drop-sub {
-      font-size: 10px;
-      color: #cbd5e1;
-      font-weight: 700;
-    }
-
-    /* Центральный узел установки и анимация проходки вниз */
-    .rig-zone {
-      position: relative;
-      margin: 34px auto 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      z-index: 4;
-    }
-
-    .rig-svg {
-      width: 248px;
-      height: 236px;
-      overflow: visible;
-    }
-
-    .mine-stage.active .chassis {
-      animation: chassisWork 1.75s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    @keyframes chassisWork {
-      0% { transform: translate(0px, 0px); }
-      46% { transform: translate(0px, 26px); }
-      53% { transform: translate(-1.5px, 29px); }
-      60% { transform: translate(1.5px, 25px); }
-      67% { transform: translate(-1px, 29px); }
-      74% { transform: translate(1px, 26px); }
-      100% { transform: translate(0px, 0px); }
-    }
-
-    .jaw-left {
-      transform-box: fill-box;
-      transform-origin: right center;
-    }
-
-    .jaw-right {
-      transform-box: fill-box;
-      transform-origin: left center;
-    }
-
-    .mine-stage.active .jaw-left {
-      animation: jawLeftWork 1.75s ease-in-out infinite;
-    }
-
-    .mine-stage.active .jaw-right {
-      animation: jawRightWork 1.75s ease-in-out infinite;
-    }
-
-    @keyframes jawLeftWork {
-      0% { transform: translateX(0) rotate(0deg); }
-      46% { transform: translateX(8px) rotate(-11deg); }
-      74% { transform: translateX(5px) rotate(-6deg); }
-      100% { transform: translateX(0) rotate(0deg); }
-    }
-
-    @keyframes jawRightWork {
-      0% { transform: translateX(0) rotate(0deg); }
-      46% { transform: translateX(-8px) rotate(11deg); }
-      74% { transform: translateX(-5px) rotate(6deg); }
-      100% { transform: translateX(0) rotate(0deg); }
-    }
-
-    .drill-assembly {
-      transform-box: fill-box;
-      transform-origin: top center;
-    }
-
-    .mine-stage.active .drill-assembly {
-      animation: drillFeedDown 1.75s cubic-bezier(0.32, 0.04, 0.72, 0.92) infinite;
-    }
-
-    @keyframes drillFeedDown {
-      0% { transform: translateY(0px); }
-      46% { transform: translateY(44px); }
-      53% { transform: translateY(48px); }
-      60% { transform: translateY(42px); }
-      67% { transform: translateY(48px); }
-      74% { transform: translateY(43px); }
-      100% { transform: translateY(0px); }
-    }
-
-    .auger-threads {
-      transform-box: fill-box;
-      transform-origin: center;
-    }
-
-    .mine-stage.active .auger-threads {
-      animation: augerSpinStep 0.15s linear infinite;
-    }
-
-    @keyframes augerSpinStep {
-      0% { transform: translateY(0px) scaleX(1); }
-      50% { transform: translateY(3px) scaleX(0.9); }
-      100% { transform: translateY(6px) scaleX(1); }
-    }
-
-    .mine-badge {
-      margin-top: 6px;
-      background: rgba(0, 0, 0, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 999px;
-      padding: 4px 12px;
-      font-size: 11px;
       font-weight: 800;
-      color: #fde68a;
-    }
-
-    /* Частицы породы и пыли */
-    .debris-chunk {
-      position: absolute;
-      pointer-events: none;
-      z-index: 5;
-      border-radius: 3px;
-      animation: debrisFly var(--dur, 0.9s) cubic-bezier(0.18, 0.75, 0.38, 1) forwards;
-    }
-
-    .debris-chunk.dust {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: rgba(214, 188, 162, 0.78);
-    }
-
-    .debris-chunk.rock {
-      width: 9px;
-      height: 7px;
-      background: #7c3f24;
-      border: 1px solid #2b1008;
-    }
-
-    @keyframes debrisFly {
-      0% {
-        opacity: 0.95;
-        transform: translate(0, 0) scale(1) rotate(0deg);
-      }
-      50% {
-        opacity: 0.85;
-        transform: translate(var(--dx1, 18px), var(--dy1, -26px)) scale(1.1) rotate(130deg);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(var(--dx2, 34px), var(--dy2, 48px)) scale(0.6) rotate(260deg);
-      }
-    }
-
-    /* Колба энергии и оранжевая кнопка справа */
-    .energy-bar-wrap {
-      position: relative;
-      z-index: 7;
-      display: flex;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .tube-inlet {
-      width: 14px;
-      height: 14px;
-      background: var(--orange);
-      border: 2px solid #1e293b;
-      border-radius: 3px 0 0 3px;
-      flex-shrink: 0;
-    }
-
-    .tube-chamber {
-      position: relative;
-      flex: 1;
-      height: 36px;
-      border-radius: 10px 0 0 10px;
-      background: linear-gradient(180deg, rgba(226, 232, 240, 0.25) 0%, rgba(15, 23, 42, 0.82) 100%);
-      border: 3px solid #1e293b;
-      border-right: none;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .tube-liquid {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      background:
-        radial-gradient(circle at 22% 35%, rgba(255, 255, 255, 0.65) 0 2px, transparent 3px),
-        radial-gradient(circle at 58% 72%, rgba(255, 255, 255, 0.5) 0 2.5px, transparent 3.5px),
-        radial-gradient(circle at 84% 28%, rgba(255, 255, 255, 0.55) 0 1.5px, transparent 2.5px),
-        linear-gradient(180deg, #7dd3fc 0%, #0284c7 55%, #0369a1 100%);
-      transition: width 0.15s ease-out;
-    }
-
-    .tube-shine {
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      top: 2px;
-      height: 6px;
-      border-radius: 99px;
-      background: rgba(255, 255, 255, 0.34);
-      pointer-events: none;
-    }
-
-    .tube-timer {
-      position: relative;
-      z-index: 2;
-      background: rgba(2, 132, 199, 0.82);
-      padding: 2px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 900;
-      color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .charge-trigger {
-      width: 52px;
-      height: 48px;
-      border-radius: 10px;
-      background: #475569;
-      border: 3px solid #1e293b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      box-shadow: 0 3px 0 #0f172a;
-      transition: transform 0.07s ease;
-    }
-
-    .charge-trigger:active {
-      transform: scale(0.93) translateY(2px);
-    }
-
-    .charge-core {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #fb923c, #ea580c 65%, #9a3412 100%);
-      border: 3px solid #fdba74;
-      box-shadow: inset 0 0 0 3px #c2410c;
-    }
-
-    /* Вкладка Детали: чертёж в клетку без спорного названия */
-    .blueprint-board {
-      padding: 12px 10px 14px;
-      background-color: #f8fafc;
-      color: #0f172a;
-      background-image:
-        linear-gradient(to right, rgba(148, 163, 184, 0.24) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(148, 163, 184, 0.24) 1px, transparent 1px);
-      background-size: 16px 16px;
-    }
-
-    .blueprint-heading {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      color: #64748b;
       margin-bottom: 6px;
     }
 
-    .blueprint-sub {
-      text-align: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: #334155;
-      margin-bottom: 8px;
+    .vein-bar {
+      height: 10px;
+      background: #120e0c;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #3b312b;
     }
 
-    .blueprint-svg {
-      display: block;
-      width: 230px;
-      height: 205px;
-      margin: 0 auto;
+    .vein-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      transition: width 0.2s ease;
     }
 
-    .parts-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      background: #292524;
-      padding: 8px 6px;
-      border-top: 2px solid var(--border);
-    }
-
-    .part-slot {
+    .tap-arena {
+      position: relative;
+      width: 100%;
+      min-height: 290px;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(245, 158, 11, 0.16), transparent 62%),
+        linear-gradient(180deg, #2b1b12 0%, #1d130d 100%);
+      border: 2px solid #523828;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      padding: 18px 12px;
+      overflow: hidden;
     }
 
-    .part-lvl-tag {
-      font-size: 11px;
-      font-weight: 900;
-      padding: 1px 8px;
-      border-radius: 4px;
-      color: #ffffff;
-    }
-
-    .part-title {
-      font-size: 9px;
-      font-weight: 700;
-      color: #e7e5e4;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .part-up-btn {
-      width: 100%;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 2px;
-      background: linear-gradient(180deg, var(--green-light), var(--green));
-      color: #052e16;
-      font-size: 9px;
-      font-weight: 900;
+    .rock-tap-btn {
+      width: 166px;
+      height: 166px;
+      border-radius: 36px;
+      border: 3px solid #78350f;
+      background: linear-gradient(165deg, #4b382f 0%, #2b1f1a 65%, #1c1411 100%);
+      box-shadow:
+        0 10px 0 #120c0a,
+        0 16px 28px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       cursor: pointer;
-      line-height: 1.15;
+      transition: transform 0.07s ease, box-shadow 0.07s ease;
     }
 
-    .part-up-btn.res-req {
-      background: linear-gradient(180deg, #38bdf8, #0284c7);
-      color: #041b29;
+    .rock-tap-btn:active {
+      transform: translateY(6px) scale(0.97);
+      box-shadow:
+        0 4px 0 #120c0a,
+        0 8px 16px rgba(0, 0, 0, 0.55);
     }
 
-    .part-up-btn:disabled {
-      opacity: 0.35;
+    .rock-tap-btn:disabled {
+      opacity: 0.45;
       cursor: not-allowed;
     }
 
-    /* Вкладка Улучшения: последовательная цепочка моделей/ступеней */
-    .upgrades-wrap {
+    .tap-caption {
+      font-size: 13px;
+      font-weight: 900;
+      color: #fde68a;
+    }
+
+    .tap-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #d6c7bc;
+    }
+
+    .float-popup {
+      position: absolute;
+      pointer-events: none;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fde047;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+      animation: popUp 0.85s ease-out forwards;
+    }
+
+    @keyframes popUp {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(0.95);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -58px) scale(1.08);
+      }
+    }
+
+    .rates-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .rate-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       padding: 10px;
+    }
+
+    .rate-title {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .rate-val {
+      margin-top: 3px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fef08a;
+    }
+
+    /* Улучшения */
+    .list-wrap {
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .section-note {
-      text-align: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .tier-card {
-      background: #2b2420;
-      border: 2px solid #4d3f37;
-      border-radius: 10px;
+    .upgrade-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       padding: 12px;
     }
 
-    .tier-card.unlocked {
-      background: #fefce8;
-      color: #1c1917;
-      border-color: #ca8a04;
-    }
-
-    .tier-card.locked {
-      opacity: 0.62;
-    }
-
-    .tier-head {
+    .upgrade-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
     }
 
-    .tier-name {
+    .upgrade-name {
       font-size: 15px;
       font-weight: 900;
     }
 
-    .tier-pill {
-      display: inline-block;
-      margin-top: 4px;
-      background: rgba(15, 23, 42, 0.14);
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .tier-state {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 10px;
+    .lvl-badge {
+      background: #332a25;
+      border: 1px solid #5c4c42;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.35);
-      color: #f8fafc;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      color: #fde68a;
     }
 
-    .tier-req {
-      margin-top: 8px;
+    .upgrade-effect {
+      margin-top: 5px;
       font-size: 12px;
-      font-weight: 700;
+      color: var(--muted);
     }
 
-    .tier-btn {
+    .upgrade-btn {
       margin-top: 10px;
       width: 100%;
       border: none;
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 12px;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 13px;
       font-weight: 900;
       cursor: pointer;
       background: linear-gradient(180deg, var(--green-light), var(--green));
       color: #052e16;
     }
 
-    .tier-btn:disabled {
-      opacity: 0.38;
+    .upgrade-btn.res-mode {
+      background: linear-gradient(180deg, #38bdf8, #0284c7);
+      color: #062030;
+    }
+
+    .upgrade-btn:disabled {
+      opacity: 0.35;
       cursor: not-allowed;
     }
 
-    /* Вкладка Склад */
-    .storage-header {
-      background: #16a34a;
-      border-bottom: 2px solid #15803d;
-      padding: 8px 10px;
+    /* Склад */
+    .storage-top {
+      background: #15803d;
+      border-bottom: 2px solid #166534;
+      padding: 10px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -758,36 +394,28 @@
     }
 
     .sell-all-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.38;
       cursor: not-allowed;
     }
 
-    .storage-list {
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .ore-row {
+    .ore-card {
       background: #f5f5f4;
       color: #1c1917;
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: 12px;
+      padding: 11px;
       border: 1px solid #d6d3d1;
     }
 
-    .ore-top {
+    .ore-head {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 8px;
     }
 
-    .ore-icon-box {
+    .ore-icon {
       width: 38px;
       height: 38px;
-      border-radius: 8px;
+      border-radius: 9px;
       background: #e7e5e4;
       border: 1px solid #a8a29e;
       display: flex;
@@ -796,38 +424,33 @@
       flex-shrink: 0;
     }
 
-    .ore-name {
+    .ore-title {
       font-size: 14px;
       font-weight: 900;
     }
 
-    .ore-rate {
+    .ore-price {
       margin-left: auto;
       font-size: 11px;
       font-weight: 800;
       color: #57534e;
     }
 
-    .ore-desc {
-      font-size: 11px;
-      color: #44403c;
-      margin-bottom: 8px;
-    }
-
-    .ore-bottom {
+    .ore-foot {
+      margin-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
     }
 
-    .ore-amount {
+    .ore-kg {
       font-size: 14px;
       font-weight: 900;
       color: #15803d;
     }
 
-    .ore-sell-btn {
+    .sell-one-btn {
       background: linear-gradient(180deg, var(--green-light), var(--green));
       color: #052e16;
       border: none;
@@ -838,54 +461,54 @@
       cursor: pointer;
     }
 
-    .ore-sell-btn:disabled {
+    .sell-one-btn:disabled {
       opacity: 0.35;
       cursor: not-allowed;
     }
 
-    .reset-wrap {
+    .footer-reset {
       display: flex;
       justify-content: flex-end;
-      padding: 8px 10px 0;
+      padding: 4px 12px 12px;
     }
 
     .reset-btn {
       background: none;
       border: 1px solid var(--border);
       color: var(--muted);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 10px;
+      border-radius: 7px;
+      padding: 5px 9px;
+      font-size: 11px;
       cursor: pointer;
     }
 
-    /* Нижняя навигация */
+    /* Нижнее меню */
     .bottom-nav {
       position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
       z-index: 30;
-      background: rgba(24, 20, 18, 0.96);
+      background: rgba(20, 18, 16, 0.96);
       border-top: 2px solid var(--border);
       padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
     }
 
-    .bottom-nav-inner {
+    .nav-grid {
       max-width: 520px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
     .nav-btn {
-      background: #292524;
+      background: #26211e;
       border: 1px solid var(--border);
       color: var(--muted);
-      border-radius: 8px;
-      padding: 8px 4px;
-      font-size: 11px;
+      border-radius: 9px;
+      padding: 9px 6px;
+      font-size: 12px;
       font-weight: 800;
       cursor: pointer;
     }
@@ -899,161 +522,84 @@
 </head>
 <body>
   <div class="app">
-    <header class="top-bar">
-      <div class="hud-top">
-        <div class="hud-pill">
-          <span>🪙 <strong id="hudCoins">0</strong></span>
-          <span>⚡ <strong id="hudEnergy">4.0ч</strong></span>
-        </div>
-        <div class="hud-pill">
-          <span id="hudStorage">0/5 т</span>
-        </div>
+    <header class="top-hud">
+      <div class="hud-row">
+        <div class="stat-chip">🪙 <span id="hudCoins">0</span></div>
+        <div class="stat-chip">⛏️ Ур. <span id="hudRigLvl">1</span></div>
+        <div class="stat-chip" id="hudStorage">0 / 2 000 кг</div>
       </div>
 
-      <div class="hud-sub">
-        <div class="rig-level-badge" title="Общий уровень установки">
-          <span class="rig-level-num" id="rigOverallLvl">1</span>
-          <div class="rig-level-dial"></div>
+      <div class="energy-wrap">
+        <div class="energy-track">
+          <div class="energy-fill" id="energyFill"></div>
+          <div class="energy-label" id="energyLabel">100 / 100</div>
         </div>
-        <div class="odometer" id="depthOdometer"></div>
+        <button class="refill-btn" id="refillBtn" type="button">⚡ Заряд</button>
       </div>
 
-      <div class="status-banner hidden" id="statusBanner"></div>
+      <div class="alert-box hidden" id="alertBox"></div>
     </header>
 
-    <!-- Экран 1: Шахта -->
-    <section id="view-mine">
-      <div class="mine-stage" id="mineStage">
-        <div class="shaft-scroll">
-          <div class="rock-vein" style="top: 10px; animation-delay: 0s;"></div>
-          <div class="rock-vein" style="top: 150px; animation-delay: -1.5s;"></div>
-          <div class="rock-vein" style="top: 290px; animation-delay: -3s;"></div>
-        </div>
-
-        <button class="chest-drop hidden" id="chestClaimBtn" type="button">
-          <span style="font-size: 24px;">🧰</span>
-          <span>
-            <span class="chest-drop-title" id="chestTitle">Находка в породе!</span><br />
-            <span class="chest-drop-sub" id="chestDesc">Нажми, чтобы забрать награду</span>
-          </span>
-        </button>
-
-        <div class="rig-zone">
-          <svg class="rig-svg" id="rigSvg" viewBox="0 0 240 236" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g class="chassis">
-              <path d="M80 56 H42 V102 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round" />
-              <path d="M160 56 H198 V102 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round" />
-              <g class="jaw-left">
-                <rect x="30" y="96" width="36" height="34" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5" />
-              </g>
-              <g class="jaw-right">
-                <rect x="174" y="96" width="36" height="34" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5" />
-              </g>
-              <rect x="82" y="18" width="76" height="60" rx="5" fill="#6ee7b7" stroke="#1e293b" stroke-width="2.5" />
-              <circle cx="104" cy="48" r="13" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5" />
-              <circle cx="136" cy="48" r="13" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5" />
-              <rect x="94" y="78" width="52" height="20" fill="#475569" stroke="#1e293b" stroke-width="2.5" />
-            </g>
-
-            <rect x="115" y="98" width="10" height="62" fill="#64748b" stroke="#1e293b" stroke-width="2" />
-
-            <g class="drill-assembly">
-              <rect x="113" y="102" width="14" height="34" fill="#94a3b8" stroke="#1e293b" stroke-width="2" />
-              <polygon points="103,136 137,136 120,192" fill="#cbd5e1" stroke="#1e293b" stroke-width="2.5" />
-              <g class="auger-threads">
-                <line x1="106" y1="146" x2="134" y2="152" stroke="#1e293b" stroke-width="4" />
-                <line x1="109" y1="158" x2="131" y2="164" stroke="#1e293b" stroke-width="4" />
-                <line x1="112" y1="170" x2="128" y2="175" stroke="#1e293b" stroke-width="4" />
-              </g>
-            </g>
-          </svg>
-          <div class="mine-badge" id="mineInfo">Верхняя земля • ~0 кг/сек</div>
-        </div>
-
-        <div class="solid-bedrock">
-          <div class="crater-glow"></div>
-        </div>
-
-        <div class="energy-bar-wrap">
-          <div class="tube-inlet"></div>
-          <div class="tube-chamber">
-            <div class="tube-liquid" id="tubeLiquid" style="width: 100%;"></div>
-            <div class="tube-shine"></div>
-            <div class="tube-timer" id="tubeTimer">04:00:00</div>
+    <!-- Экран 1: Кликер -->
+    <section id="view-clicker">
+      <div class="clicker-screen">
+        <div class="vein-card">
+          <div class="vein-top">
+            <span id="layerTitle">Слой 1 • Поверхность</span>
+            <span id="layerProgressText">0 / 5 000 кг</span>
           </div>
-          <button class="charge-trigger" id="chargeBtn" type="button" title="Набрать энергию">
-            <div class="charge-core"></div>
+          <div class="vein-bar">
+            <div class="vein-bar-fill" id="layerBarFill"></div>
+          </div>
+        </div>
+
+        <div class="tap-arena" id="tapArena">
+          <button class="rock-tap-btn" id="tapRockBtn" type="button">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <polygon points="14,48 10,24 26,10 50,16 54,42 36,54" fill="#9ca3af" stroke="#1f2937" stroke-width="3.5" />
+              <polygon points="26,10 50,16 34,28 20,22" fill="#d1d5db" opacity="0.65" />
+              <circle cx="38" cy="36" r="5" fill="#fbbf24" />
+            </svg>
+            <span class="tap-caption">ДОБЫТЬ ПОРОДУ</span>
+            <span class="tap-sub" id="tapPowerHint">+25 кг за клик</span>
           </button>
         </div>
-      </div>
-    </section>
 
-    <!-- Экран 2: Детали -->
-    <section class="hidden" id="view-parts">
-      <div class="blueprint-board">
-        <div class="blueprint-heading">СХЕМА УСТАНОВКИ</div>
-        <div class="blueprint-sub" id="blueprintSummary"></div>
-
-        <svg class="blueprint-svg" viewBox="0 0 240 210" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Ковши -->
-          <path d="M76 58 H36 V108 H66" stroke="#1e293b" stroke-width="5" stroke-linejoin="round" />
-          <path d="M164 58 H204 V108 H174" stroke="#1e293b" stroke-width="5" stroke-linejoin="round" />
-          <rect x="24" y="104" width="44" height="34" rx="4" fill="#e2e8f0" stroke="#1e293b" stroke-width="3" />
-          <rect x="172" y="104" width="44" height="34" rx="4" fill="#e2e8f0" stroke="#1e293b" stroke-width="3" />
-
-          <!-- Мотор -->
-          <rect x="78" y="20" width="84" height="58" rx="6" fill="#cbd5e1" stroke="#1e293b" stroke-width="3" />
-          <circle cx="101" cy="49" r="12" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5" />
-          <circle cx="139" cy="49" r="12" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5" />
-          <text x="120" y="34" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a" id="bpMotorTxt">1</text>
-
-          <!-- Энергоблок -->
-          <rect x="96" y="82" width="48" height="24" rx="4" fill="#bae6fd" stroke="#1e293b" stroke-width="2.5" />
-          <text x="120" y="98" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a" id="bpBatTxt">1</text>
-
-          <!-- Бур -->
-          <polygon points="94,114 146,114 120,194" fill="#e2e8f0" stroke="#1e293b" stroke-width="3" />
-          <line x1="99" y1="130" x2="141" y2="140" stroke="#1e293b" stroke-width="3.5" />
-          <line x1="104" y1="148" x2="136" y2="157" stroke="#1e293b" stroke-width="3.5" />
-          <line x1="109" y1="166" x2="131" y2="173" stroke="#1e293b" stroke-width="3.5" />
-          <text x="120" y="126" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a" id="bpDrillTxt">1</text>
-
-          <!-- Уровни ковшей и хранилища -->
-          <text x="46" y="125" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a" id="bpBucketsTxt">1</text>
-          <text x="194" y="125" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a" id="bpStorageTxt">1</text>
-        </svg>
-      </div>
-
-      <div class="parts-grid" id="partsGrid"></div>
-
-      <div class="reset-wrap">
-        <button class="reset-btn" id="resetBtn" type="button">Сброс прогресса</button>
-      </div>
-    </section>
-
-    <!-- Экран 3: Улучшения (последовательные ступени батарей и модулей) -->
-    <section class="hidden" id="view-upgrades">
-      <div class="upgrades-wrap" id="upgradesList"></div>
-    </section>
-
-    <!-- Экран 4: Склад -->
-    <section class="hidden" id="view-storage">
-      <div class="storage-header">
-        <div>
-          <strong style="font-size: 14px;">Склад</strong>
-          <span id="storageHeaderMeta" style="font-size: 12px; font-weight: 800; color: #dcfce7;"></span>
+        <div class="rates-grid">
+          <div class="rate-box">
+            <div class="rate-title">За клик</div>
+            <div class="rate-val" id="statTap">+25 кг</div>
+          </div>
+          <div class="rate-box">
+            <div class="rate-title">Автодобыча</div>
+            <div class="rate-val" id="statAuto">+10 кг/сек</div>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Экран 2: Улучшения -->
+    <section class="hidden" id="view-upgrades">
+      <div class="list-wrap" id="upgradesList"></div>
+      <div class="footer-reset">
+        <button class="reset-btn" id="resetBtn" type="button">Сбросить прогресс</button>
+      </div>
+    </section>
+
+    <!-- Экран 3: Склад -->
+    <section class="hidden" id="view-storage">
+      <div class="storage-top">
+        <strong style="font-size: 14px;" id="storageSummary">Склад</strong>
         <button class="sell-all-btn" id="sellAllBtn" type="button">Продать всё</button>
       </div>
-      <div class="storage-list" id="storageList"></div>
+      <div class="list-wrap" id="storageList"></div>
     </section>
   </div>
 
   <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <button class="nav-btn active" data-view="mine" type="button">⛏️ Шахта</button>
-      <button class="nav-btn" data-view="parts" type="button">🔧 Детали</button>
-      <button class="nav-btn" data-view="upgrades" type="button">⚡ Батареи</button>
+    <div class="nav-grid">
+      <button class="nav-btn active" data-view="clicker" type="button">⛏️ Кликер</button>
+      <button class="nav-btn" data-view="upgrades" type="button">⬆️ Улучшения</button>
       <button class="nav-btn" data-view="storage" type="button">📦 Склад</button>
     </div>
   </nav>
@@ -1064,174 +610,43 @@
       window.Telegram.WebApp.expand();
     }
 
-    const STORAGE_KEY = "deep_excavator_save_v1";
+    const SAVE_KEY = "deep_clicker_save_v1";
 
-    const RESOURCES = [
-      {
-        id: "dirt",
-        name: "Земля",
-        perTon: 12,
-        desc: "Верхний рыхлый пласт грунта с верхних горизонтов."
-      },
-      {
-        id: "stone",
-        name: "Камень",
-        perTon: 28,
-        desc: "Плотная порода из стен шахты, пригодна для продажи и крафта."
-      },
-      {
-        id: "coal",
-        name: "Уголь",
-        perTon: 65,
-        desc: "Тёмный твёрдый уголь с более глубоких пластов."
-      },
-      {
-        id: "iron",
-        name: "Железная руда",
-        perTon: 140,
-        desc: "Тяжёлая металлическая руда для серьёзных апгрейдов."
-      },
-      {
-        id: "gold",
-        name: "Золотая руда",
-        perTon: 320,
-        desc: "Редкая жила с высокой стоимостью за тонну."
-      }
+    const ORES = [
+      { id: "dirt", name: "Земля", pricePerTon: 15, color: "#9a3412", accent: "#c2410c" },
+      { id: "stone", name: "Камень", pricePerTon: 35, color: "#9ca3af", accent: "#4b5563" },
+      { id: "coal", name: "Уголь", pricePerTon: 75, color: "#334155", accent: "#64748b" },
+      { id: "iron", name: "Железная руда", pricePerTon: 155, color: "#78716c", accent: "#e7e5e4" },
+      { id: "gold", name: "Золотая руда", pricePerTon: 340, color: "#854d0e", accent: "#facc15" }
     ];
 
-    const BATTERY_TIERS = [
-      {
-        level: 1,
-        title: "Батарея MK-1 [1]",
-        capacityHours: 4.0,
-        mult: 1.0,
-        coinCost: 0,
-        craftRes: null
-      },
-      {
-        level: 2,
-        title: "Батарея MK-2 [2]",
-        capacityHours: 6.0,
-        mult: 1.35,
-        coinCost: 140,
-        craftRes: { id: "stone", kg: 450 }
-      },
-      {
-        level: 3,
-        title: "Батарея MK-3 [3]",
-        capacityHours: 9.0,
-        mult: 1.85,
-        coinCost: 520,
-        craftRes: { id: "coal", kg: 1100 }
-      },
-      {
-        level: 4,
-        title: "Батарея MK-4 [4]",
-        capacityHours: 14.0,
-        mult: 2.6,
-        coinCost: 1800,
-        craftRes: { id: "iron", kg: 2600 }
-      },
-      {
-        level: 5,
-        title: "Батарея MK-5 [5]",
-        capacityHours: 22.0,
-        mult: 3.8,
-        coinCost: 6500,
-        craftRes: { id: "gold", kg: 5000 }
-      }
+    const LAYERS = [
+      { title: "Слой 1 • Поверхность", targetKg: 5000, pool: [["dirt", 0.72], ["stone", 0.28]] },
+      { title: "Слой 2 • Каменный пласт", targetKg: 18000, pool: [["dirt", 0.3], ["stone", 0.5], ["coal", 0.2]] },
+      { title: "Слой 3 • Угольная жила", targetKg: 55000, pool: [["stone", 0.25], ["coal", 0.48], ["iron", 0.27]] },
+      { title: "Слой 4 • Рудный разлом", targetKg: 160000, pool: [["coal", 0.2], ["iron", 0.5], ["gold", 0.3]] },
+      { title: "Слой 5 • Глубокое ядро", targetKg: 450000, pool: [["iron", 0.35], ["gold", 0.65]] }
     ];
 
-    function renderOreSvg(id) {
-      if (id === "stone") {
-        return `<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <polygon points="6,20 4,11 12,5 22,8 24,18 16,23" fill="#9ca3af" stroke="#1f2937" stroke-width="2" />
-          <line x1="11" y1="8" x2="15" y2="15" stroke="#4b5563" stroke-width="1.8" />
-          <line x1="15" y1="15" x2="21" y2="13" stroke="#4b5563" stroke-width="1.8" />
-        </svg>`;
-      }
-      if (id === "coal") {
-        return `<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <polygon points="5,19 6,9 14,5 23,10 22,20 13,24" fill="#334155" stroke="#0f172a" stroke-width="2" />
-          <polygon points="14,5 23,10 15,14 11,9" fill="#475569" />
-        </svg>`;
-      }
-      if (id === "iron") {
-        return `<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <polygon points="5,20 5,10 13,5 23,9 22,20 14,23" fill="#78716c" stroke="#1c1917" stroke-width="2" />
-          <circle cx="11" cy="13" r="3" fill="#d6d3d1" />
-          <circle cx="18" cy="16" r="2.5" fill="#e7e5e4" />
-        </svg>`;
-      }
-      if (id === "gold") {
-        return `<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <polygon points="5,20 6,10 14,5 23,9 22,20 14,23" fill="#854d0e" stroke="#1c1917" stroke-width="2" />
-          <circle cx="12" cy="13" r="3.5" fill="#facc15" />
-          <circle cx="18" cy="16" r="2.5" fill="#fde047" />
-        </svg>`;
-      }
-      return `<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <polygon points="5,20 5,11 13,6 23,10 22,20 14,23" fill="#9a3412" stroke="#291209" stroke-width="2" />
-        <circle cx="10" cy="15" r="2" fill="#c2410c" />
-        <circle cx="17" cy="12" r="2" fill="#7c2d12" />
-      </svg>`;
-    }
-
-    function renderPartSvg(partKey) {
-      if (partKey === "motor") {
-        return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <rect x="4" y="6" width="16" height="12" rx="2" fill="#a8a29e" stroke="#fafaf9" stroke-width="1.6" />
-          <circle cx="9" cy="12" r="2.5" fill="#292524" />
-          <circle cx="15" cy="12" r="2.5" fill="#292524" />
-        </svg>`;
-      }
-      if (partKey === "battery") {
-        return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <rect x="5" y="5" width="14" height="15" rx="2" fill="#38bdf8" stroke="#e0f2fe" stroke-width="1.6" />
-          <path d="M13 8L9.5 13H12L11 17L14.5 12H12L13 8Z" fill="#0f172a" />
-        </svg>`;
-      }
-      if (partKey === "drill") {
-        return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <polygon points="5,5 19,5 12,21" fill="#fb923c" stroke="#ffedd5" stroke-width="1.6" />
-          <line x1="7" y1="9" x2="17" y2="11" stroke="#1c1917" stroke-width="2" />
-          <line x1="8" y1="13" x2="16" y2="15" stroke="#1c1937" stroke-width="2" />
-        </svg>`;
-      }
-      if (partKey === "buckets") {
-        return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M4 7H14V14H20V19H4V7Z" fill="#f59e0b" stroke="#fef3c7" stroke-width="1.6" />
-        </svg>`;
-      }
-      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <rect x="4" y="5" width="16" height="14" rx="2" fill="#4ade80" stroke="#dcfce7" stroke-width="1.6" />
-        <line x1="4" y1="10" x2="20" y2="10" stroke="#14532d" stroke-width="1.8" />
-        <line x1="4" y1="14" x2="20" y2="14" stroke="#14532d" stroke-width="1.8" />
+    function oreSvg(ore) {
+      return `<svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+        <polygon points="5,20 5,10 13,5 23,9 22,20 14,23" fill="${ore.color}" stroke="#1c1917" stroke-width="2" />
+        <circle cx="12" cy="13" r="3" fill="${ore.accent}" />
+        <circle cx="18" cy="16" r="2.2" fill="${ore.accent}" />
       </svg>`;
     }
 
     function defaultState() {
       return {
         coins: 0,
-        depth: 0,
-        energy: 4.0,
-        batteryLevel: 1,
-        batteryBoughtLevels: [1],
-        chestReward: null,
-        nextChestDepth: 65,
-        inv: {
-          dirt: 0,
-          stone: 0,
-          coal: 0,
-          iron: 0,
-          gold: 0
-        },
-        parts: {
-          motor: { lvl: 1, color: "#16a34a" },
-          battery: { lvl: 1, color: "#0284c7" },
-          drill: { lvl: 1, color: "#ea580c" },
-          buckets: { lvl: 1, color: "#d97706" },
-          storage: { lvl: 1, color: "#15803d" }
+        energy: 100,
+        minedInLayer: 0,
+        inv: { dirt: 0, stone: 0, coal: 0, iron: 0, gold: 0 },
+        upgrades: {
+          pickaxe: 1,
+          rig: 1,
+          battery: 1,
+          warehouse: 1
         }
       };
     }
@@ -1239,24 +654,12 @@
     function loadState() {
       const base = defaultState();
       try {
-        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}");
         return {
           ...base,
           ...raw,
-          batteryBoughtLevels: Array.isArray(raw.batteryBoughtLevels) && raw.batteryBoughtLevels.length
-            ? raw.batteryBoughtLevels
-            : [1],
-          inv: {
-            ...base.inv,
-            ...(raw.inv || {})
-          },
-          parts: {
-            motor: { ...base.parts.motor, ...(raw.parts && raw.parts.motor ? raw.parts.motor : {}) },
-            battery: { ...base.parts.battery, ...(raw.parts && raw.parts.battery ? raw.parts.battery : {}) },
-            drill: { ...base.parts.drill, ...(raw.parts && raw.parts.drill ? raw.parts.drill : {}) },
-            buckets: { ...base.parts.buckets, ...(raw.parts && raw.parts.buckets ? raw.parts.buckets : {}) },
-            storage: { ...base.parts.storage, ...(raw.parts && raw.parts.storage ? raw.parts.storage : {}) }
-          }
+          inv: { ...base.inv, ...(raw.inv || {}) },
+          upgrades: { ...base.upgrades, ...(raw.upgrades || {}) }
         };
       } catch {
         return base;
@@ -1267,563 +670,324 @@
 
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
       } catch {}
     }
 
-    function formatMass(kg) {
-      if (kg >= 1e9) return `${(kg / 1e9).toFixed(2)} млн т`;
-      if (kg >= 1e6) return `${(kg / 1e6).toFixed(2)} тыс. т`;
+    function fmtNum(n) {
+      if (n >= 1e9) return `${(n / 1e9).toFixed(2)} млрд`;
+      if (n >= 1e6) return `${(n / 1e6).toFixed(2)} млн`;
+      if (n >= 1e4) return `${(n / 1e3).toFixed(1)} тыс.`;
+      return `${Math.floor(n).toLocaleString("ru-RU")}`;
+    }
+
+    function fmtKg(kg) {
       if (kg >= 1000) return `${(kg / 1000).toFixed(2)} т`;
       return `${Math.round(kg).toLocaleString("ru-RU")} кг`;
     }
 
-    function formatCoins(num) {
-      if (num >= 1e9) return `${(num / 1e9).toFixed(2)} млрд`;
-      if (num >= 1e6) return `${(num / 1e6).toFixed(2)} млн`;
-      if (num >= 1e4) return `${(num / 1e3).toFixed(1)} тыс.`;
-      return `${Math.floor(num).toLocaleString("ru-RU")}`;
+    function getMaxEnergy() {
+      return 100 + (state.upgrades.battery - 1) * 35;
     }
 
-    function formatClock(hours) {
-      const totalSeconds = Math.max(0, Math.floor(hours * 3600));
-      const hh = Math.floor(totalSeconds / 3600);
-      const mm = Math.floor((totalSeconds % 3600) / 60);
-      const ss = totalSeconds % 60;
-      return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+    function getStorageCapKg() {
+      return Math.round(2000 * Math.pow(1.45, state.upgrades.warehouse - 1));
     }
 
-    function getActiveBattery() {
-      return BATTERY_TIERS.find((b) => b.level === state.batteryLevel) || BATTERY_TIERS[0];
+    function getUsedKg() {
+      return Object.values(state.inv).reduce((a, b) => a + (b || 0), 0);
     }
 
-    function getBatteryCapacityHours() {
-      const tier = getActiveBattery();
-      return tier.capacityHours * Math.pow(1.22, state.parts.battery.lvl - 1);
+    function getTapKg() {
+      return Math.round(25 * Math.pow(1.48, state.upgrades.pickaxe - 1));
     }
 
-    function getOverallRigLevel() {
-      const lvls = Object.values(state.parts).map((p) => p.lvl);
-      return Math.max(1, Math.min(...lvls));
+    function getAutoKgPerSec() {
+      return Math.round(10 * Math.pow(1.42, state.upgrades.rig - 1));
     }
 
-    function getWorkMultiplier() {
-      const motorMult = Math.pow(1.65, state.parts.motor.lvl - 1);
-      const drillMult = 1 + (state.parts.drill.lvl - 1) * 0.25;
-      const batMult = getActiveBattery().mult;
-      return motorMult * drillMult * batMult;
+    function getOverallLevel() {
+      return Math.min(
+        state.upgrades.pickaxe,
+        state.upgrades.rig,
+        state.upgrades.battery,
+        state.upgrades.warehouse
+      );
     }
 
-    function getDrainPerSec() {
-      return (4.0 / (4 * 3600)) * (1 + (state.parts.motor.lvl - 1) * 0.22);
+    function getCurrentLayer() {
+      const idx = Math.min(LAYERS.length - 1, getOverallLevel() - 1);
+      return LAYERS[idx];
     }
 
-    function getTapChargeHours() {
-      return 0.16 + (state.parts.battery.lvl - 1) * 0.05;
-    }
-
-    function getStorageCapacityKg() {
-      return Math.round((5000 + (state.parts.storage.lvl - 1) * 2500) * Math.pow(1.2, state.parts.storage.lvl - 1));
-    }
-
-    function getUsedStorageKg() {
-      return Object.values(state.inv).reduce((sum, val) => sum + (val || 0), 0);
-    }
-
-    function isStorageFull() {
-      return getUsedStorageKg() >= getStorageCapacityKg();
-    }
-
-    function getSellMultiplier() {
-      return 1 + (state.parts.storage.lvl - 1) * 0.05;
-    }
-
-    function getBucketMultiplier() {
-      return 1 + (state.parts.buckets.lvl - 1) * 0.35 + (state.parts.drill.lvl - 1) * 0.12;
-    }
-
-    /* Последовательная прокачка деталей: сначала монеты, с 3-го уровня ресурсы со склада */
-    function getPartUpgradeRequirement(partKey) {
-      const lvl = state.parts[partKey].lvl;
-      const baseCoins = {
-        motor: 25,
-        battery: 25,
-        drill: 30,
-        buckets: 35,
-        storage: 20
-      }[partKey] || 25;
-
+    function getUpgradeCost(key) {
+      const lvl = state.upgrades[key];
+      const base = { pickaxe: 20, rig: 30, battery: 25, warehouse: 25 }[key];
       if (lvl < 3) {
-        return {
-          mode: "coins",
-          coins: Math.round(baseCoins * Math.pow(1.55, lvl - 1))
-        };
+        return { type: "coins", coins: Math.round(base * Math.pow(1.75, lvl - 1)) };
       }
-
-      const resId =
-        lvl >= 11 ? "gold" :
-        lvl >= 9 ? "iron" :
-        lvl >= 7 ? "coal" :
-        lvl >= 5 ? "stone" : "dirt";
-
-      const resObj = RESOURCES.find((r) => r.id === resId) || RESOURCES[0];
-      const kg = Math.round(140 * Math.pow(1.42, lvl - 3));
-      return {
-        mode: "resource",
-        res: resObj,
-        kg
-      };
+      const ore = ORES[Math.min(ORES.length - 1, lvl - 3)];
+      const kg = Math.round(180 * Math.pow(1.5, lvl - 3));
+      return { type: "ore", ore, kg };
     }
 
-    function getResourceSalePrice(resObj, kg) {
-      return Math.max(1, Math.round((kg / 1000) * resObj.perTon * getSellMultiplier()));
+    function getSalePrice(ore, kg) {
+      return Math.max(1, Math.round((kg / 1000) * ore.pricePerTon));
     }
 
-    function getCurrentHorizon() {
-      if (state.depth >= 800) {
-        return { name: "Глубинный горизонт", speed: 0.45, baseKg: 2600, weights: [["iron", 0.52, 1.1], ["gold", 0.48, 1.25]] };
-      }
-      if (state.depth >= 450) {
-        return { name: "Рудная жила", speed: 0.55, baseKg: 1180, weights: [["coal", 0.38, 1.0], ["iron", 0.62, 1.18]] };
-      }
-      if (state.depth >= 220) {
-        return { name: "Угольный пласт", speed: 0.65, baseKg: 520, weights: [["stone", 0.4, 0.95], ["coal", 0.6, 1.15]] };
-      }
-      if (state.depth >= 80) {
-        return { name: "Плотный грунт", speed: 0.75, baseKg: 210, weights: [["dirt", 0.42, 1.0], ["stone", 0.58, 1.12]] };
-      }
-      return { name: "Верхняя земля", speed: 0.85, baseKg: 85, weights: [["dirt", 0.78, 1.1], ["stone", 0.22, 0.95]] };
-    }
+    function addMinedKg(amount, clientX, clientY) {
+      if (amount <= 0) return;
+      const cap = getStorageCapKg();
+      const used = getUsedKg();
+      const free = Math.max(0, cap - used);
+      if (free <= 0) return;
 
-    function mineOreChunk(kgAmount) {
-      if (kgAmount <= 0 || isStorageFull()) return null;
-      const horizon = getCurrentHorizon();
-      const freeSpace = Math.max(0, getStorageCapacityKg() - getUsedStorageKg());
+      const taken = Math.min(free, amount);
+      const layer = getCurrentLayer();
       const roll = Math.random();
       let acc = 0;
-      let chosen = horizon.weights[horizon.weights.length - 1];
+      let chosenId = layer.pool[layer.pool.length - 1][0];
 
-      for (const item of horizon.weights) {
-        acc += item[1];
+      for (const [id, weight] of layer.pool) {
+        acc += weight;
         if (roll <= acc) {
-          chosen = item;
+          chosenId = id;
           break;
         }
       }
 
-      const raw = Math.max(1, Math.round(kgAmount * chosen[2] * (0.85 + Math.random() * 0.35)));
-      const taken = Math.min(raw, freeSpace);
-      if (taken > 0) {
-        state.inv[chosen[0]] = (state.inv[chosen[0]] || 0) + taken;
-      }
-      return chosen[0];
-    }
+      state.inv[chosenId] = (state.inv[chosenId] || 0) + taken;
+      state.minedInLayer += taken;
 
-    function spawnDigDebris() {
-      const stage = document.getElementById("mineStage");
-      for (let i = 0; i < 3; i++) {
-        const isRock = i === 0 || Math.random() < 0.55;
-        const side = Math.random() < 0.5 ? -1 : 1;
-        const dx1 = side * (12 + Math.round(Math.random() * 24));
-        const dy1 = -14 - Math.round(Math.random() * 22);
-        const dx2 = side * (24 + Math.round(Math.random() * 34));
-        const dy2 = 24 + Math.round(Math.random() * 34);
-
-        const el = document.createElement("div");
-        el.className = `debris-chunk ${isRock ? "rock" : "dust"}`;
-        el.style.left = `${44 + Math.round(Math.random() * 12)}%`;
-        el.style.top = `${258 + Math.round(Math.random() * 14)}px`;
-        el.style.setProperty("--dx1", `${dx1}px`);
-        el.style.setProperty("--dy1", `${dy1}px`);
-        el.style.setProperty("--dx2", `${dx2}px`);
-        el.style.setProperty("--dy2", `${dy2}px`);
-        el.style.setProperty("--dur", `${(0.72 + Math.random() * 0.35).toFixed(2)}s`);
-        stage.appendChild(el);
-        setTimeout(() => el.remove(), 1100);
+      if (clientX != null && clientY != null) {
+        const arena = document.getElementById("tapArena");
+        const rect = arena.getBoundingClientRect();
+        const popup = document.createElement("div");
+        popup.className = "float-popup";
+        popup.textContent = `+${fmtKg(taken)}`;
+        popup.style.left = `${Math.max(36, Math.min(rect.width - 36, clientX - rect.left))}px`;
+        popup.style.top = `${Math.max(36, Math.min(rect.height - 36, clientY - rect.top))}px`;
+        arena.appendChild(popup);
+        setTimeout(() => popup.remove(), 860);
       }
     }
 
-    function maybeSpawnChest() {
-      if (state.chestReward) return;
-      if (state.depth >= state.nextChestDepth) {
-        const bonusCoins = Math.round(80 + state.depth * 1.6);
-        const bonusRes = RESOURCES[Math.min(RESOURCES.length - 1, Math.floor(state.depth / 180))];
-        const bonusKg = Math.round(180 + state.depth * 0.8);
-        state.chestReward = {
-          coins: bonusCoins,
-          resId: bonusRes.id,
-          resName: bonusRes.name,
-          kg: bonusKg
-        };
-        state.nextChestDepth = Math.floor(state.depth + 85);
-      }
-    }
+    function render() {
+      const maxE = getMaxEnergy();
+      state.energy = Math.min(maxE, Math.max(0, state.energy));
 
-    function renderOdometer() {
-      const digits = Math.floor(state.depth).toString().padStart(5, "0").split("");
-      const box = document.getElementById("depthOdometer");
-      box.innerHTML =
-        digits.map((d, idx) => `<span class="digit ${idx === 0 ? "lead" : ""}">${d}</span>`).join("") +
-        `<span class="unit">M</span>`;
-    }
+      const usedKg = getUsedKg();
+      const capKg = getStorageCapKg();
+      const isFull = usedKg >= capKg;
+      const tapCost = 2;
 
-    function renderMine() {
-      const capH = getBatteryCapacityHours();
-      state.energy = Math.min(capH, Math.max(0, state.energy));
+      document.getElementById("hudCoins").textContent = fmtNum(state.coins);
+      document.getElementById("hudRigLvl").textContent = String(getOverallLevel());
+      const hudStorage = document.getElementById("hudStorage");
+      hudStorage.textContent = `${fmtKg(usedKg)} / ${fmtKg(capKg)}`;
+      hudStorage.style.color = isFull ? "#f87171" : "#4ade80";
 
-      const full = isStorageFull();
-      const canMine = state.energy > 0 && !full;
-      const stage = document.getElementById("mineStage");
-      stage.classList.toggle("active", canMine);
+      const ePct = Math.max(0, Math.min(100, (state.energy / Math.max(1, maxE)) * 100));
+      document.getElementById("energyFill").style.width = `${ePct}%`;
+      document.getElementById("energyLabel").textContent = `${Math.floor(state.energy)} / ${maxE}`;
 
-      const pct = Math.max(0, Math.min(100, (state.energy / Math.max(0.01, capH)) * 100));
-      document.getElementById("tubeLiquid").style.width = `${pct}%`;
-      document.getElementById("tubeTimer").textContent = formatClock(state.energy);
-
-      const horizon = getCurrentHorizon();
-      const kgPerSec = canMine
-        ? horizon.baseKg * getWorkMultiplier() * getBucketMultiplier() * (1 + state.depth / 260)
-        : 0;
-
-      document.getElementById("mineInfo").textContent =
-        `${horizon.name} • ~${formatMass(kgPerSec)}/сек`;
-
-      const chestBtn = document.getElementById("chestClaimBtn");
-      if (state.chestReward) {
-        chestBtn.classList.remove("hidden");
-        document.getElementById("chestTitle").textContent = `Сундук на ${Math.floor(state.depth)} м`;
-        document.getElementById("chestDesc").textContent =
-          `+${formatCoins(state.chestReward.coins)} 🪙 и ${formatMass(state.chestReward.kg)} (${state.chestReward.resName})`;
+      const alertBox = document.getElementById("alertBox");
+      alertBox.classList.remove("hidden", "warn", "full");
+      if (isFull) {
+        alertBox.classList.add("full");
+        alertBox.textContent = "Склад заполнен! Перейдите на склад и продайте добытое.";
+      } else if (state.energy < tapCost) {
+        alertBox.classList.add("warn");
+        alertBox.textContent = "Не хватает энергии — нажмите «Заряд» или подождите восстановления.";
       } else {
-        chestBtn.classList.add("hidden");
+        alertBox.classList.add("hidden");
       }
-    }
 
-    function renderParts() {
-      const overallLvl = getOverallRigLevel();
-      const capH = getBatteryCapacityHours();
-      document.getElementById("blueprintSummary").textContent =
-        `Общий уровень: ${overallLvl} • ${getActiveBattery().title} • Бак: ${capH.toFixed(1)}ч • Мощность ×${getWorkMultiplier().toFixed(2)}`;
+      const layer = getCurrentLayer();
+      document.getElementById("layerTitle").textContent = layer.title;
+      const lPct = Math.min(100, Math.round((state.minedInLayer / layer.targetKg) * 100));
+      document.getElementById("layerBarFill").style.width = `${lPct}%`;
+      document.getElementById("layerProgressText").textContent = `${fmtKg(state.minedInLayer)} / ${fmtKg(layer.targetKg)}`;
 
-      document.getElementById("bpMotorTxt").textContent = String(state.parts.motor.lvl);
-      document.getElementById("bpBatTxt").textContent = String(state.parts.battery.lvl);
-      document.getElementById("bpDrillTxt").textContent = String(state.parts.drill.lvl);
-      document.getElementById("bpBucketsTxt").textContent = String(state.parts.buckets.lvl);
-      document.getElementById("bpStorageTxt").textContent = String(state.parts.storage.lvl);
+      const tapKg = getTapKg();
+      const autoKg = getAutoKgPerSec();
+      document.getElementById("tapPowerHint").textContent = `+${fmtKg(tapKg)} за клик (−${tapCost} ⚡)`;
+      document.getElementById("statTap").textContent = `+${fmtKg(tapKg)}`;
+      document.getElementById("statAuto").textContent = `+${fmtKg(autoKg)}/сек`;
 
-      const partList = [
-        ["motor", "Мотор"],
-        ["battery", "Энергоблок"],
-        ["drill", "Бур"],
-        ["buckets", "Ковши"],
-        ["storage", "Хранилище"]
+      const tapBtn = document.getElementById("tapRockBtn");
+      tapBtn.disabled = isFull || state.energy < tapCost;
+
+      // Список последовательных улучшений
+      const upDefs = [
+        { key: "pickaxe", title: "Ударный инструмент", effect: `Сила клика: ${fmtKg(tapKg)}` },
+        { key: "rig", title: "Авто-бур", effect: `Автодобыча: ${fmtKg(autoKg)}/сек` },
+        { key: "battery", title: "Энергоячейка", effect: `Ёмкость энергии: ${maxE}` },
+        { key: "warehouse", title: "Отсек склада", effect: `Вместимость: ${fmtKg(capKg)}` }
       ];
 
-      const grid = document.getElementById("partsGrid");
-      grid.innerHTML = "";
+      const upList = document.getElementById("upgradesList");
+      upList.innerHTML = "";
 
-      partList.forEach(([key, label]) => {
-        const part = state.parts[key];
-        const req = getPartUpgradeRequirement(key);
-        let canAfford = false;
-        let btnLabel = "";
+      upDefs.forEach((u) => {
+        const lvl = state.upgrades[u.key];
+        const req = getUpgradeCost(u.key);
+        const canBuy = req.type === "coins"
+          ? state.coins >= req.coins
+          : (state.inv[req.ore.id] || 0) >= req.kg;
 
-        if (req.mode === "coins") {
-          canAfford = state.coins >= req.coins;
-          btnLabel = `▲ ${formatCoins(req.coins)} 🪙`;
-        } else {
-          const haveKg = state.inv[req.res.id] || 0;
-          canAfford = haveKg >= req.kg;
-          btnLabel = `▲ ${formatMass(req.kg)} ${req.res.name.slice(0, 5)}.`;
-        }
+        const btnText = req.type === "coins"
+          ? `Улучшить до ${lvl + 1} ур. за ${fmtNum(req.coins)} 🪙`
+          : `Улучшить до ${lvl + 1} ур. за ${fmtKg(req.kg)} (${req.ore.name})`;
 
-        const slot = document.createElement("div");
-        slot.className = "part-slot";
-        slot.innerHTML = `
-          ${renderPartSvg(key)}
-          <span class="part-lvl-tag" style="background: ${part.color};">${part.lvl}</span>
-          <span class="part-title">${label}</span>
-          <button class="part-up-btn ${req.mode === "resource" ? "res-req" : ""}" type="button" ${canAfford ? "" : "disabled"}>
-            ${btnLabel}
+        const card = document.createElement("div");
+        card.className = "upgrade-card";
+        card.innerHTML = `
+          <div class="upgrade-head">
+            <div class="upgrade-name">${u.title}</div>
+            <span class="lvl-badge">Уровень ${lvl}</span>
+          </div>
+          <div class="upgrade-effect">${u.effect}</div>
+          <button class="upgrade-btn ${req.type === "ore" ? "res-mode" : ""}" type="button" ${canBuy ? "" : "disabled"}>
+            ${btnText}
           </button>
         `;
 
-        slot.querySelector("button").addEventListener("click", () => {
-          if (req.mode === "coins") {
+        card.querySelector("button").addEventListener("click", () => {
+          if (req.type === "coins") {
             if (state.coins < req.coins) return;
             state.coins -= req.coins;
           } else {
-            if ((state.inv[req.res.id] || 0) < req.kg) return;
-            state.inv[req.res.id] -= req.kg;
+            if ((state.inv[req.ore.id] || 0) < req.kg) return;
+            state.inv[req.ore.id] -= req.kg;
           }
-          part.lvl += 1;
+          state.upgrades[u.key] += 1;
           saveState();
-          renderAll();
+          render();
         });
 
-        grid.appendChild(slot);
+        upList.appendChild(card);
       });
-    }
 
-    function renderUpgrades() {
-      const container = document.getElementById("upgradesList");
-      container.innerHTML = `<div class="section-note">Последовательная ветка батарей: каждый следующий уровень открывается строго по порядку</div>`;
-
-      const maxUnlocked = Math.max(...state.batteryBoughtLevels);
-
-      BATTERY_TIERS.forEach((tier) => {
-        const isBought = state.batteryBoughtLevels.includes(tier.level);
-        const isEquipped = state.batteryLevel === tier.level;
-        const isNextAvailable = !isBought && tier.level === maxUnlocked + 1;
-
-        const card = document.createElement("div");
-        card.className = `tier-card ${isBought ? "unlocked" : isNextAvailable ? "" : "locked"}`;
-
-        let statusText = "Закрыто";
-        if (isEquipped) statusText = "Установлена";
-        else if (isBought) statusText = "Доступна";
-        else if (isNextAvailable) statusText = "Следующая в очереди";
-
-        let reqHtml = "";
-        if (!isBought && tier.craftRes) {
-          const reqRes = RESOURCES.find((r) => r.id === tier.craftRes.id) || RESOURCES[1];
-          const haveKg = state.inv[reqRes.id] || 0;
-          reqHtml = `<div class="tier-req">Рецепт: ${reqRes.name} — <strong>${formatMass(haveKg)}</strong> / ${formatMass(tier.craftRes.kg)}</div>`;
-        }
-
-        let actionHtml = "";
-        if (isBought) {
-          actionHtml = `<button class="tier-btn" type="button" ${isEquipped ? "disabled" : ""}>${isEquipped ? "Установлена" : "Установить"}</button>`;
-        } else if (isNextAvailable) {
-          const canBuyCoins = state.coins >= tier.coinCost;
-          const canCraftRes = tier.craftRes && (state.inv[tier.craftRes.id] || 0) >= tier.craftRes.kg;
-          actionHtml = `
-            <button class="tier-btn" type="button" ${canBuyCoins || canCraftRes ? "" : "disabled"}>
-              ${canCraftRes && !canBuyCoins
-                ? `Скрафтить (${formatMass(tier.craftRes.kg)} ${RESOURCES.find((r) => r.id === tier.craftRes.id).name})`
-                : `Открыть за ${formatCoins(tier.coinCost)} 🪙`}
-            </button>
-          `;
-        } else {
-          actionHtml = `<button class="tier-btn" type="button" disabled>Сначала откройте уровень ${tier.level - 1}</button>`;
-        }
-
-        card.innerHTML = `
-          <div class="tier-head">
-            <div>
-              <div class="tier-name">${tier.title}</div>
-              <span class="tier-pill">${tier.capacityHours.toFixed(1)} ч • Мощность ×${tier.mult.toFixed(2)}</span>
-            </div>
-            <span class="tier-state">${statusText}</span>
-          </div>
-          ${reqHtml}
-          ${actionHtml}
-        `;
-
-        const btn = card.querySelector("button");
-        btn.addEventListener("click", () => {
-          if (isBought) {
-            state.batteryLevel = tier.level;
-            saveState();
-            renderAll();
-            return;
-          }
-          if (!isNextAvailable) return;
-
-          if (state.coins >= tier.coinCost) {
-            state.coins -= tier.coinCost;
-            state.batteryBoughtLevels.push(tier.level);
-            state.batteryLevel = tier.level;
-            saveState();
-            renderAll();
-            return;
-          }
-
-          if (tier.craftRes && (state.inv[tier.craftRes.id] || 0) >= tier.craftRes.kg) {
-            state.inv[tier.craftRes.id] -= tier.craftRes.kg;
-            state.batteryBoughtLevels.push(tier.level);
-            state.batteryLevel = tier.level;
-            saveState();
-            renderAll();
-          }
-        });
-
-        container.appendChild(card);
+      // Склад: продажа по отдельности и продать всё
+      let totalSell = 0;
+      ORES.forEach((ore) => {
+        const kg = state.inv[ore.id] || 0;
+        if (kg > 0) totalSell += getSalePrice(ore, kg);
       });
-    }
 
-    function renderStorage() {
-      const usedKg = getUsedStorageKg();
-      const capKg = getStorageCapacityKg();
       const pct = Math.min(100, Math.round((usedKg / Math.max(1, capKg)) * 100));
-
-      let totalValue = 0;
-      RESOURCES.forEach((res) => {
-        const kg = state.inv[res.id] || 0;
-        if (kg > 0) totalValue += getResourceSalePrice(res, kg);
-      });
-
-      document.getElementById("storageHeaderMeta").textContent =
-        ` • Ур. ${state.parts.storage.lvl} (${pct}%) • ${formatMass(usedKg)} / ${formatMass(capKg)}`;
+      document.getElementById("storageSummary").textContent = `Склад • ${pct}% (${fmtKg(usedKg)} / ${fmtKg(capKg)})`;
 
       const sellAllBtn = document.getElementById("sellAllBtn");
       sellAllBtn.disabled = usedKg <= 0;
-      sellAllBtn.textContent = usedKg > 0 ? `Продать всё (${formatCoins(totalValue)} 🪙)` : "Продать всё";
+      sellAllBtn.textContent = usedKg > 0 ? `Продать всё (${fmtNum(totalSell)} 🪙)` : "Продать всё";
 
-      const list = document.getElementById("storageList");
-      list.innerHTML = "";
+      const stList = document.getElementById("storageList");
+      stList.innerHTML = "";
 
-      RESOURCES.forEach((res) => {
-        const kg = state.inv[res.id] || 0;
-        const price = kg > 0 ? getResourceSalePrice(res, kg) : 0;
-        const unitRate = Math.round(res.perTon * getSellMultiplier());
+      ORES.forEach((ore) => {
+        const kg = state.inv[ore.id] || 0;
+        const price = kg > 0 ? getSalePrice(ore, kg) : 0;
 
         const row = document.createElement("div");
-        row.className = "ore-row";
+        row.className = "ore-card";
         row.innerHTML = `
-          <div class="ore-top">
-            <div class="ore-icon-box">${renderOreSvg(res.id)}</div>
-            <div class="ore-name">${res.name}</div>
-            <div class="ore-rate">${unitRate} 🪙 / т</div>
+          <div class="ore-head">
+            <div class="ore-icon">${oreSvg(ore)}</div>
+            <div class="ore-title">${ore.name}</div>
+            <div class="ore-price">${ore.pricePerTon} 🪙 / т</div>
           </div>
-          <div class="ore-desc">${res.desc}</div>
-          <div class="ore-bottom">
-            <span class="ore-amount">${formatMass(kg)}</span>
-            <button class="ore-sell-btn" type="button" ${kg > 0 ? "" : "disabled"}>
-              ${kg > 0 ? `Продать (${formatCoins(price)} 🪙)` : "Продать"}
+          <div class="ore-foot">
+            <span class="ore-kg">${fmtKg(kg)}</span>
+            <button class="sell-one-btn" type="button" ${kg > 0 ? "" : "disabled"}>
+              ${kg > 0 ? `Продать (${fmtNum(price)} 🪙)` : "Продать"}
             </button>
           </div>
         `;
 
         row.querySelector("button").addEventListener("click", () => {
-          const currentKg = state.inv[res.id] || 0;
-          if (currentKg <= 0) return;
-          state.coins += getResourceSalePrice(res, currentKg);
-          state.inv[res.id] = 0;
+          const cur = state.inv[ore.id] || 0;
+          if (cur <= 0) return;
+          state.coins += getSalePrice(ore, cur);
+          state.inv[ore.id] = 0;
           saveState();
-          renderAll();
+          render();
         });
 
-        list.appendChild(row);
+        stList.appendChild(row);
       });
     }
 
-    function renderAll() {
-      const capH = getBatteryCapacityHours();
-      state.energy = Math.min(capH, Math.max(0, state.energy));
-
-      const usedKg = getUsedStorageKg();
-      const capKg = getStorageCapacityKg();
-      const full = isStorageFull();
-
-      document.getElementById("hudCoins").textContent = formatCoins(state.coins);
-      document.getElementById("hudEnergy").textContent = `${state.energy.toFixed(1)}ч`;
-
-      const hudStorage = document.getElementById("hudStorage");
-      hudStorage.textContent = `${formatMass(usedKg)}/${formatMass(capKg)}`;
-      hudStorage.style.color = full ? "#f87171" : "#4ade80";
-
-      document.getElementById("rigOverallLvl").textContent = String(getOverallRigLevel());
-      renderOdometer();
-
-      const banner = document.getElementById("statusBanner");
-      banner.classList.remove("hidden", "energy-low", "stor-full");
-      if (state.energy <= 0) {
-        banner.classList.add("energy-low");
-        banner.textContent = "Энергия в колбе на нуле — нажимайте оранжевую кнопку справа для заряда.";
-      } else if (full) {
-        banner.classList.add("stor-full");
-        banner.textContent = "Склад заполнен на 100%! Продавайте породу и руду на складе.";
-      } else {
-        banner.classList.add("hidden");
-      }
-
-      renderMine();
-      renderParts();
-      renderUpgrades();
-      renderStorage();
-    }
-
-    document.getElementById("chargeBtn").addEventListener("click", () => {
-      state.energy = Math.min(getBatteryCapacityHours(), state.energy + getTapChargeHours());
+    document.getElementById("tapRockBtn").addEventListener("click", (e) => {
+      const tapCost = 2;
+      if (state.energy < tapCost || getUsedKg() >= getStorageCapKg()) return;
+      state.energy = Math.max(0, state.energy - tapCost);
+      addMinedKg(getTapKg(), e.clientX, e.clientY);
       saveState();
-      renderAll();
+      render();
     });
 
-    document.getElementById("chestClaimBtn").addEventListener("click", () => {
-      if (!state.chestReward) return;
-      state.coins += state.chestReward.coins;
-      const freeSpace = Math.max(0, getStorageCapacityKg() - getUsedStorageKg());
-      const addKg = Math.min(freeSpace, state.chestReward.kg);
-      if (addKg > 0) {
-        state.inv[state.chestReward.resId] = (state.inv[state.chestReward.resId] || 0) + addKg;
-      }
-      state.chestReward = null;
+    document.getElementById("refillBtn").addEventListener("click", () => {
+      const add = Math.round(getMaxEnergy() * 0.35);
+      state.energy = Math.min(getMaxEnergy(), state.energy + add);
       saveState();
-      renderAll();
+      render();
     });
 
     document.getElementById("sellAllBtn").addEventListener("click", () => {
-      let gained = 0;
-      RESOURCES.forEach((res) => {
-        const kg = state.inv[res.id] || 0;
+      let sum = 0;
+      ORES.forEach((ore) => {
+        const kg = state.inv[ore.id] || 0;
         if (kg > 0) {
-          gained += getResourceSalePrice(res, kg);
-          state.inv[res.id] = 0;
+          sum += getSalePrice(ore, kg);
+          state.inv[ore.id] = 0;
         }
       });
-      if (gained > 0) {
-        state.coins += gained;
+      if (sum > 0) {
+        state.coins += sum;
         saveState();
-        renderAll();
+        render();
       }
     });
 
     document.getElementById("resetBtn").addEventListener("click", () => {
       state = defaultState();
       saveState();
-      renderAll();
+      render();
     });
 
     document.querySelectorAll(".nav-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
-        const target = btn.dataset.view;
-        ["mine", "parts", "upgrades", "storage"].forEach((viewId) => {
-          document.getElementById(`view-${viewId}`).classList.toggle("hidden", viewId !== target);
+        const view = btn.dataset.view;
+        ["clicker", "upgrades", "storage"].forEach((id) => {
+          document.getElementById(`view-${id}`).classList.toggle("hidden", id !== view);
         });
       });
     });
 
-    let tickCount = 0;
+    let ticks = 0;
     setInterval(() => {
       const dt = 0.25;
-      tickCount += 1;
+      ticks += 1;
 
-      if (state.energy > 0) {
-        state.energy = Math.max(0, state.energy - getDrainPerSec() * dt);
-        if (!isStorageFull()) {
-          const horizon = getCurrentHorizon();
-          state.depth = Number((state.depth + horizon.speed * dt).toFixed(1));
-          const mined = mineOreChunk(
-            horizon.baseKg * getWorkMultiplier() * getBucketMultiplier() * (1 + state.depth / 260) * dt
-          );
-          maybeSpawnChest();
-          if (mined && tickCount % 2 === 0) {
-            spawnDigDebris();
-          }
-        }
+      const maxE = getMaxEnergy();
+      if (state.energy < maxE) {
+        state.energy = Math.min(maxE, state.energy + 3.5 * dt);
       }
 
-      if (tickCount % 4 === 0) {
-        saveState();
+      if (state.energy >= 1 && getUsedKg() < getStorageCapKg()) {
+        state.energy = Math.max(0, state.energy - 0.8 * dt);
+        addMinedKg(getAutoKgPerSec() * dt);
       }
 
-      renderAll();
+      if (ticks % 4 === 0) saveState();
+      render();
     }, 250);
 
-    renderAll();
+    render();
   </script>
 </body>
 </html>
