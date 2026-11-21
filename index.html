@@ -69,23 +69,48 @@
     .rig-area {
       position:relative; margin:auto 0; display:flex; flex-direction:column; align-items:center; z-index:3;
     }
-    .rig-svg { width:240px; height:210px; overflow:visible; }
-    .rig-body { transition:transform .18s ease-out; }
-    .rig-svg.spin .rig-body { animation:bodyDrop 1.05s cubic-bezier(.22,.85,.36,1) infinite; }
-    @keyframes bodyDrop {
+    .rig-svg { width:240px; height:225px; overflow:visible; }
+
+    /* Механика анимации в стиле «Бурило»:
+       1) корпус слегка вибрирует на месте
+       2) боковые ковши сводятся/работают
+       3) шток с буром плавно отпускается вниз, бьёт в забой и резко отскакивает наверх */
+    .rig-svg.spin .chassis { animation:chassisVib .12s steps(2, end) infinite; }
+    @keyframes chassisVib {
+      0% { transform:translate(0px, 0px); }
+      50% { transform:translate(-1px, 1px); }
+      100% { transform:translate(1px, 0px); }
+    }
+
+    .claw-left { transform-box:fill-box; transform-origin:right center; }
+    .claw-right { transform-box:fill-box; transform-origin:left center; }
+    .rig-svg.spin .claw-left { animation:clawWorkL .9s ease-in-out infinite; }
+    .rig-svg.spin .claw-right { animation:clawWorkR .9s ease-in-out infinite; }
+    @keyframes clawWorkL {
+      0%, 100% { transform:translateX(0) rotate(0deg); }
+      50% { transform:translateX(6px) rotate(-8deg); }
+    }
+    @keyframes clawWorkR {
+      0%, 100% { transform:translateX(0) rotate(0deg); }
+      50% { transform:translateX(-6px) rotate(8deg); }
+    }
+
+    .bit-feed { transform-box:fill-box; transform-origin:top center; }
+    .rig-svg.spin .bit-feed { animation:bitFeedCycle 1.2s cubic-bezier(.32,.02,.82,.65) infinite; }
+    @keyframes bitFeedCycle {
       0% { transform:translateY(0px); }
-      55% { transform:translateY(14px); }
-      75% { transform:translateY(10px); }
+      68% { transform:translateY(28px); }
+      78% { transform:translateY(23px); }
       100% { transform:translateY(0px); }
     }
-    .auger-shaft { transform-box:fill-box; transform-origin:top center; }
-    .rig-svg.spin .auger-shaft { animation:augerExtend 1.05s cubic-bezier(.35,.05,.75,.95) infinite; }
-    @keyframes augerExtend {
-      0% { transform:translateY(0px) scaleY(1); }
-      55% { transform:translateY(18px) scaleY(1.22); }
-      72% { transform:translateY(12px) scaleY(1.12); }
-      100% { transform:translateY(0px) scaleY(1); }
+
+    .spiral-flutes { transform-box:fill-box; transform-origin:center; }
+    .rig-svg.spin .spiral-flutes { animation:fluteStep .16s steps(2, end) infinite; }
+    @keyframes fluteStep {
+      0% { transform:translateY(0px); }
+      100% { transform:translateY(4px); }
     }
+
     .mine-info {
       background:#00000099; border:1px solid #ffffff24; border-radius:999px;
       padding:4px 12px; font-size:11px; font-weight:700; color:#fde68a; margin-top:8px;
@@ -93,7 +118,7 @@
 
     .falling-ore {
       position:absolute; pointer-events:none; font-size:14px; z-index:2;
-      animation:oreDrop 1.1s linear forwards;
+      animation:oreDrop 1.05s linear forwards;
     }
     @keyframes oreDrop {
       0% { opacity:0.95; transform:translateY(0) rotate(0deg); }
@@ -242,22 +267,32 @@
     <div id="p-mine">
       <div class="mine-view" id="mineStage">
         <div class="rig-area">
-          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 210" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g class="rig-body">
-              <path d="M80 62 H42 V112 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
-              <path d="M160 62 H198 V112 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
-              <rect x="34" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
-              <rect x="172" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
-              <rect x="82" y="24" width="76" height="62" rx="5" fill="#6ee7b7" stroke="#1e293b" stroke-width="2.5"/>
-              <circle cx="104" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
-              <circle cx="136" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
-              <rect x="94" y="86" width="52" height="24" fill="#475569" stroke="#1e293b" stroke-width="2.5"/>
+          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="chassis">
+              <path d="M80 56 H42 V102 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
+              <path d="M160 56 H198 V102 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
+              <g class="claw-left">
+                <rect x="30" y="96" width="36" height="34" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
+              </g>
+              <g class="claw-right">
+                <rect x="174" y="96" width="36" height="34" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
+              </g>
+              <rect x="82" y="18" width="76" height="60" rx="5" fill="#6ee7b7" stroke="#1e293b" stroke-width="2.5"/>
+              <circle cx="104" cy="48" r="13" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+              <circle cx="136" cy="48" r="13" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+              <rect x="94" y="78" width="52" height="20" fill="#475569" stroke="#1e293b" stroke-width="2.5"/>
             </g>
-            <g class="auger-shaft">
-              <rect x="115" y="110" width="10" height="24" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
-              <polygon points="104,134 136,134 120,186" fill="#cbd5e1" stroke="#1e293b" stroke-width="2.5"/>
-              <line x1="107" y1="147" x2="133" y2="154" stroke="#1e293b" stroke-width="4"/>
-              <line x1="110" y1="162" x2="130" y2="168" stroke="#1e293b" stroke-width="4"/>
+
+            <rect x="115" y="98" width="10" height="44" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
+
+            <g class="bit-feed">
+              <rect x="113" y="102" width="14" height="34" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+              <polygon points="103,136 137,136 120,192" fill="#cbd5e1" stroke="#1e293b" stroke-width="2.5"/>
+              <g class="spiral-flutes">
+                <line x1="106" y1="146" x2="134" y2="152" stroke="#1e293b" stroke-width="4"/>
+                <line x1="109" y1="158" x2="131" y2="164" stroke="#1e293b" stroke-width="4"/>
+                <line x1="112" y1="170" x2="128" y2="175" stroke="#1e293b" stroke-width="4"/>
+              </g>
             </g>
           </svg>
           <div class="mine-info" id="mineInfo">Верхняя земля • ~23 кг/сек</div>
@@ -313,7 +348,7 @@
 
   <script>
     if (window.Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); }
-    const KEY = "burilo_drop_v5";
+    const KEY = "burilo_mech_v6";
 
     const RES = [
       { id: "dirt", name: "Земля", icon: "🟫", perTon: 12, desc: "Верхний рыхлый слой породы." },
@@ -387,7 +422,6 @@
     const sellMult = () => 1 + (st.parts.storage.lvl - 1) * 0.05;
     const bucketMult = () => 1 + (st.parts.buckets.lvl - 1) * 0.35 + (st.parts.drill.lvl - 1) * 0.15;
 
-    // До 3 уровня — монеты; с 3 уровня — ресурс зависит от текущего уровня детали
     function partUpgradeReq(k) {
       const lvl = st.parts[k].lvl;
       const baseCoin = { motor: 25, battery: 25, drill: 30, buckets: 35, storage: 20 }[k] || 25;
@@ -430,7 +464,7 @@
       el.style.left = `${16 + Math.random() * 68}%`;
       el.style.top = "14px";
       stage.appendChild(el);
-      setTimeout(() => el.remove(), 1120);
+      setTimeout(() => el.remove(), 1060);
     }
 
     function renderOdometer() {
