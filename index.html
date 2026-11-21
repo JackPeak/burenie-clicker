@@ -29,8 +29,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .header-right-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .profile-pill {
       display: flex;
@@ -39,6 +45,16 @@
       background: rgba(255, 255, 255, 0.18);
       padding: 5px 10px 5px 6px;
       border-radius: 999px;
+      cursor: pointer;
+    }
+    .help-pill {
+      background: rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      color: #fff;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
       cursor: pointer;
     }
     .avatar-circle {
@@ -107,6 +123,26 @@
       flex-direction: column;
       gap: 8px;
     }
+    .guide-card {
+      background: #ffffff;
+      border: 2px solid #22b653;
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 6px 18px rgba(23, 148, 63, 0.14);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .guide-steps {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
     .nest-card {
       background: #ffffff;
       border-radius: 14px;
@@ -134,6 +170,13 @@
       align-items: center;
       justify-content: center;
       font-size: 32px;
+      overflow: hidden;
+    }
+    .nest-art img {
+      width: 58px;
+      height: 52px;
+      object-fit: contain;
+      display: block;
     }
     .nest-title {
       font-size: 14px;
@@ -156,6 +199,10 @@
       background: #fef3c7;
       color: #b45309;
     }
+    .tag-purple {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
     .nest-meta {
       font-size: 12px;
       color: #526075;
@@ -167,7 +214,6 @@
       align-items: center;
       gap: 6px;
     }
-    /* Объёмная полукруглая шкала-дуга */
     .arc-gauge {
       position: relative;
       width: 96px;
@@ -233,16 +279,18 @@
     .btn-blue { background: #2563eb; color: #fff; }
     .btn-red { background: #dc2626; color: #fff; }
     .btn-amber { background: #d97706; color: #fff; }
+    .btn-purple { background: #7c3aed; color: #fff; }
     .btn-gray { background: #e5e9f0; color: #1c2430; }
     .btn-sm { padding: 5px 8px; font-size: 11px; }
     .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    select, input[type="text"], input[type="number"] {
+    select, input[type="text"], input[type="number"], textarea {
       border: 1px solid #d0d7e2;
       border-radius: 8px;
       padding: 7px 10px;
       font-size: 13px;
       background: #fff;
       color: #1c2430;
+      font-family: inherit;
     }
     .bar-bg {
       width: 100%;
@@ -301,6 +349,15 @@
       border-color: #1ea84b;
       background: #e8f7ee;
     }
+    .code-box {
+      background: #f1f5f9;
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      font-size: 13px;
+    }
     .bottom-nav {
       position: fixed;
       left: 0;
@@ -331,7 +388,6 @@
   </style>
 </head>
 <body>
-  <!-- Общий градиент для объёмных дуг -->
   <svg width="0" height="0" style="position:absolute;">
     <defs>
       <linearGradient id="greenArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -343,14 +399,17 @@
   </svg>
 
   <div class="wrap">
-    <!-- Верхняя зелёная шапка -->
     <div class="green-header">
       <div class="top-profile-bar">
         <div class="profile-pill" data-open-page="profile">
           <div class="avatar-circle" id="header-avatar">🐓</div>
           <span style="font-size: 13px; font-weight: 800;" id="header-nick">Игрок</span>
+          <span id="header-supporter-badge" class="tag tag-purple" style="display: none;">💡 Меценат</span>
         </div>
-        <span class="bal-badge" id="header-feed-status">🌾 Сыты</span>
+        <div class="header-right-group">
+          <button type="button" class="help-pill" id="toggle-guide-btn">❓ Как играть</button>
+          <span class="bal-badge" id="header-feed-status">🌾 Сыты</span>
+        </div>
       </div>
 
       <div class="balance-strip">
@@ -368,9 +427,23 @@
     </div>
 
     <div class="section">
-      <div class="notice" id="status-notice">Добро пожаловать! На старте у вас 2 простые курицы, корм на 4 часа и 20 монет.</div>
+      <!-- Карточка ознакомления для новичков -->
+      <div class="guide-card" id="onboarding-box" style="display: none;">
+        <div class="row" style="justify-content: space-between;">
+          <strong>🧭 Быстрое ознакомление: что делать новичку</strong>
+          <button type="button" class="btn btn-gray btn-sm" id="close-guide-btn">Скрыть</button>
+        </div>
+        <ol class="guide-steps">
+          <li><strong>Следи за кормом:</strong> сытые птицы несут яйца (простая раз в 10 мин, несушка раз в 5 мин). Без корма более 9 ч понадобится лекарство (100 🪙), а через 12 ч птицы могут погибнуть.</li>
+          <li><strong>Собирай яйца и продавай или копи:</strong> нажми <em>«Собирать»</em> в гнезде — обычные яйца идут на склад (продажа по 2 🪙), а редкие (~10%) попадают в кликер <em>«Разбей яйцо»</em>.</li>
+          <li><strong>Выводи петухов:</strong> разбей редкое яйцо за 1000 кликов — с шансом 50/50 вылупится курица или петух. Петуха можно выставить в <strong>Гонки 1×1 / 1×4</strong> или сдать на мясо (220–800 🪙).</li>
+          <li><strong>Зови друзей и поддерживай идеи:</strong> в разделе <em>«Склад и Топ»</em> есть твой код приглашения (награда за 2 яйца с цыплёнком у друга) и блок <em>«Донат на идею»</em> (значок мецената без поломки баланса).</li>
+        </ol>
+        <button type="button" class="btn btn-green btn-sm" id="got-it-guide-btn">Понятно, погнали!</button>
+      </div>
 
-      <!-- Баннер лекарства при голоде > 9 часов -->
+      <div class="notice" id="status-notice">Подключаемся к защищённой сессии двора...</div>
+
       <div class="card" id="medicine-box" style="display: none; border: 1px solid #fca5a5; background: #fef2f2;">
         <strong style="color: #991b1b;">⚠️ Птицы заболели от голода (прошло более 9 часов без корма)!</strong>
         <div style="font-size: 12px; color: #7f1d1d;">
@@ -381,7 +454,6 @@
 
       <!-- ВКЛАДКА 1: ГНЁЗДА И ОБЩИЙ КОРМ -->
       <div class="page active" id="page-nests">
-        <!-- Общая кормушка с объёмной дугой -->
         <div class="nest-card" style="grid-template-columns: 64px 1fr 104px;">
           <div class="nest-left">
             <div class="nest-art" style="font-size: 30px;">🌾</div>
@@ -410,11 +482,10 @@
           <button type="button" class="btn btn-green" id="feed-all-btn">Накормить всех</button>
         </div>
 
-        <!-- Список отдельных гнёзд для каждой курицы -->
         <div id="nests-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
       </div>
 
-      <!-- ВКЛАДКА 2: МАГАЗИН, КЛИКЕР 1000 КЛИКОВ И ПЕТУХИ -->
+      <!-- ВКЛАДКА 2: МАГАЗИН, КЛИКЕР И ПЕТУХИ -->
       <div class="page" id="page-shop">
         <div class="card">
           <strong>🏪 Магазин двора</strong>
@@ -434,7 +505,6 @@
           </div>
         </div>
 
-        <!-- Мини-игра «Разбей яйцо» на 1000 кликов -->
         <div class="card">
           <div class="row" style="justify-content: space-between;">
             <strong>🥚 Разбей яйцо с цыплёнком (1000 кликов)</strong>
@@ -450,11 +520,10 @@
           </div>
         </div>
 
-        <!-- Петухи: выбор бойца и сдача на мясо 200-800 -->
         <div class="card">
           <strong>🐓 Мои петухи (гонки и сдача на мясо)</strong>
           <div style="font-size: 12px; color: #526075;">
-            Каждый петух ест 1 кг корма в час. Можно выставить в забег или сдать на мясо (200–800 🪙 по редкости).
+            Каждый петух ест 1 кг корма в час. Можно выставить в забег или сдать на мясо (220–800 🪙 по редкости).
           </div>
           <div id="roosters-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
@@ -503,11 +572,16 @@
         </div>
       </div>
 
-      <!-- ВКЛАДКА 4: СКЛАД, ПРОФИЛЬ (НИК/АВА), ДОСТИЖЕНИЯ И ТОП ПО БАЛАНСУ -->
+      <!-- ВКЛАДКА 4: ПРОФИЛЬ, РЕФЕРАЛКА, ДОНАТ НА ИДЕЮ, СКЛАД, ДОСТИЖЕНИЯ И ТОП -->
       <div class="page" id="page-profile">
-        <!-- Профиль: любой локальный ник + аватарка -->
         <div class="card">
-          <strong>👤 Профиль игрока</strong>
+          <div class="row" style="justify-content: space-between;">
+            <strong>👤 Профиль игрока</strong>
+            <div class="row">
+              <span id="profile-supporter-tag" class="tag tag-purple" style="display: none;">💡 Идейный меценат</span>
+              <button type="button" class="btn btn-gray btn-sm" id="open-guide-profile-btn">❓ Инструкция</button>
+            </div>
+          </div>
           <div class="row">
             <div class="avatar-circle" id="profile-avatar-preview" style="width: 44px; height: 44px; font-size: 22px;">🐓</div>
             <input type="text" id="nickname-input" maxlength="24" placeholder="Любой ник (хоть манты)" style="flex: 1;" />
@@ -530,7 +604,44 @@
           </div>
         </div>
 
-        <!-- Склад обычных яиц -->
+        <div class="card">
+          <strong>🤝 Рефералка по коду</strong>
+          <div style="font-size: 12px; color: #526075; line-height: 1.4;">
+            Когда приглашённый друг получит <strong>2 яйца с цыплёнком</strong>: вам придёт <strong>1 курица-несушка + 4 кг корма</strong>, а другу — <strong>1 простая курица + 4 кг корма</strong>.
+          </div>
+          <div class="row" style="justify-content: space-between;">
+            <span style="font-size: 12px;">Ваш код:</span>
+            <div class="row">
+              <span class="code-box" id="my-ref-code">------</span>
+              <button type="button" class="btn btn-gray btn-sm" id="copy-ref-code-btn">Копировать</button>
+            </div>
+          </div>
+          <div id="ref-bound-info" style="font-size: 12px; color: #16873b; font-weight: 700;"></div>
+          <div class="row" id="ref-input-row">
+            <input type="text" id="ref-code-input" maxlength="10" placeholder="Введите код друга" style="flex: 1; text-transform: uppercase;" />
+            <button type="button" class="btn btn-blue btn-sm" id="apply-ref-code-btn">Применить</button>
+          </div>
+          <div style="font-size: 12px; color: #526075;">
+            Прогресс яиц с цыплёнком: <strong id="ref-chick-eggs-progress">0 / 2</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <strong>💡 Донат на идею для игры</strong>
+          <div style="font-size: 12px; color: #526075; line-height: 1.4;">
+            Поддержите развитие и новые идеи без влияния на баланс и гонки — за отклик выдаётся бейдж мецената в профиле.
+          </div>
+          <textarea id="idea-donation-text" rows="2" maxlength="240" placeholder="Какую идею или обновление хотите поддержать?"></textarea>
+          <div class="row" style="justify-content: space-between;">
+            <select id="idea-donation-tier">
+              <option value="100">Идея-взнос · 100</option>
+              <option value="300">Поддержка идеи · 300</option>
+              <option value="500">Меценат идеи · 500</option>
+            </select>
+            <button type="button" class="btn btn-purple" id="send-idea-donation-btn">Отправить идею</button>
+          </div>
+        </div>
+
         <div class="card">
           <strong>📦 Склад обычных яиц</strong>
           <div class="list-item">
@@ -539,7 +650,6 @@
           </div>
         </div>
 
-        <!-- Достижения -->
         <div class="card">
           <strong>🎖 Достижения</strong>
           <div class="list-item">
@@ -552,7 +662,6 @@
           </div>
         </div>
 
-        <!-- Топ только по балансу -->
         <div class="card">
           <strong>🏆 Топ по балансу</strong>
           <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
@@ -561,7 +670,6 @@
     </div>
   </div>
 
-  <!-- Нижнее меню навигации -->
   <nav class="bottom-nav">
     <button type="button" class="nav-btn active" data-nav="nests">
       <span class="nav-ico">🪺</span>
@@ -583,6 +691,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getDatabase,
       ref,
@@ -610,6 +719,7 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
 
     const HOUR_MS = 3600 * 1000;
@@ -620,6 +730,13 @@
     const DEATH_AFTER_HOURS = 12;
     const MEDICINE_COST = 100;
     const MAX_NEST_EGGS = 12;
+    const REF_TARGET_CHICK_EGGS = 2;
+    const REF_REWARD_FEED_HOURS = 4;
+
+    const CHICKEN_ART = {
+      simple: "./chicken_simple.png",
+      layer: "./chicken_layer.png"
+    };
 
     const RARITIES = [
       { key: "common", label: "Обычный", meatPrice: 220, mult: 1.0, weight: 52 },
@@ -629,36 +746,33 @@
       { key: "mythic", label: "Мифический", meatPrice: 800, mult: 1.72, weight: 3 }
     ];
 
-    function getDevicePlayerId() {
-      const tg = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (tg?.id) return String(tg.id);
-      let id = localStorage.getItem("yard_local_uid");
-      if (!id) {
-        id = "u_" + Math.random().toString(36).slice(2, 9);
-        localStorage.setItem("yard_local_uid", id);
-      }
-      return id;
-    }
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+    const tgId = tgUser?.id ? String(tgUser.id) : null;
+    let authUid = null;
+    let SAVE_KEY = "yard_v4_guest";
 
-    const playerId = getDevicePlayerId();
-    const SAVE_KEY = `yard_v3_state_${playerId}`;
+    function makeRefCodeFromSeed(seed) {
+      const clean = String(seed || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+      if (clean.length >= 6) return "YR" + clean.slice(-4);
+      return "YR" + Math.random().toString(36).slice(2, 6).toUpperCase();
+    }
 
     function createHen(isLayer, indexNum) {
       return {
         id: "h_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 5),
         name: `Гнездо #${indexNum}`,
-        isLayer: Boolean(isLayer), // true = Несушка (5 мин), false = Простая (10 мин)
+        isLayer: Boolean(isLayer),
         intervalMs: isLayer ? 5 * 60 * 1000 : 10 * 60 * 1000,
         lastLayAt: Date.now(),
         storedEggs: 0
       };
     }
 
-    function createDefaultState() {
+    function createDefaultState(uid = "") {
       const now = Date.now();
       return {
-        nick: "Фермер",
-        avatarType: "emoji", // "emoji" | "image"
+        nick: tgUser?.first_name ? String(tgUser.first_name).slice(0, 24) : "Фермер",
+        avatarType: "emoji",
         avatarValue: "🐓",
         coins: 20,
         warehouseEggs: 0,
@@ -666,35 +780,50 @@
         hungryWarned: false,
         sickNeedsMedicine: false,
         lastTickAt: now,
-        fedUntil: now + 4 * HOUR_MS, // на старте корм на 4 часа
-        hens: [
-          createHen(false, 1),
-          createHen(false, 2)
-        ],
+        fedUntil: now + 4 * HOUR_MS,
+        hens: [createHen(false, 1), createHen(false, 2)],
         roosters: [],
         selectedRoosterId: "",
-        chickQueue: [], // [{ id, rarity, rarityLabel, clicks }]
-        nextNestNum: 3
+        chickQueue: [],
+        nextNestNum: 3,
+        refCode: makeRefCodeFromSeed(uid || tgId || now),
+        referredByCode: "",
+        referredByUid: "",
+        refChickEggsHatched: 0,
+        refRewardClaimed: false,
+        ideaSupporter: false,
+        guideSeen: false
       };
     }
 
-    let state = (() => {
-      try {
-        const raw = localStorage.getItem(SAVE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          return { ...createDefaultState(), ...parsed };
-        }
-      } catch (_) {}
-      return createDefaultState();
-    })();
-
+    let state = createDefaultState();
     let activeRoomId = null;
     let roomUnsub = null;
     let raceInterval = null;
 
+    function loadLocalStateForUid(uid) {
+      SAVE_KEY = `yard_v4_state_${uid}`;
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+          state = { ...createDefaultState(uid), ...JSON.parse(raw) };
+        } else {
+          state = createDefaultState(uid);
+        }
+      } catch (_) {
+        state = createDefaultState(uid);
+      }
+      if (!state.refCode) state.refCode = makeRefCodeFromSeed(uid);
+      saveState();
+    }
+
     function saveState() {
+      if (!authUid) return;
       localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    }
+
+    function setGuideVisible(visible) {
+      document.getElementById("onboarding-box").style.display = visible ? "flex" : "none";
     }
 
     function notify(text, isWarn = false) {
@@ -717,11 +846,21 @@
       return RARITIES[0];
     }
 
-    // Отрисовка объёмной полукруглой дуги (как на скриншоте)
+    function addFeedHoursToYard(hours) {
+      const now = Date.now();
+      const birds = Math.max(1, totalBirdsCount());
+      const addMs = hours * HOUR_MS;
+      const base = Math.max(now, state.fedUntil || now);
+      state.fedUntil = Math.min(now + MAX_FEED_HOURS * HOUR_MS, base + addMs);
+      state.sickNeedsMedicine = false;
+      state.hungryWarned = false;
+      return birds;
+    }
+
     function renderArcSvg(percent, subText) {
       const pct = Math.max(0, Math.min(100, Math.round(percent)));
       const radius = 38;
-      const arcLen = Math.PI * radius; // длина полуокружности
+      const arcLen = Math.PI * radius;
       const offset = arcLen * (1 - pct / 100);
       return `
         <div class="arc-gauge">
@@ -738,7 +877,12 @@
       `;
     }
 
-    // Пересчёт времени, кладки яиц, голода (9ч лекарство, 12ч смерть)
+    function renderHenArt(hen) {
+      const src = hen.isLayer ? CHICKEN_ART.layer : CHICKEN_ART.simple;
+      const fallback = hen.isLayer ? "🐔" : "🐓";
+      return `<img src="${src}" alt="${hen.isLayer ? "Несушка" : "Простая курица"}" onerror="this.replaceWith(document.createTextNode('${fallback}'))" />`;
+    }
+
     function processSimulation() {
       const now = Date.now();
       const birds = totalBirdsCount();
@@ -753,7 +897,6 @@
 
       const hungryMs = Math.max(0, now - (state.fedUntil || now));
 
-      // 12 часов без корма -> птицы погибают
       if (hungryMs >= DEATH_AFTER_HOURS * HOUR_MS) {
         state.hens = [];
         state.roosters = [];
@@ -768,19 +911,16 @@
         return;
       }
 
-      // После 9 часов без корма нужно лекарство за 100 монет
       if (hungryMs >= SICK_AFTER_HOURS * HOUR_MS && !state.sickNeedsMedicine) {
         state.sickNeedsMedicine = true;
         notify("Прошло более 9 часов без корма! Купите лекарство за 100 монет.", true);
       }
 
-      // Предупреждение в момент окончания корма
       if (hungryMs > 0 && !state.hungryWarned) {
         state.hungryWarned = true;
         notify("Корм закончился! Курицы хотят кушать — покормите двор.", true);
       }
 
-      // Яйца несутся только в период, пока птицы сыты (до fedUntil)
       const activeProductionEnd = Math.min(now, state.fedUntil || now);
       let changed = false;
 
@@ -796,7 +936,6 @@
           }
         }
         if (now > (state.fedUntil || now) && hen.lastLayAt < now && hen.storedEggs < MAX_NEST_EGGS) {
-          // Сдвигаем таймер во время голода, чтобы голодные часы не считались за время кладки
           const hungryDelta = now - Math.max(state.lastTickAt || now, state.fedUntil || now);
           if (hungryDelta > 0) {
             hen.lastLayAt += hungryDelta;
@@ -810,19 +949,25 @@
     }
 
     async function syncFirebaseBalance() {
+      if (!authUid) return;
       const activeR = state.roosters.find((r) => r.id === state.selectedRoosterId) || state.roosters[0] || null;
       await update(ref(db), {
-        [`players/${playerId}/profile`]: {
-          id: playerId,
+        [`refCodes/${state.refCode}`]: authUid,
+        [`players/${authUid}/profile`]: {
+          id: authUid,
+          tgId: tgId || null,
           name: state.nick || "Фермер",
+          refCode: state.refCode,
+          ideaSupporter: Boolean(state.ideaSupporter),
           updatedAt: Date.now()
         },
-        [`players/${playerId}/balance`]: Number(state.coins || 0),
-        [`players/${playerId}/eggs`]: Number(state.warehouseEggs || 0),
-        [`leaderboard/${playerId}`]: {
-          id: playerId,
+        [`players/${authUid}/balance`]: Number(state.coins || 0),
+        [`players/${authUid}/eggs`]: Number(state.warehouseEggs || 0),
+        [`leaderboard/${authUid}`]: {
+          id: authUid,
           name: state.nick || "Фермер",
           avatarEmoji: state.avatarType === "emoji" ? state.avatarValue : "🐓",
+          ideaSupporter: Boolean(state.ideaSupporter),
           balance: Number(state.coins || 0),
           eggs: Number(state.warehouseEggs || 0),
           roosterRarity: activeR?.rarityLabel || "",
@@ -843,8 +988,9 @@
       const now = Date.now();
       const birds = totalBirdsCount();
 
-      // Шапка
       document.getElementById("header-nick").textContent = state.nick || "Фермер";
+      document.getElementById("header-supporter-badge").style.display = state.ideaSupporter ? "inline-block" : "none";
+      document.getElementById("profile-supporter-tag").style.display = state.ideaSupporter ? "inline-block" : "none";
       applyAvatarToElement(document.getElementById("header-avatar"));
       applyAvatarToElement(document.getElementById("profile-avatar-preview"));
 
@@ -854,7 +1000,6 @@
       document.getElementById("top-hens").textContent = state.hens.length;
       document.getElementById("top-roosters").textContent = state.roosters.length;
 
-      // Статус корма и лекарства
       const fedRemainingMs = Math.max(0, (state.fedUntil || now) - now);
       const hungryMs = Math.max(0, now - (state.fedUntil || now));
       const statusBadge = document.getElementById("header-feed-status");
@@ -872,7 +1017,6 @@
 
       document.getElementById("medicine-box").style.display = state.sickNeedsMedicine && birds > 0 ? "flex" : "none";
 
-      // Общая карточка корма
       document.getElementById("hourly-need-kg").textContent = birds;
       document.getElementById("total-birds-count").textContent = birds;
 
@@ -886,7 +1030,6 @@
       const totalFeedKgLeft = Number((fedHoursLeft * birds).toFixed(1));
       document.getElementById("feed-arc-holder").innerHTML = renderArcSvg(feedPct, `${totalFeedKgLeft} кг`);
 
-      // Расчёт кнопки «Накормить всех»
       const selHours = Number(document.getElementById("feed-hours-select").value) || 1;
       const targetMs = now + selHours * HOUR_MS;
       const addMs = Math.max(0, targetMs - Math.max(now, state.fedUntil || now));
@@ -906,7 +1049,6 @@
         feedBtn.disabled = false;
       }
 
-      // Карточки гнёзд с объёмными дугами
       const nestsBox = document.getElementById("nests-list");
       if (!state.hens.length) {
         nestsBox.innerHTML = `<div class="card" style="text-align:center;color:#64748b;">Гнёзд пока нет. Купите курицу в магазине за 600 🪙 или выведите из яйца с цыплёнком!</div>`;
@@ -927,13 +1069,13 @@
             return `
               <div class="nest-card">
                 <div class="nest-left">
-                  <div class="nest-art">${hen.isLayer ? "🐔" : "🐓"}</div>
+                  <div class="nest-art">${renderHenArt(hen)}</div>
                   <button type="button" class="btn btn-gray btn-sm" data-release-hen="${hen.id}">На волю</button>
                 </div>
                 <div>
                   <div class="nest-title">${escapeHtml(hen.name)} ${typeTag}</div>
                   <div class="nest-meta">
-                    Кладка: <strong>${layText}</strong><br />
+                    Кладка: <strong>${layText}</strong> · Макс: <strong>${MAX_NEST_EGGS}</strong><br />
                     Корм: <strong>1 кг в час</strong><br />
                     ${moodText}
                   </div>
@@ -955,7 +1097,6 @@
         });
       }
 
-      // Мини-игра «Разбей яйцо» (1000 кликов)
       document.getElementById("chick-queue-badge").textContent = `В очереди: ${state.chickQueue.length}`;
       const currEgg = state.chickQueue[0] || null;
       const clickBtn = document.getElementById("chick-click-btn");
@@ -973,7 +1114,6 @@
         clickBtn.disabled = false;
       }
 
-      // Петухи (сдача на мясо 200-800 + выбор для гонок)
       const rList = document.getElementById("roosters-list");
       const rSel = document.getElementById("race-rooster-select");
       if (!state.roosters.length) {
@@ -1003,13 +1143,25 @@
           .join("");
       }
 
-      // Склад и достижения
+      document.getElementById("my-ref-code").textContent = state.refCode || "------";
+      const boundEl = document.getElementById("ref-bound-info");
+      const inputRow = document.getElementById("ref-input-row");
+      if (state.referredByCode) {
+        boundEl.textContent = `Привязан код друга: ${state.referredByCode}`;
+        inputRow.style.display = "none";
+      } else {
+        boundEl.textContent = "";
+        inputRow.style.display = "flex";
+      }
+      const progEggs = Math.min(REF_TARGET_CHICK_EGGS, Number(state.refChickEggsHatched || 0));
+      document.getElementById("ref-chick-eggs-progress").textContent =
+        state.refRewardClaimed ? `${REF_TARGET_CHICK_EGGS} / ${REF_TARGET_CHICK_EGGS} (награда получена)` : `${progEggs} / ${REF_TARGET_CHICK_EGGS}`;
+
       document.getElementById("warehouse-eggs").textContent = state.warehouseEggs;
       const rel = Number(state.releasedCount || 0);
       document.getElementById("ach-kind-status").textContent = rel >= 1 ? "Выполнено!" : `${rel} / 1`;
       document.getElementById("ach-rich-status").textContent = rel >= 10 ? "Выполнено!" : `${rel} / 10`;
 
-      // Подсветка выбранного пресета аватарки
       document.querySelectorAll(".preset-btn").forEach((btn) => {
         btn.classList.toggle(
           "selected",
@@ -1018,7 +1170,6 @@
       });
     }
 
-    // Переключение вкладок
     function openPage(name) {
       document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
       document.getElementById(`page-${name}`)?.classList.add("active");
@@ -1034,7 +1185,138 @@
       b.addEventListener("click", () => openPage(b.getAttribute("data-nav")));
     });
 
-    // Кормление всех и лекарство
+    // Управление ознакомлением
+    document.getElementById("toggle-guide-btn").addEventListener("click", () => {
+      const box = document.getElementById("onboarding-box");
+      setGuideVisible(box.style.display === "none");
+    });
+    document.getElementById("open-guide-profile-btn").addEventListener("click", () => {
+      openPage("nests");
+      setGuideVisible(true);
+    });
+    document.getElementById("close-guide-btn").addEventListener("click", () => {
+      state.guideSeen = true;
+      saveState();
+      setGuideVisible(false);
+    });
+    document.getElementById("got-it-guide-btn").addEventListener("click", () => {
+      state.guideSeen = true;
+      saveState();
+      setGuideVisible(false);
+    });
+
+    // Рефералка
+    document.getElementById("copy-ref-code-btn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(state.refCode);
+        notify(`Код ${state.refCode} скопирован!`);
+      } catch (_) {
+        notify(`Ваш код: ${state.refCode}`);
+      }
+    });
+
+    document.getElementById("apply-ref-code-btn").addEventListener("click", async () => {
+      if (!authUid) return;
+      if (state.referredByCode) {
+        notify("Реферальный код уже привязан.", true);
+        return;
+      }
+      const code = document.getElementById("ref-code-input").value.trim().toUpperCase();
+      if (!code) {
+        notify("Введите код пригласившего игрока.", true);
+        return;
+      }
+      if (code === state.refCode) {
+        notify("Нельзя ввести собственный код!", true);
+        return;
+      }
+      const snap = await get(ref(db, `refCodes/${code}`));
+      if (!snap.exists() || snap.val() === authUid) {
+        notify("Такой реферальный код не найден.", true);
+        return;
+      }
+      state.referredByCode = code;
+      state.referredByUid = snap.val();
+      saveState();
+      renderAll();
+      notify(`Код ${code} привязан! Соберите 2 яйца с цыплёнком, чтобы получить награду.`);
+    });
+
+    async function checkReferralChickEggMilestone() {
+      if (!authUid || state.refRewardClaimed || !state.referredByUid) return;
+      state.refChickEggsHatched = Number(state.refChickEggsHatched || 0) + 1;
+      if (state.refChickEggsHatched >= REF_TARGET_CHICK_EGGS) {
+        state.refRewardClaimed = true;
+        state.hens.push(createHen(false, state.nextNestNum++));
+        addFeedHoursToYard(REF_REWARD_FEED_HOURS);
+
+        await runTransaction(ref(db, `referralRewards/${state.referredByUid}/${authUid}`), (curr) => {
+          if (curr) return curr;
+          return {
+            fromUid: authUid,
+            rewardLayerHen: 1,
+            rewardFeedHours: REF_REWARD_FEED_HOURS,
+            claimed: false,
+            createdAt: Date.now()
+          };
+        });
+
+        notify("Поздравляем! За 2 яйца с цыплёнком вы получили 1 простую курицу + 4 кг корма, а друг — 1 несушку + 4 кг корма!");
+      }
+      saveState();
+    }
+
+    async function claimPendingReferrerRewards() {
+      if (!authUid) return;
+      const snap = await get(ref(db, `referralRewards/${authUid}`));
+      if (!snap.exists()) return;
+      let claimedAny = false;
+      const updates = {};
+      snap.forEach((ch) => {
+        const item = ch.val();
+        if (item && !item.claimed) {
+          for (let i = 0; i < (Number(item.rewardLayerHen) || 1); i++) {
+            state.hens.push(createHen(true, state.nextNestNum++));
+          }
+          addFeedHoursToYard(Number(item.rewardFeedHours) || REF_REWARD_FEED_HOURS);
+          updates[`referralRewards/${authUid}/${ch.key}/claimed`] = true;
+          claimedAny = true;
+        }
+      });
+      if (claimedAny) {
+        await update(ref(db), updates);
+        saveState();
+        renderAll();
+        await syncFirebaseBalance();
+        notify("Реферальная награда за друга зачислена: +1 курица-несушка и +4 кг корма!");
+      }
+    }
+
+    // Донат на идею
+    document.getElementById("send-idea-donation-btn").addEventListener("click", async () => {
+      if (!authUid) return;
+      const ideaText = document.getElementById("idea-donation-text").value.trim();
+      const tier = Number(document.getElementById("idea-donation-tier").value) || 100;
+      if (!ideaText) {
+        notify("Напишите кратко идею или комментарий к поддержке.", true);
+        return;
+      }
+      await push(ref(db, `ideaDonations/${authUid}`), {
+        uid: authUid,
+        nick: state.nick || "Фермер",
+        tier,
+        idea: ideaText.slice(0, 240),
+        createdAt: Date.now()
+      });
+      state.ideaSupporter = true;
+      document.getElementById("idea-donation-text").value = "";
+      saveState();
+      renderAll();
+      await syncFirebaseBalance();
+      notify("Спасибо за идею и поддержку! В профиле появился бейдж «Идейный меценат».");
+    });
+
+    // Кормление и лекарство
     document.getElementById("feed-hours-select").addEventListener("change", renderAll);
 
     document.getElementById("buy-medicine-btn").addEventListener("click", async () => {
@@ -1045,7 +1327,7 @@
       }
       state.coins -= MEDICINE_COST;
       state.sickNeedsMedicine = false;
-      state.fedUntil = Date.now(); // сбрасываем критический таймер до кормления
+      state.fedUntil = Date.now();
       saveState();
       renderAll();
       await syncFirebaseBalance();
@@ -1082,7 +1364,6 @@
       notify(`Все птицы (${birds} шт.) накормлены на ${selHours} ч! Потрачено ${needKg} кг (${needCoins} 🪙).`);
     });
 
-    // Сбор яиц из гнезда (~10% редкое яйцо с цыплёнком, 90% обычное на склад)
     async function collectFromNest(henId) {
       processSimulation();
       const hen = state.hens.find((h) => h.id === henId);
@@ -1122,7 +1403,6 @@
       }
     }
 
-    // Отпустить курицу на волю (Добряк = 1, Богач = 10)
     async function releaseHenToWild(henId) {
       const idx = state.hens.findIndex((h) => h.id === henId);
       if (idx === -1) return;
@@ -1141,14 +1421,13 @@
       }
     }
 
-    // Магазин
     document.getElementById("buy-hen-shop-btn").addEventListener("click", async () => {
       if (state.coins < 600) {
         notify("Нужно 600 монет для покупки курицы в магазине.", true);
         return;
       }
       state.coins -= 600;
-      const isLayer = Math.random() < 0.2; // 20% несушка, 80% простая
+      const isLayer = Math.random() < 0.2;
       const newHen = createHen(isLayer, state.nextNestNum++);
       state.hens.push(newHen);
       saveState();
@@ -1176,7 +1455,6 @@
       notify(`Куплено яйцо с цыплёнком (${rar.label})! Разбейте его за 1000 кликов.`);
     });
 
-    // Кликер 1000 кликов -> 50/50 курица или петух с сохранением редкости
     document.getElementById("chick-click-btn").addEventListener("click", async () => {
       const egg = state.chickQueue[0];
       if (!egg) return;
@@ -1201,6 +1479,7 @@
           state.selectedRoosterId = newR.id;
           notify(`Яйцо разбито! Вылупился петух ${newR.name} (${newR.rarityLabel})!`);
         }
+        await checkReferralChickEggMilestone();
         saveState();
         renderAll();
         await syncFirebaseBalance();
@@ -1210,7 +1489,6 @@
       }
     });
 
-    // Сдача петуха на мясо (200-800 по редкости)
     async function sellRoosterMeat(roosterId) {
       const idx = state.roosters.findIndex((r) => r.id === roosterId);
       if (idx === -1) return;
@@ -1227,7 +1505,6 @@
       notify(`Петух ${r.name} (${r.rarityLabel}) сдан на мясо за ${rMeta.meatPrice} 🪙!`);
     }
 
-    // Продажа обычных яиц со склада (по 2 монеты)
     document.getElementById("sell-eggs-btn").addEventListener("click", async () => {
       if (state.warehouseEggs < 1) {
         notify("На складе нет обычных яиц для продажи.");
@@ -1243,8 +1520,6 @@
       notify(`Продано ${sold} яиц за ${gain} 🪙!`);
     });
 
-    // Профиль: любой локальный ник + аватарка
-    document.getElementById("nickname-input").value = state.nick || "";
     document.getElementById("save-nick-btn").addEventListener("click", async () => {
       const raw = document.getElementById("nickname-input").value.trim();
       if (!raw) {
@@ -1295,7 +1570,6 @@
       reader.readAsDataURL(file);
     });
 
-    // Гонки 1x1 и 1x4
     document.getElementById("race-rooster-select").addEventListener("change", (e) => {
       state.selectedRoosterId = e.target.value;
       saveState();
@@ -1318,6 +1592,7 @@
     }
 
     document.getElementById("create-room-btn").addEventListener("click", async () => {
+      if (!authUid) return;
       const activeR = state.roosters.find((r) => r.id === state.selectedRoosterId) || state.roosters[0];
       if (!activeR) {
         notify("Для гонок нужен хотя бы 1 петух (выведите его из редкого яйца с цыплёнком).", true);
@@ -1342,11 +1617,11 @@
         status: "waiting",
         bet,
         createdAt: Date.now(),
-        hostId: playerId,
+        hostId: authUid,
         winnerId: null,
         players: {
-          [playerId]: {
-            id: playerId,
+          [authUid]: {
+            id: authUid,
             name: state.nick || "Фермер",
             progress: 0,
             finishedAt: null,
@@ -1368,6 +1643,7 @@
     });
 
     async function joinRoom(roomId) {
+      if (!authUid) return;
       const activeR = state.roosters.find((r) => r.id === state.selectedRoosterId) || state.roosters[0];
       if (!activeR) {
         notify("Для участия в гонке нужен петух!", true);
@@ -1383,9 +1659,9 @@
       const tx = await runTransaction(ref(db, `rooms/${roomId}`), (curr) => {
         if (!curr || curr.status !== "waiting") return;
         const players = curr.players || {};
-        if (!players[playerId] && Object.keys(players).length >= curr.maxPlayers) return;
-        players[playerId] = {
-          id: playerId,
+        if (!players[authUid] && Object.keys(players).length >= curr.maxPlayers) return;
+        players[authUid] = {
+          id: authUid,
           name: state.nick || "Фермер",
           progress: 0,
           finishedAt: null,
@@ -1435,7 +1711,7 @@
         }
 
         const players = Object.values(room.players || {});
-        const isHost = room.hostId === playerId;
+        const isHost = room.hostId === authUid;
         document.getElementById("race-room-title").textContent = `${room.mode} · ${room.status} (${players.length}/${room.maxPlayers})`;
         document.getElementById("race-room-pot").textContent = `Ставка каждого: ${fmtBet(room.bet)}`;
 
@@ -1443,7 +1719,7 @@
           await update(ref(db, `rooms/${roomId}`), { status: "racing" });
         }
 
-        if (room.status === "racing" && room.players?.[playerId] && !room.players[playerId].finishedAt) {
+        if (room.status === "racing" && room.players?.[authUid] && !room.players[authUid].finishedAt) {
           runMyRacer(room);
         }
 
@@ -1458,7 +1734,7 @@
 
         if (room.status === "finished") {
           if (raceInterval) { clearInterval(raceInterval); raceInterval = null; }
-          const won = room.winnerId === playerId;
+          const won = room.winnerId === authUid;
           if (won && !room.claimedByWinner) {
             await update(ref(db, `rooms/${roomId}`), { claimedByWinner: true });
             const bank = (room.bet?.amount || 0) * Math.max(2, players.length);
@@ -1492,8 +1768,8 @@
     }
 
     function runMyRacer(room) {
-      if (raceInterval) return;
-      const slot = room.players?.[playerId];
+      if (raceInterval || !authUid) return;
+      const slot = room.players?.[authUid];
       if (!slot) return;
       const rObj = RARITIES.find((r) => r.key === slot.racer?.rarity) || RARITIES[0];
       const bonus = 0.92 + ((Number(slot._hiddenPower || 10)) % 20) * 0.01;
@@ -1502,14 +1778,14 @@
       raceInterval = setInterval(async () => {
         if (prog >= 100) { clearInterval(raceInterval); raceInterval = null; return; }
         prog = Math.min(100, Number((prog + (Math.random() * 6.5 + 3.5) * rObj.mult * bonus).toFixed(1)));
-        const upd = { [`rooms/${room.id}/players/${playerId}/progress`]: prog };
-        if (prog >= 100) upd[`rooms/${room.id}/players/${playerId}/finishedAt`] = Date.now();
+        const upd = { [`rooms/${room.id}/players/${authUid}/progress`]: prog };
+        if (prog >= 100) upd[`rooms/${room.id}/players/${authUid}/finishedAt`] = Date.now();
         try { await update(ref(db), upd); } catch (_) {}
       }, 350);
     }
 
     document.getElementById("leave-room-btn").addEventListener("click", async () => {
-      if (!activeRoomId) return;
+      if (!activeRoomId || !authUid) return;
       const id = activeRoomId;
       if (raceInterval) { clearInterval(raceInterval); raceInterval = null; }
       if (roomUnsub) { roomUnsub(); roomUnsub = null; }
@@ -1519,8 +1795,8 @@
       const snap = await get(ref(db, `rooms/${id}`));
       if (snap.exists()) {
         const r = snap.val();
-        if (r.hostId === playerId || r.status === "finished") await remove(ref(db, `rooms/${id}`));
-        else await remove(ref(db, `rooms/${id}/players/${playerId}`));
+        if (r.hostId === authUid || r.status === "finished") await remove(ref(db, `rooms/${id}`));
+        else await remove(ref(db, `rooms/${id}/players/${authUid}`));
       }
     });
 
@@ -1558,7 +1834,6 @@
       });
     }
 
-    // Топ только по балансу
     const topQ = query(ref(db, "leaderboard"), orderByChild("balance"), limitToLast(15));
     onValue(topQ, (snap) => {
       const arr = [];
@@ -1572,7 +1847,10 @@
       box.innerHTML = arr
         .map((p, i) => `
           <div class="list-item">
-            <span><strong>#${i + 1}</strong> ${escapeHtml(p.avatarEmoji || "🐓")} <strong>${escapeHtml(p.name || "Игрок")}</strong></span>
+            <span>
+              <strong>#${i + 1}</strong> ${escapeHtml(p.avatarEmoji || "🐓")} <strong>${escapeHtml(p.name || "Игрок")}</strong>
+              ${p.ideaSupporter ? `<span class="tag tag-purple">💡 Меценат</span>` : ""}
+            </span>
             <strong>🪙 ${Number(p.balance || 0).toLocaleString("ru-RU")}</strong>
           </div>
         `)
@@ -1587,12 +1865,25 @@
         .replace(/"/g, "&quot;");
     }
 
-    // Живой тик раз в 5 секунд для обновления дуг и таймеров голода
-    processSimulation();
-    renderAll();
-    syncFirebaseBalance().catch(() => {});
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      authUid = user.uid;
+      loadLocalStateForUid(authUid);
+      document.getElementById("nickname-input").value = state.nick || "";
+      setGuideVisible(!state.guideSeen);
+      processSimulation();
+      renderAll();
+      await claimPendingReferrerRewards().catch(() => {});
+      await syncFirebaseBalance().catch(() => {});
+      notify("Сессия активна. На старте у вас 2 простые курицы, корм на 4 часа и 20 монет.");
+    });
+
+    signInAnonymously(auth).catch(() => {
+      notify("Не удалось войти через Anonymous Auth — проверьте настройки в консоли Firebase.", true);
+    });
 
     setInterval(() => {
+      if (!authUid) return;
       processSimulation();
       renderAll();
     }, 5000);
