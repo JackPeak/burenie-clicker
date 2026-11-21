@@ -3,1031 +3,720 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Петушиный Двор — Ферма и Забеги</title>
+  <title>Yard and Roosters</title>
   <style>
-    :root {
-      --bg: #121417;
-      --panel: #1b1f24;
-      --panel-2: #242930;
-      --border: #323943;
-      --text: #eef2f6;
-      --muted: #9aa5b4;
-      --accent: #f59e0b;
-      --accent-2: #10b981;
-      --danger: #ef4444;
-      --common: #9ca3af;
-      --uncommon: #22c55e;
-      --rare: #3b82f6;
-      --epic: #a855f7;
-      --legendary: #f59e0b;
-    }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.4;
+      padding: 12px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f131a;
+      color: #f3f6fc;
     }
-
-    .wrap {
-      max-width: 1120px;
+    .app {
+      max-width: 560px;
       margin: 0 auto;
-      padding: 16px;
-    }
-
-    header {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--panel);
-      border: 1px solid var(--border);
+      flex-direction: column;
+      gap: 14px;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: #181e29;
+      border: 1px solid #2b3548;
       border-radius: 14px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
+      padding: 12px;
     }
-
-    .title {
-      font-size: 20px;
-      font-weight: 700;
+    .stat-box {
+      background: #11161f;
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
     }
-
-    .stats-bar {
+    .stat-label { font-size: 11px; color: #9aa7bd; }
+    .stat-val { font-size: 16px; font-weight: 700; margin-top: 2px; }
+    .card {
+      background: #181e29;
+      border: 1px solid #2b3548;
+      border-radius: 14px;
+      padding: 14px;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 10px;
     }
-
-    .pill {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid var(--border);
+    .card-title { font-size: 16px; font-weight: 700; margin: 0; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    select, input, button {
+      background: #222b3b;
+      color: #f3f6fc;
+      border: 1px solid #39465e;
       border-radius: 10px;
-      padding: 8px 14px;
+      padding: 9px 12px;
       font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.15s ease;
     }
-
-    button:hover:not(:disabled) {
-      border-color: var(--accent);
-      transform: translateY(-1px);
-    }
-
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    button.primary {
-      background: var(--accent);
-      color: #111;
-      border-color: var(--accent);
-    }
-
-    button.green {
-      background: var(--accent-2);
-      color: #091510;
-      border-color: var(--accent-2);
-    }
-
-    button.danger {
-      background: rgba(239, 68, 68, 0.16);
-      border-color: var(--danger);
-      color: #fecaca;
-    }
-
-    .tab-btn.active {
-      background: var(--accent);
-      color: #111;
-      border-color: var(--accent);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-    }
-
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 16px;
-    }
-
-    .muted { color: var(--muted); font-size: 13px; }
-
-    .feeder-box {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .bar-track {
-      height: 12px;
-      background: #0e1013;
-      border-radius: 999px;
-      overflow: hidden;
-      margin: 8px 0;
-      border: 1px solid var(--border);
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-2), var(--accent));
-      width: 0%;
-      transition: width 0.25s ease;
-    }
-
-    .rarity {
+    button { cursor: pointer; font-weight: 600; transition: opacity 0.15s ease; }
+    button:hover { opacity: 0.92; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.primary { background: #2f7cf6; border-color: #2f7cf6; }
+    button.success { background: #26a269; border-color: #26a269; }
+    button.danger { background: #c01c28; border-color: #c01c28; }
+    .pill {
       display: inline-block;
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      border: 1px solid currentColor;
+      background: #283347;
+      color: #dbe6fa;
     }
-    .r-common { color: var(--common); }
-    .r-uncommon { color: var(--uncommon); }
-    .r-rare { color: var(--rare); }
-    .r-epic { color: var(--epic); }
-    .r-legendary { color: var(--legendary); }
-
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
+    .list { display: flex; flex-direction: column; gap: 8px; }
     .item-row {
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
+      background: #11161f;
+      border: 1px solid #252f40;
       border-radius: 10px;
-      padding: 10px 12px;
-    }
-
-    .track-wrap {
-      background: #14181d;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      margin-top: 12px;
-    }
-
-    .lane {
-      position: relative;
-      height: 46px;
-      background: #1d2229;
-      border: 1px dashed #3a424e;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-    }
-
-    .lane-label {
-      font-size: 12px;
-      color: var(--muted);
-      z-index: 1;
-      max-width: 65%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .runner {
-      position: absolute;
-      left: 8px;
-      font-size: 24px;
-      transition: left 0.18s linear;
-      z-index: 2;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-    }
-
-    .finish-line {
-      position: absolute;
-      right: 14px;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: repeating-linear-gradient(
-        to bottom,
-        #fff 0px, #fff 6px,
-        #111 6px, #111 12px
-      );
-    }
-
-    .log {
-      margin-top: 12px;
-      background: #101317;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      max-height: 190px;
-      overflow-y: auto;
+      padding: 9px 11px;
       font-size: 13px;
     }
-
-    .log p { margin: 4px 0; }
-
-    select, input {
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 10px;
-      font-size: 14px;
-    }
-
-    .controls-row {
+    .track-item {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 10px;
+      flex-direction: column;
+      gap: 5px;
+      background: #11161f;
+      border: 1px solid #252f40;
+      border-radius: 10px;
+      padding: 9px 11px;
     }
-
-    .hidden { display: none !important; }
+    .bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #232d3f;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #33d17a;
+      transition: width 0.25s ease;
+    }
+    .log-box {
+      font-size: 12px;
+      color: #b7c4d9;
+      background: #11161f;
+      border-radius: 10px;
+      padding: 8px 10px;
+      min-height: 20px;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <div class="title">🐔 Петушиный Двор</div>
-      <div class="muted">Ферма, кормушка, редкость и забеги 1×1 / 1×4</div>
+  <div class="app">
+    <!-- Баланс: монеты, яйца и петухи -->
+    <div class="topbar">
+      <div class="stat-box">
+        <div class="stat-label">Монеты</div>
+        <div class="stat-val" id="ui-coins">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Яйца</div>
+        <div class="stat-val" id="ui-eggs">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Петухов</div>
+        <div class="stat-val" id="ui-roosters-count">0</div>
+      </div>
     </div>
-    <div class="stats-bar">
-      <div class="pill" id="ui-coins">🪙 0</div>
-      <div class="pill" id="ui-grain">🌾 0</div>
-      <div class="pill" id="ui-eggs">🥚 0</div>
-      <div class="pill" id="ui-roosters">🐓 0</div>
-      <button class="danger" id="btn-reset" title="Сбросить прогресс">Сброс</button>
-    </div>
-  </header>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="farm">🏡 Ферма и кормушка</button>
-    <button class="tab-btn" data-tab="race">🏁 Забеги 1×1 и 1×4</button>
-    <button class="tab-btn" data-tab="market">🛒 Лавка и инкубатор</button>
+    <!-- 1. Кормушка и инкубатор -->
+    <div class="card">
+      <h2 class="card-title">Кормушка и инкубатор</h2>
+      <div class="row">
+        <button type="button" class="success" id="feed-btn">Покормить (20 монет → +яйцо и +монеты)</button>
+        <button type="button" class="primary" id="hatch-btn">Высидеть яйцо (1 яйцо → петух)</button>
+      </div>
+      <div class="row">
+        <label for="active-rooster-select" style="font-size: 13px; color: #b7c4d9;">Боец для забега:</label>
+        <select id="active-rooster-select" style="flex: 1;"></select>
+        <span class="pill" id="active-rooster-rarity">common</span>
+      </div>
+      <div class="log-box" id="farm-log">Готов к кормлению и забегам.</div>
+    </div>
+
+    <!-- 2. Создание комнаты 1x1 / 1x4 -->
+    <div class="card">
+      <h2 class="card-title">Создать комнату гонки</h2>
+      <div class="row">
+        <select id="room-mode">
+          <option value="1x1">1×1 (2 игрока)</option>
+          <option value="1x4">1×4 (4 игрока)</option>
+        </select>
+
+        <select id="room-bet-type">
+          <option value="coins">Ставка: Монеты</option>
+          <option value="egg">Ставка: Яйцо</option>
+        </select>
+
+        <input id="room-bet-amount" type="number" min="1" value="30" style="width: 100px;" />
+        <button type="button" class="primary" id="create-room-btn">Создать</button>
+      </div>
+    </div>
+
+    <!-- 3. Открытые комнаты -->
+    <div class="card">
+      <h2 class="card-title">Открытые комнаты 1×1</h2>
+      <div class="list" id="rooms-1x1-list"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Открытые комнаты 1×4</h2>
+      <div class="list" id="rooms-1x4-list"></div>
+    </div>
+
+    <!-- 4. Экран активного заезда -->
+    <div class="card" id="race-card" style="display: none;">
+      <div class="row" style="justify-content: space-between;">
+        <strong id="race-title">Забег</strong>
+        <button type="button" class="danger" id="leave-room-btn">Выйти</button>
+      </div>
+      <div id="race-bet-text" style="font-size: 13px; color: #b7c4d9;"></div>
+      <div class="list" id="race-tracks"></div>
+      <div id="race-outcome" style="font-weight: 700; color: #f8e45c;"></div>
+    </div>
+
+    <!-- 5. Топ по балансу -->
+    <div class="card">
+      <h2 class="card-title">Топ по балансу</h2>
+      <div class="list" id="balance-top-list"></div>
+    </div>
   </div>
 
-  <!-- ВКЛАДКА 1: ФЕРМА -->
-  <section id="tab-farm">
-    <div class="grid">
-      <div class="card">
-        <h3>🌾 Кормушка и уход</h3>
-        <div class="feeder-box">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong>Уровень кормушки: <span id="feeder-lvl">1</span></strong>
-            <span id="feeder-text">0 / 100</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" id="feeder-bar"></div>
-          </div>
-          <div class="muted">Когда в кормушке есть зерно, куры несутся и растут быстрее, а петухи бодрее выходят на старт.</div>
-        </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      push,
+      update,
+      remove,
+      onValue,
+      query,
+      orderByChild,
+      limitToLast,
+      runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-        <div class="controls-row">
-          <button class="primary" id="btn-fill-feeder">Насыпать зерно (+25)</button>
-          <button id="btn-buy-grain">Купить 20 зерна (15 🪙)</button>
-          <button id="btn-upgrade-feeder">Апгрейд кормушки</button>
-        </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAxKiUf-DCaj4A5aIoZmJezOa5UD8j60Wc",
+      authDomain: "yard-and-roosters.firebaseapp.com",
+      databaseURL: "https://yard-and-roosters-default-rtdb.firebaseio.com",
+      projectId: "yard-and-roosters",
+      storageBucket: "yard-and-roosters.firebasestorage.app",
+      messagingSenderId: "978553937670",
+      appId: "1:978553937670:web:9ab2c607104527aabf8887",
+      measurementId: "G-6ZT24E07SW"
+    };
 
-        <div class="controls-row">
-          <button class="green" id="btn-collect-eggs">Собрать яйца</button>
-          <button id="btn-sell-all-eggs">Продать обычные/необычные яйца</button>
-        </div>
-      </div>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      <div class="card">
-        <h3>🥚 Яйца в корзине</h3>
-        <div class="muted">У каждого яйца есть редкость. Можно продать или положить в инкубатор.</div>
-        <div class="list" id="eggs-list"></div>
-      </div>
-    </div>
+    const RARITIES = [
+      { key: "common", label: "Обычный", mult: 1.0, weight: 55 },
+      { key: "rare", label: "Редкий", mult: 1.15, weight: 25 },
+      { key: "epic", label: "Эпический", mult: 1.32, weight: 12 },
+      { key: "legendary", label: "Легендарный", mult: 1.5, weight: 6 },
+      { key: "mythic", label: "Мифический", mult: 1.72, weight: 2 }
+    ];
 
-    <div class="grid" style="margin-top:16px;">
-      <div class="card">
-        <h3>🐔 Куры (несушки)</h3>
-        <div class="muted">Приносят яйца с шансом редкости, зависящим от самой курицы и кормушки.</div>
-        <div class="list" id="hens-list"></div>
-      </div>
+    const ROOSTER_NAMES = ["Гроза", "Искра", "Вихрь", "Шпора", "Болт", "Сокол", "Тайфун", "Коготь"];
 
-      <div class="card">
-        <h3>🐓 Петухи (для забегов)</h3>
-        <div class="muted">В забеге видна только редкость петуха — характеристики скрыты.</div>
-        <div class="list" id="roosters-list"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ВКЛАДКА 2: ЗАБЕГИ -->
-  <section id="tab-race" class="hidden">
-    <div class="card">
-      <h3>🏁 Настройка забега</h3>
-      <div class="controls-row">
-        <label>Режим:
-          <select id="race-mode">
-            <option value="1v1">1×1 (Дуэль)</option>
-            <option value="1v4">1×4 (Четвёрка)</option>
-          </select>
-        </label>
-
-        <label>Твой петух:
-          <select id="race-rooster"></select>
-        </label>
-
-        <label>Тип ставки:
-          <select id="bet-type">
-            <option value="coins">Монеты (🪙)</option>
-            <option value="egg">Яйцо (🥚)</option>
-            <option value="rooster">Петух (🐓 — риск!)</option>
-          </select>
-        </label>
-
-        <span id="bet-input-wrap">
-          <label>Сумма: <input type="number" id="bet-coins" value="50" min="10" step="10" style="width:90px;" /></label>
-        </span>
-
-        <span id="bet-egg-wrap" class="hidden">
-          <label>Яйцо: <select id="bet-egg"></select></label>
-        </span>
-
-        <span id="bet-rooster-info" class="muted hidden">На кону выбранный петух (победитель забирает петуха соперника или банк!)</span>
-      </div>
-
-      <div class="controls-row">
-        <button class="primary" id="btn-start-race">🚀 Запустить забег</button>
-      </div>
-
-      <div class="track-wrap">
-        <div id="race-participants" class="muted" style="margin-bottom:10px;">Выберите петуха и нажмите «Запустить забег».</div>
-        <div id="lanes-container"></div>
-        <div class="finish-line" style="display:none;"></div>
-      </div>
-
-      <div class="log" id="race-log">
-        <p class="muted">Журнал забега появится здесь...</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ВКЛАДКА 3: ЛАВКА И ИНКУБАТОР -->
-  <section id="tab-market" class="hidden">
-    <div class="grid">
-      <div class="card">
-        <h3>🔥 Инкубатор</h3>
-        <div class="muted">Выбери яйцо из корзины и выведи курицу или петуха. Редкость птенца тяготеет к редкости яйца, но возможен сюрприз.</div>
-        <div class="controls-row" style="margin-top:10px;">
-          <select id="incubator-egg"></select>
-          <button class="green" id="btn-hatch-egg">Вывести птенца</button>
-        </div>
-        <div id="hatch-result" class="muted"></div>
-      </div>
-
-      <div class="card">
-        <h3>🛒 Лавка фермера</h3>
-        <div class="list">
-          <div class="item-row">
-            <div>
-              <strong>Мешок зерна (+30 🌾)</strong>
-              <div class="muted">Для наполнения кормушки</div>
-            </div>
-            <button id="shop-grain">20 🪙</button>
-          </div>
-          <div class="item-row">
-            <div>
-              <strong>Обычное яйцо</strong>
-              <div class="muted">Шанс редких пород низкий</div>
-            </div>
-            <button id="shop-egg-common">35 🪙</button>
-          </div>
-          <div class="item-row">
-            <div>
-              <strong>Таинственное яйцо (шанс Редкого/Эпического)</strong>
-              <div class="muted">Отличный кандидат на редкого петуха</div>
-            </div>
-            <button id="shop-egg-mystery">140 🪙</button>
-          </div>
-          <div class="item-row">
-            <div>
-              <strong>Бодрый петух (случайная редкость)</strong>
-              <div class="muted">Сразу готов к забегам 1×1 и 1×4</div>
-            </div>
-            <button id="shop-rooster">120 🪙</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<script>
-const STORAGE_KEY = "chicken_yard_save_v1";
-
-const RARITIES = [
-  { id: "common", name: "Обычный", weight: 52, power: 1.0, eggValue: 15 },
-  { id: "uncommon", name: "Необычный", weight: 25, power: 1.14, eggValue: 35 },
-  { id: "rare", name: "Редкий", weight: 14, power: 1.30, eggValue: 80 },
-  { id: "epic", name: "Эпический", weight: 7, power: 1.50, eggValue: 180 },
-  { id: "legendary", name: "Легендарный", weight: 2, power: 1.75, eggValue: 400 }
-];
-
-const ROOSTER_NAMES = [
-  "Вихрь", "Болтун", "Гром", "Шпора", "Рыжий", "Барон",
-  "Шустрик", "Кекс", "Пылесос", "Джокер", "Зевс", "Фантом"
-];
-
-const HEN_NAMES = [
-  "Пеструшка", "Ряба", "Хохлатка", "Квочка", "Зоя", "Ночка",
-  "Пухля", "Марфа", "Искорка", "Дуня"
-];
-
-function uid() {
-  return Math.random().toString(36).slice(2, 9);
-}
-
-function getRarity(id) {
-  return RARITIES.find(r => r.id === id) || RARITIES[0];
-}
-
-function pickWeighted(entries) {
-  const total = entries.reduce((acc, e) => acc + e.weight, 0);
-  let r = Math.random() * total;
-  for (const e of entries) {
-    r -= e.weight;
-    if (r <= 0) return e;
-  }
-  return entries[entries.length - 1];
-}
-
-function rollRarity(biasId = null) {
-  if (!biasId) return pickWeighted(RARITIES).id;
-  const idx = RARITIES.findIndex(r => r.id === biasId);
-  if (idx < 0) return pickWeighted(RARITIES).id;
-  const biased = RARITIES.map((r, i) => {
-    const dist = Math.abs(i - idx);
-    const mult = dist === 0 ? 3.2 : dist === 1 ? 1.5 : 0.45;
-    return { ...r, weight: Math.max(1, r.weight * mult) };
-  });
-  return pickWeighted(biased).id;
-}
-
-function makeBird(kind, rarityId = null) {
-  const rarity = rarityId || rollRarity();
-  const names = kind === "rooster" ? ROOSTER_NAMES : HEN_NAMES;
-  const name = names[Math.floor(Math.random() * names.length)] + " #" + Math.floor(10 + Math.random() * 89);
-  // Скрытые характеристики для забегов/продуктивности (нигде не выводятся числами)
-  return {
-    id: uid(),
-    kind,
-    name,
-    rarity,
-    progress: 0,
-    hiddenSpeed: 0.75 + Math.random() * 0.55,
-    hiddenStamina: 0.75 + Math.random() * 0.55,
-    hiddenLuck: 0.7 + Math.random() * 0.65
-  };
-}
-
-function makeEgg(rarityId = null) {
-  return {
-    id: uid(),
-    rarity: rarityId || rollRarity()
-  };
-}
-
-function defaultState() {
-  return {
-    coins: 120,
-    grain: 50,
-    feederLevel: 1,
-    feederFood: 60,
-    hens: [makeBird("hen", "common"), makeBird("hen", "uncommon")],
-    roosters: [makeBird("rooster", "common"), makeBird("rooster", "rare")],
-    eggs: [makeEgg("common"), makeEgg("uncommon")],
-    lastTick: Date.now()
-  };
-}
-
-let state = loadState();
-let raceRunning = false;
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    return { ...defaultState(), ...parsed };
-  } catch {
-    return defaultState();
-  }
-}
-
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function feederCapacity() {
-  return 100 + (state.feederLevel - 1) * 50;
-}
-
-function feederUpgradeCost() {
-  return 90 * state.feederLevel;
-}
-
-// Фоновый тик фермы: куры несут яйца, если в кормушке есть зерно
-function simulateFarmTime(seconds) {
-  const steps = Math.min(Math.floor(seconds), 600);
-  if (steps <= 0) return;
-
-  for (let i = 0; i < steps; i++) {
-    if (state.feederFood > 0 && state.hens.length > 0) {
-      const consume = Math.min(state.feederFood, state.hens.length * 0.12);
-      state.feederFood = Math.max(0, +(state.feederFood - consume).toFixed(2));
-
-      for (const hen of state.hens) {
-        const r = getRarity(hen.rarity);
-        const chance = 0.018 * r.power * (1 + (state.feederLevel - 1) * 0.1);
-        if (Math.random() < chance && state.eggs.length < 30) {
-          state.eggs.push(makeEgg(rollRarity(hen.rarity)));
-        }
+    function getPlayerIdentity() {
+      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      if (tgUser?.id) {
+        return {
+          id: String(tgUser.id),
+          name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ") || tgUser.username || `Player_${tgUser.id}`
+        };
       }
-    }
-  }
-}
-
-function renderAll() {
-  const cap = feederCapacity();
-  document.getElementById("ui-coins").textContent = `🪙 ${Math.floor(state.coins)}`;
-  document.getElementById("ui-grain").textContent = `🌾 ${Math.floor(state.grain)}`;
-  document.getElementById("ui-eggs").textContent = `🥚 ${state.eggs.length}`;
-  document.getElementById("ui-roosters").textContent = `🐓 ${state.roosters.length}`;
-
-  document.getElementById("feeder-lvl").textContent = state.feederLevel;
-  document.getElementById("feeder-text").textContent = `${Math.floor(state.feederFood)} / ${cap}`;
-  document.getElementById("feeder-bar").style.width = `${Math.min(100, (state.feederFood / cap) * 100)}%`;
-
-  const upgBtn = document.getElementById("btn-upgrade-feeder");
-  upgBtn.textContent = `Апгрейд кормушки (${feederUpgradeCost()} 🪙)`;
-  upgBtn.disabled = state.coins < feederUpgradeCost();
-
-  // Яйца
-  const eggsList = document.getElementById("eggs-list");
-  eggsList.innerHTML = "";
-  if (state.eggs.length === 0) {
-    eggsList.innerHTML = `<div class="muted">Яиц пока нет. Соберите с кур или купите в лавке.</div>`;
-  } else {
-    state.eggs.forEach((egg, idx) => {
-      const r = getRarity(egg.rarity);
-      const row = document.createElement("div");
-      row.className = "item-row";
-      row.innerHTML = `
-        <div>
-          <strong>Яйцо #${idx + 1}</strong>
-          <span class="rarity r-${r.id}">${r.name}</span>
-        </div>
-        <div>
-          <button onclick="sellEgg('${egg.id}')">Продать (+${r.eggValue} 🪙)</button>
-        </div>
-      `;
-      eggsList.appendChild(row);
-    });
-  }
-
-  // Куры
-  const hensList = document.getElementById("hens-list");
-  hensList.innerHTML = "";
-  state.hens.forEach(hen => {
-    const r = getRarity(hen.rarity);
-    const row = document.createElement("div");
-    row.className = "item-row";
-    row.innerHTML = `
-      <div>
-        <strong>${hen.name}</strong>
-        <span class="rarity r-${r.id}">${r.name}</span>
-      </div>
-      <div class="muted">Несушка</div>
-    `;
-    hensList.appendChild(row);
-  });
-
-  // Петухи
-  const roostersList = document.getElementById("roosters-list");
-  roostersList.innerHTML = "";
-  if (state.roosters.length === 0) {
-    roostersList.innerHTML = `<div class="muted">Петухов нет — выведите из яйца или купите в лавке.</div>`;
-  } else {
-    state.roosters.forEach(rooster => {
-      const r = getRarity(rooster.rarity);
-      const row = document.createElement("div");
-      row.className = "item-row";
-      row.innerHTML = `
-        <div>
-          <strong>${rooster.name}</strong>
-          <span class="rarity r-${r.id}">${r.name}</span>
-        </div>
-        <button onclick="sellRooster('${rooster.id}')">Продать (${Math.round(45 * r.power)} 🪙)</button>
-      `;
-      roostersList.appendChild(row);
-    });
-  }
-
-  // Селекты забега и инкубатора
-  const roosterSel = document.getElementById("race-rooster");
-  roosterSel.innerHTML = state.roosters.map(ro => {
-    const r = getRarity(ro.rarity);
-    return `<option value="${ro.id}">${ro.name} [${r.name}]</option>`;
-  }).join("");
-
-  const eggSel = document.getElementById("incubator-egg");
-  const betEggSel = document.getElementById("bet-egg");
-  const eggOptions = state.eggs.map((e, i) => {
-    const r = getRarity(e.rarity);
-    return `<option value="${e.id}">Яйцо #${i + 1} [${r.name}]</option>`;
-  }).join("");
-  eggSel.innerHTML = eggOptions || `<option value="">Нет яиц</option>`;
-  betEggSel.innerHTML = eggOptions || `<option value="">Нет яиц</option>`;
-
-  document.getElementById("btn-start-race").disabled = raceRunning || state.roosters.length === 0;
-  document.getElementById("btn-hatch-egg").disabled = state.eggs.length === 0;
-}
-
-window.sellEgg = function(id) {
-  const idx = state.eggs.findIndex(e => e.id === id);
-  if (idx < 0) return;
-  const r = getRarity(state.eggs[idx].rarity);
-  state.eggs.splice(idx, 1);
-  state.coins += r.eggValue;
-  saveState();
-  renderAll();
-};
-
-window.sellRooster = function(id) {
-  if (state.roosters.length <= 1 && state.eggs.length === 0 && state.coins < 120) {
-    alert("Оставьте хотя бы одного петуха для забегов!");
-    return;
-  }
-  const idx = state.roosters.findIndex(ro => ro.id === id);
-  if (idx < 0) return;
-  const r = getRarity(state.roosters[idx].rarity);
-  state.roosters.splice(idx, 1);
-  state.coins += Math.round(45 * r.power);
-  saveState();
-  renderAll();
-};
-
-// Действия на ферме
-document.getElementById("btn-fill-feeder").onclick = () => {
-  const cap = feederCapacity();
-  const need = cap - state.feederFood;
-  if (need <= 0) return;
-  const add = Math.min(25, need, state.grain);
-  if (add <= 0) {
-    alert("Недостаточно зерна! Купите зерно в лавке.");
-    return;
-  }
-  state.grain -= add;
-  state.feederFood += add;
-  saveState();
-  renderAll();
-};
-
-document.getElementById("btn-buy-grain").onclick = () => {
-  if (state.coins < 15) return;
-  state.coins -= 15;
-  state.grain += 20;
-  saveState();
-  renderAll();
-};
-
-document.getElementById("btn-upgrade-feeder").onclick = () => {
-  const cost = feederUpgradeCost();
-  if (state.coins < cost) return;
-  state.coins -= cost;
-  state.feederLevel += 1;
-  saveState();
-  renderAll();
-};
-
-document.getElementById("btn-collect-eggs").onclick = () => {
-  // Бонусный быстрый сбор при наличии корма в кормушке
-  if (state.feederFood < 5) {
-    alert("Насыпьте в кормушку хотя бы 5 ед. корма, чтобы куры были активны!");
-    return;
-  }
-  state.feederFood -= 5;
-  const count = Math.max(1, Math.min(3, Math.ceil(state.hens.length * 0.6)));
-  for (let i = 0; i < count; i++) {
-    const hen = state.hens[Math.floor(Math.random() * state.hens.length)];
-    state.eggs.push(makeEgg(rollRarity(hen.rarity)));
-  }
-  saveState();
-  renderAll();
-};
-
-document.getElementById("btn-sell-all-eggs").onclick = () => {
-  let earned = 0;
-  state.eggs = state.eggs.filter(e => {
-    if (e.rarity === "common" || e.rarity === "uncommon") {
-      earned += getRarity(e.rarity).eggValue;
-      return false;
-    }
-    return true;
-  });
-  state.coins += earned;
-  saveState();
-  renderAll();
-};
-
-// Лавка и инкубатор
-document.getElementById("shop-grain").onclick = () => {
-  if (state.coins < 20) return;
-  state.coins -= 20;
-  state.grain += 30;
-  saveState();
-  renderAll();
-};
-
-document.getElementById("shop-egg-common").onclick = () => {
-  if (state.coins < 35) return;
-  state.coins -= 35;
-  state.eggs.push(makeEgg("common"));
-  saveState();
-  renderAll();
-};
-
-document.getElementById("shop-egg-mystery").onclick = () => {
-  if (state.coins < 140) return;
-  state.coins -= 140;
-  const r = pickWeighted([
-    { id: "uncommon", weight: 35 },
-    { id: "rare", weight: 40 },
-    { id: "epic", weight: 20 },
-    { id: "legendary", weight: 5 }
-  ]).id;
-  state.eggs.push(makeEgg(r));
-  saveState();
-  renderAll();
-};
-
-document.getElementById("shop-rooster").onclick = () => {
-  if (state.coins < 120) return;
-  state.coins -= 120;
-  state.roosters.push(makeBird("rooster"));
-  saveState();
-  renderAll();
-};
-
-document.getElementById("btn-hatch-egg").onclick = () => {
-  const eggId = document.getElementById("incubator-egg").value;
-  const idx = state.eggs.findIndex(e => e.id === eggId);
-  if (idx < 0) return;
-  const egg = state.eggs[idx];
-  state.eggs.splice(idx, 1);
-
-  const childRarity = rollRarity(egg.rarity);
-  const kind = Math.random() < 0.52 ? "rooster" : "hen";
-  const bird = makeBird(kind, childRarity);
-  if (kind === "rooster") state.roosters.push(bird);
-  else state.hens.push(bird);
-
-  const r = getRarity(childRarity);
-  document.getElementById("hatch-result").innerHTML =
-    `Вылупился ${kind === "rooster" ? "петух" : "курица"} <strong>${bird.name}</strong> — <span class="rarity r-${r.id}">${r.name}</span>!`;
-
-  saveState();
-  renderAll();
-};
-
-// Переключение типа ставки
-document.getElementById("bet-type").onchange = (e) => {
-  const val = e.target.value;
-  document.getElementById("bet-input-wrap").classList.toggle("hidden", val !== "coins");
-  document.getElementById("bet-egg-wrap").classList.toggle("hidden", val !== "egg");
-  document.getElementById("bet-rooster-info").classList.toggle("hidden", val !== "rooster");
-};
-
-// Забеги 1x1 и 1x4
-function appendLog(text) {
-  const log = document.getElementById("race-log");
-  const p = document.createElement("p");
-  p.innerHTML = text;
-  log.prepend(p);
-}
-
-document.getElementById("btn-start-race").onclick = () => {
-  if (raceRunning) return;
-  const mode = document.getElementById("race-mode").value;
-  const myRoosterId = document.getElementById("race-rooster").value;
-  const betType = document.getElementById("bet-type").value;
-  const myRooster = state.roosters.find(r => r.id === myRoosterId);
-  if (!myRooster) return;
-
-  const opponentsCount = mode === "1v1" ? 1 : 3;
-  let coinBet = 0;
-  let wageredEgg = null;
-
-  if (betType === "coins") {
-    coinBet = Math.max(10, parseInt(document.getElementById("bet-coins").value || "0", 10));
-    if (state.coins < coinBet) {
-      alert("Недостаточно монет для ставки!");
-      return;
-    }
-    state.coins -= coinBet;
-  } else if (betType === "egg") {
-    const eggId = document.getElementById("bet-egg").value;
-    const eIdx = state.eggs.findIndex(e => e.id === eggId);
-    if (eIdx < 0) {
-      alert("Выберите яйцо для ставки!");
-      return;
-    }
-    wageredEgg = state.eggs.splice(eIdx, 1)[0];
-  } else if (betType === "rooster") {
-    if (state.roosters.length <= 1) {
-      alert("Нельзя ставить последнего петуха!");
-      return;
-    }
-  }
-
-  raceRunning = true;
-  renderAll();
-
-  const contenders = [
-    { ...myRooster, isPlayer: true, progress: 0 }
-  ];
-
-  for (let i = 0; i < opponentsCount; i++) {
-    const opp = makeBird("rooster");
-    opp.name = "Соперник " + opp.name;
-    contenders.push({ ...opp, isPlayer: false, progress: 0 });
-  }
-
-  // На старте показываем только редкость (никаких цифр характеристик!)
-  const participantsBox = document.getElementById("race-participants");
-  participantsBox.innerHTML = "Участники забега: " + contenders.map(c => {
-    const r = getRarity(c.rarity);
-    return `<strong>${c.name}</strong> <span class="rarity r-${r.id}">${r.name}</span>`;
-  }).join(" • ");
-
-  const lanesContainer = document.getElementById("lanes-container");
-  lanesContainer.innerHTML = "";
-  contenders.forEach((c, idx) => {
-    const r = getRarity(c.rarity);
-    const lane = document.createElement("div");
-    lane.className = "lane";
-    lane.innerHTML = `
-      <div class="lane-label">${idx + 1}. ${c.name} <span class="rarity r-${r.id}">${r.name}</span></div>
-      <div class="runner" id="runner-${idx}">🐓</div>
-      <div class="finish-line"></div>
-    `;
-    lanesContainer.appendChild(lane);
-  });
-
-  document.getElementById("race-log").innerHTML = "";
-  appendLog(`🏁 Старт забега <strong>${mode}</strong>! Внимание: на треке показана только редкость, характеристики скрыты.`);
-
-  const feederBonus = state.feederFood > 0 ? 1.08 : 0.96;
-
-  const interval = setInterval(() => {
-    let winner = null;
-
-    contenders.forEach((c, idx) => {
-      const r = getRarity(c.rarity);
-      // Симуляция опирается на скрытые статы, редкость и случайные события на треке
-      const surge = Math.random() < 0.14 ? 1.35 : (Math.random() < 0.10 ? 0.65 : 1.0);
-      const step = (3.4 + Math.random() * 4.2)
-        * r.power
-        * c.hiddenSpeed
-        * (0.85 + c.hiddenStamina * 0.25)
-        * surge
-        * (c.isPlayer ? feederBonus : 1.0);
-
-      c.progress = Math.min(100, c.progress + step);
-
-      const laneEl = lanesContainer.children[idx];
-      const runnerEl = document.getElementById(`runner-${idx}`);
-      const maxLeft = Math.max(40, laneEl.clientWidth - 58);
-      runnerEl.style.left = `${8 + (c.progress / 100) * maxLeft}px`;
-
-      if (c.progress >= 100 && !winner) {
-        winner = c;
+      let devId = localStorage.getItem("yard_player_id");
+      if (!devId) {
+        devId = "p_" + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem("yard_player_id", devId);
       }
+      return { id: devId, name: `Игрок_${devId.slice(-4)}` };
+    }
+
+    const me = getPlayerIdentity();
+    const STORAGE_KEY = `yard_state_${me.id}`;
+
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (_) {}
+      return {
+        coins: 200,
+        eggs: 2,
+        roosters: [
+          {
+            id: "r_start_1",
+            name: "Гроза",
+            rarity: "common",
+            rarityLabel: "Обычный",
+            // Скрытые характеристики: в интерфейсе забега не показываем точные цифры
+            _hiddenPower: 10
+          }
+        ],
+        selectedRoosterId: "r_start_1"
+      };
+    }
+
+    let state = loadLocalState();
+    let currentRoomId = null;
+    let roomUnsub = null;
+    let raceTimer = null;
+
+    function saveLocalState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getSelectedRooster() {
+      return state.roosters.find((r) => r.id === state.selectedRoosterId) || state.roosters[0];
+    }
+
+    function setLog(msg) {
+      document.getElementById("farm-log").textContent = msg;
+    }
+
+    async function syncBalanceToFirebase() {
+      const active = getSelectedRooster();
+      const totalScore = Number(state.coins || 0) + Number(state.eggs || 0) * 50;
+      await update(ref(db), {
+        [`players/${me.id}/profile`]: { id: me.id, name: me.name, updatedAt: Date.now() },
+        [`players/${me.id}/balance`]: Number(state.coins || 0),
+        [`players/${me.id}/eggs`]: Number(state.eggs || 0),
+        [`leaderboard/${me.id}`]: {
+          id: me.id,
+          name: me.name,
+          balance: Number(state.coins || 0),
+          eggs: Number(state.eggs || 0),
+          score: totalScore,
+          roosterName: active?.name || "Петух",
+          roosterRarity: active?.rarityLabel || "Обычный",
+          updatedAt: Date.now()
+        }
+      });
+    }
+
+    function renderFarmUI() {
+      document.getElementById("ui-coins").textContent = Number(state.coins || 0).toLocaleString("ru-RU");
+      document.getElementById("ui-eggs").textContent = Number(state.eggs || 0).toLocaleString("ru-RU");
+      document.getElementById("ui-roosters-count").textContent = String(state.roosters.length);
+
+      const select = document.getElementById("active-rooster-select");
+      select.innerHTML = state.roosters
+        .map((r) => `<option value="${r.id}" ${r.id === state.selectedRoosterId ? "selected" : ""}>${escapeHtml(r.name)} (${escapeHtml(r.rarityLabel)})</option>`)
+        .join("");
+
+      const active = getSelectedRooster();
+      document.getElementById("active-rooster-rarity").textContent = active?.rarityLabel || "Обычный";
+    }
+
+    function rollRarity() {
+      const totalWeight = RARITIES.reduce((acc, r) => acc + r.weight, 0);
+      let roll = Math.random() * totalWeight;
+      for (const r of RARITIES) {
+        roll -= r.weight;
+        if (roll <= 0) return r;
+      }
+      return RARITIES[0];
+    }
+
+    // Кормление: списываем 20 монет, даём +1 яйцо и случайный бонус монет от кормления (10..35)
+    document.getElementById("feed-btn").addEventListener("click", async () => {
+      const feedCost = 20;
+      if (state.coins < feedCost) {
+        setLog("Не хватает монет на кормление (нужно минимум 20).");
+        return;
+      }
+      const feedGain = Math.floor(Math.random() * 26) + 10;
+      state.coins = state.coins - feedCost + feedGain;
+      state.eggs += 1;
+      saveLocalState();
+      renderFarmUI();
+      setLog(`Покормил хозяйство: −${feedCost} монет, +${feedGain} монет за кормление и +1 яйцо.`);
+      await syncBalanceToFirebase();
     });
 
-    if (winner) {
-      clearInterval(interval);
-      raceRunning = false;
-      const winRarity = getRarity(winner.rarity);
-      appendLog(`🏆 Финиш! Победил <strong>${winner.name}</strong> (<span class="rarity r-${winRarity.id}">${winRarity.name}</span>)!`);
+    // Инкубатор: высиживаем 1 яйцо -> новый петух с редкостью
+    document.getElementById("hatch-btn").addEventListener("click", async () => {
+      if (state.eggs < 1) {
+        setLog("Нет яиц для инкубатора. Покорми птиц или выиграй ставку в гонке.");
+        return;
+      }
+      state.eggs -= 1;
+      const rarity = rollRarity();
+      const baseName = ROOSTER_NAMES[Math.floor(Math.random() * ROOSTER_NAMES.length)];
+      const newRooster = {
+        id: "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 5),
+        name: `${baseName} #${state.roosters.length + 1}`,
+        rarity: rarity.key,
+        rarityLabel: rarity.label,
+        _hiddenPower: Math.floor(Math.random() * 12) + 8
+      };
+      state.roosters.push(newRooster);
+      state.selectedRoosterId = newRooster.id;
+      saveLocalState();
+      renderFarmUI();
+      setLog(`Вылупился боец «${newRooster.name}» (${newRooster.rarityLabel})!`);
+      await syncBalanceToFirebase();
+    });
 
-      if (winner.isPlayer) {
-        if (betType === "coins") {
-          const prize = mode === "1v1" ? coinBet * 2 : coinBet * 3;
-          state.coins += prize;
-          appendLog(`🎉 Победа! Вы забрали <strong>${prize} 🪙</strong>.`);
-        } else if (betType === "egg" && wageredEgg) {
-          const bonusEgg = makeEgg(rollRarity(wageredEgg.rarity));
-          state.eggs.push(wageredEgg, bonusEgg);
-          const br = getRarity(bonusEgg.rarity);
-          appendLog(`🎉 Победа! Вы сохранили свою ставку и выиграли новое яйцо [<span class="rarity r-${br.id}">${br.name}</span>]!`);
-        } else if (betType === "rooster") {
-          const trophy = makeBird("rooster", rollRarity(myRooster.rarity));
-          state.roosters.push(trophy);
-          const tr = getRarity(trophy.rarity);
-          appendLog(`🎉 Победа! К вашему двору присоединился трофейный петух <strong>${trophy.name}</strong> [<span class="rarity r-${tr.id}">${tr.name}</span>]!`);
-        }
-      } else {
-        if (betType === "coins") {
-          appendLog(`😅 Ставка <strong>${coinBet} 🪙</strong> ушла в призовой фонд забега.`);
-        } else if (betType === "egg") {
-          appendLog(`😅 Поставленное яйцо проиграно в забеге.`);
-        } else if (betType === "rooster") {
-          const idx = state.roosters.findIndex(r => r.id === myRooster.id);
-          if (idx >= 0) {
-            const lost = state.roosters.splice(idx, 1)[0];
-            appendLog(`😅 Вы потеряли петуха <strong>${lost.name}</strong> по условиям ставки.`);
+    document.getElementById("active-rooster-select").addEventListener("change", async (e) => {
+      state.selectedRoosterId = e.target.value;
+      saveLocalState();
+      renderFarmUI();
+      await syncBalanceToFirebase();
+    });
+
+    function checkAndDeductBet(bet) {
+      if (bet.type === "coins") {
+        if (state.coins < bet.amount) return `Недостаточно монет для ставки (${bet.amount}).`;
+        state.coins -= bet.amount;
+        return null;
+      }
+      if (bet.type === "egg") {
+        if (state.eggs < bet.amount) return `Недостаточно яиц для ставки (${bet.amount}).`;
+        state.eggs -= bet.amount;
+        return null;
+      }
+      return "Неизвестный тип ставки.";
+    }
+
+    function formatBet(bet) {
+      if (!bet) return "Без ставки";
+      return bet.type === "coins" ? `${bet.amount} монет` : `${bet.amount} яиц`;
+    }
+
+    // Создание комнаты 1x1 или 1x4
+    document.getElementById("create-room-btn").addEventListener("click", async () => {
+      const mode = document.getElementById("room-mode").value;
+      const betType = document.getElementById("room-bet-type").value;
+      const betAmount = Math.max(1, Number(document.getElementById("room-bet-amount").value) || 1);
+      const bet = { type: betType, amount: betAmount };
+
+      const err = checkAndDeductBet(bet);
+      if (err) {
+        setLog(err);
+        return;
+      }
+
+      const active = getSelectedRooster();
+      const maxPlayers = mode === "1x4" ? 4 : 2;
+      const roomRef = push(ref(db, "rooms"));
+      const roomId = roomRef.key;
+
+      await set(roomRef, {
+        id: roomId,
+        mode,
+        maxPlayers,
+        status: "waiting",
+        bet,
+        createdAt: Date.now(),
+        hostId: me.id,
+        winnerId: null,
+        payoutDone: false,
+        players: {
+          [me.id]: {
+            id: me.id,
+            name: me.name,
+            progress: 0,
+            finishedAt: null,
+            racer: {
+              name: active?.name || "Боец",
+              rarity: active?.rarity || "common",
+              rarityLabel: active?.rarityLabel || "Обычный"
+            },
+            _hiddenPower: active?._hiddenPower || 10
           }
         }
+      });
+
+      saveLocalState();
+      renderFarmUI();
+      await syncBalanceToFirebase();
+      subscribeToRoom(roomId);
+      setLog(`Создана комната ${mode}. Ставка списана: ${formatBet(bet)}.`);
+    });
+
+    async function joinRoom(roomId) {
+      const snap = await get(ref(db, `rooms/${roomId}`));
+      if (!snap.exists()) {
+        setLog("Комната уже закрыта.");
+        return;
+      }
+      const room = snap.val();
+      const err = checkAndDeductBet(room.bet);
+      if (err) {
+        setLog(err);
+        return;
       }
 
-      saveState();
-      renderAll();
+      const active = getSelectedRooster();
+      const tx = await runTransaction(ref(db, `rooms/${roomId}`), (curr) => {
+        if (!curr || curr.status !== "waiting") return;
+        const players = curr.players || {};
+        if (!players[me.id] && Object.keys(players).length >= curr.maxPlayers) return;
+
+        players[me.id] = {
+          id: me.id,
+          name: me.name,
+          progress: 0,
+          finishedAt: null,
+          racer: {
+            name: active?.name || "Боец",
+            rarity: active?.rarity || "common",
+            rarityLabel: active?.rarityLabel || "Обычный"
+          },
+          _hiddenPower: active?._hiddenPower || 10
+        };
+        curr.players = players;
+
+        if (Object.keys(players).length >= curr.maxPlayers) {
+          curr.status = "countdown";
+          curr.startAt = Date.now() + 2500;
+        }
+        return curr;
+      });
+
+      if (!tx.committed) {
+        // Возвращаем списанную ставку, если не удалось войти
+        if (room.bet.type === "coins") state.coins += room.bet.amount;
+        if (room.bet.type === "egg") state.eggs += room.bet.amount;
+        saveLocalState();
+        renderFarmUI();
+        setLog("Не удалось войти: комната полна или гонка началась.");
+        return;
+      }
+
+      saveLocalState();
+      renderFarmUI();
+      await syncBalanceToFirebase();
+      subscribeToRoom(roomId);
     }
-  }, 190);
-};
 
-// Вкладки
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    const tab = btn.dataset.tab;
-    ["farm", "race", "market"].forEach(id => {
-      document.getElementById("tab-" + id).classList.toggle("hidden", id !== tab);
+    function subscribeToRoom(roomId) {
+      if (roomUnsub) { roomUnsub(); roomUnsub = null; }
+      if (raceTimer) { clearInterval(raceTimer); raceTimer = null; }
+
+      currentRoomId = roomId;
+      document.getElementById("race-card").style.display = "flex";
+      document.getElementById("race-outcome").textContent = "";
+
+      roomUnsub = onValue(ref(db, `rooms/${roomId}`), async (snapshot) => {
+        const room = snapshot.val();
+        if (!room) {
+          document.getElementById("race-card").style.display = "none";
+          currentRoomId = null;
+          return;
+        }
+
+        const players = Object.values(room.players || {});
+        const isHost = room.hostId === me.id;
+
+        document.getElementById("race-bet-text").textContent = `Банк на ставку: ${formatBet(room.bet)} (участников: ${players.length}/${room.maxPlayers})`;
+
+        if (room.status === "waiting") {
+          document.getElementById("race-title").textContent = `Ожидание соперников (${players.length}/${room.maxPlayers}) · ${room.mode}`;
+        } else if (room.status === "countdown") {
+          const left = Math.max(0, Math.ceil(((room.startAt || Date.now()) - Date.now()) / 1000));
+          document.getElementById("race-title").textContent = `Старт через ${left}...`;
+          if (isHost && Date.now() >= (room.startAt || 0)) {
+            await update(ref(db, `rooms/${roomId}`), { status: "racing" });
+          }
+        } else if (room.status === "racing") {
+          document.getElementById("race-title").textContent = `Забег идёт · ${room.mode}`;
+          if (room.players?.[me.id] && !room.players[me.id].finishedAt) {
+            startRaceMovement(room);
+          }
+          if (isHost && !room.winnerId) {
+            const finishers = players
+              .filter((p) => Number(p.progress || 0) >= 100)
+              .sort((a, b) => (a.finishedAt || Infinity) - (b.finishedAt || Infinity));
+            if (finishers.length > 0) {
+              await update(ref(db, `rooms/${roomId}`), {
+                status: "finished",
+                winnerId: finishers[0].id
+              });
+            }
+          }
+        } else if (room.status === "finished") {
+          if (raceTimer) { clearInterval(raceTimer); raceTimer = null; }
+          document.getElementById("race-title").textContent = `Забег завершён · ${room.mode}`;
+          const winner = room.players?.[room.winnerId];
+          const wonByMe = room.winnerId === me.id;
+
+          if (wonByMe && !room.payoutClaimedByMe) {
+            await update(ref(db, `rooms/${roomId}`), { payoutClaimedByMe: true });
+            const pot = (room.bet?.amount || 0) * Math.max(2, players.length);
+            if (room.bet?.type === "coins") state.coins += pot;
+            if (room.bet?.type === "egg") state.eggs += pot;
+            saveLocalState();
+            renderFarmUI();
+            await syncBalanceToFirebase();
+          }
+
+          document.getElementById("race-outcome").textContent = wonByMe
+            ? `Победа! Ты забрал банк: ${formatBet({ type: room.bet?.type, amount: (room.bet?.amount || 0) * Math.max(2, players.length) })}`
+            : `Победитель: ${winner?.name || "Игрок"} (${winner?.racer?.name || "Боец"})`;
+        }
+
+        // Выводим только имя игрока, имя бойца и редкость — точные скрытые статы наружу не отдаём
+        document.getElementById("race-tracks").innerHTML = players
+          .map((p) => {
+            const pct = Math.max(0, Math.min(100, Number(p.progress || 0)));
+            return `
+              <div class="track-item">
+                <div class="row" style="justify-content: space-between; font-size: 13px;">
+                  <span>🐓 <strong>${escapeHtml(p.name)}</strong> — ${escapeHtml(p.racer?.name || "Боец")} <span class="pill">${escapeHtml(p.racer?.rarityLabel || "Обычный")}</span></span>
+                  <span>${pct.toFixed(0)}%</span>
+                </div>
+                <div class="bar-bg"><div class="bar-fill" style="width: ${pct}%;"></div></div>
+              </div>
+            `;
+          })
+          .join("");
+      });
+    }
+
+    function startRaceMovement(room) {
+      if (raceTimer) return;
+      const slot = room.players?.[me.id];
+      if (!slot) return;
+
+      const rarityObj = RARITIES.find((r) => r.key === slot.racer?.rarity) || RARITIES[0];
+      const hiddenBonus = 0.92 + ((Number(slot._hiddenPower || 10)) % 20) * 0.01;
+      let progress = Number(slot.progress || 0);
+
+      raceTimer = setInterval(async () => {
+        if (progress >= 100) {
+          clearInterval(raceTimer);
+          raceTimer = null;
+          return;
+        }
+        const step = (Math.random() * 6.5 + 3.5) * rarityObj.mult * hiddenBonus;
+        progress = Math.min(100, Number((progress + step).toFixed(1)));
+        const updates = { [`rooms/${room.id}/players/${me.id}/progress`]: progress };
+        if (progress >= 100) {
+          updates[`rooms/${room.id}/players/${me.id}/finishedAt`] = Date.now();
+        }
+        try { await update(ref(db), updates); } catch (_) {}
+      }, 350);
+    }
+
+    document.getElementById("leave-room-btn").addEventListener("click", async () => {
+      if (!currentRoomId) return;
+      const roomId = currentRoomId;
+      if (raceTimer) { clearInterval(raceTimer); raceTimer = null; }
+      if (roomUnsub) { roomUnsub(); roomUnsub = null; }
+      currentRoomId = null;
+      document.getElementById("race-card").style.display = "none";
+
+      const snap = await get(ref(db, `rooms/${roomId}`));
+      if (snap.exists()) {
+        const room = snap.val();
+        if (room.hostId === me.id || room.status === "finished") {
+          await remove(ref(db, `rooms/${roomId}`));
+        } else {
+          await remove(ref(db, `rooms/${roomId}/players/${me.id}`));
+        }
+      }
     });
-  };
-});
 
-// Сброс
-document.getElementById("btn-reset").onclick = () => {
-  if (!confirm("Сбросить весь прогресс фермы?")) return;
-  state = defaultState();
-  saveState();
-  renderAll();
-};
+    // Списки открытых комнат 1x1 и 1x4
+    onValue(ref(db, "rooms"), (snapshot) => {
+      const r1x1 = [];
+      const r1x4 = [];
+      snapshot.forEach((child) => {
+        const val = child.val();
+        if (!val || val.status !== "waiting") return;
+        const count = Object.keys(val.players || {}).length;
+        if (count >= val.maxPlayers) return;
+        if (val.mode === "1x1") r1x1.push({ ...val, count });
+        if (val.mode === "1x4") r1x4.push({ ...val, count });
+      });
 
-// Авто-тик фермы каждую секунду
-setInterval(() => {
-  const now = Date.now();
-  const elapsed = (now - state.lastTick) / 1000;
-  state.lastTick = now;
-  simulateFarmTime(elapsed);
-  saveState();
-  renderAll();
-}, 1000);
+      renderRoomsList("rooms-1x1-list", r1x1, "1×1");
+      renderRoomsList("rooms-1x4-list", r1x4, "1×4");
+    });
 
-const initialElapsed = (Date.now() - state.lastTick) / 1000;
-simulateFarmTime(initialElapsed);
-state.lastTick = Date.now();
-saveState();
-renderAll();
-</script>
+    function renderRoomsList(containerId, rooms, label) {
+      const el = document.getElementById(containerId);
+      if (!rooms.length) {
+        el.innerHTML = `<div class="item-row" style="color:#9aa7bd;">Открытых комнат ${label} пока нет</div>`;
+        return;
+      }
+      el.innerHTML = rooms
+        .map((r) => `
+          <div class="item-row">
+            <div>
+              <strong>${label}</strong> · ${r.count}/${r.maxPlayers} игроков · <span class="pill">${escapeHtml(formatBet(r.bet))}</span>
+            </div>
+            <button type="button" class="primary" data-join="${r.id}">Войти</button>
+          </div>
+        `)
+        .join("");
+
+      el.querySelectorAll("[data-join]").forEach((btn) => {
+        btn.addEventListener("click", () => joinRoom(btn.getAttribute("data-join")));
+      });
+    }
+
+    // Топ по балансу в реальном времени
+    const topQuery = query(ref(db, "leaderboard"), orderByChild("balance"), limitToLast(10));
+    onValue(topQuery, (snapshot) => {
+      const list = [];
+      snapshot.forEach((child) => {
+        const v = child.val();
+        if (v) list.push(v);
+      });
+      list.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+
+      const topEl = document.getElementById("balance-top-list");
+      if (!list.length) {
+        topEl.innerHTML = `<div class="item-row" style="color:#9aa7bd;">Пока пусто</div>`;
+        return;
+      }
+
+      topEl.innerHTML = list
+        .map((p, idx) => `
+          <div class="item-row">
+            <div>
+              <strong>#${idx + 1} ${escapeHtml(p.name)}</strong> · <span style="color:#9aa7bd;">🥚 ${Number(p.eggs || 0)}</span>
+            </div>
+            <strong>🪙 ${Number(p.balance || 0).toLocaleString("ru-RU")}</strong>
+          </div>
+        `)
+        .join("");
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    renderFarmUI();
+    syncBalanceToFirebase().catch(() => {});
+  </script>
 </body>
 </html>
