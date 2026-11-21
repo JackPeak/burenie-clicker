@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Глубинный Кликер — Кувалда и Отдых</title>
+  <title>Глубинный Кликер — Рандом камни, Печка и Прокачка</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -38,7 +38,7 @@
     }
 
     body {
-      padding-bottom: 84px;
+      padding-bottom: 88px;
     }
 
     .app {
@@ -169,6 +169,15 @@
       font-size: 12px;
       font-weight: 800;
       margin-bottom: 6px;
+      gap: 8px;
+    }
+
+    .rarity-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .hp-bar {
@@ -189,7 +198,7 @@
     .tap-arena {
       position: relative;
       width: 100%;
-      min-height: 315px;
+      min-height: 300px;
       border-radius: 18px;
       background:
         radial-gradient(circle at 50% 56%, rgba(245, 158, 11, 0.15), transparent 62%),
@@ -223,7 +232,20 @@
       color: #fffbeb;
     }
 
-    /* Визуальный автокликер (правый маятниковый боёк) */
+    .tool-tier-pill {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #e2e8f0;
+      z-index: 5;
+    }
+
     .autohammer-rig {
       position: absolute;
       right: 14px;
@@ -243,7 +265,7 @@
     }
 
     .autohammer-rig.swinging .autohammer-pivot {
-      animation: autoHammerStrike 0.75s cubic-bezier(0.35, 0.05, 0.7, 0.95) infinite;
+      animation: autoHammerStrike var(--auto-speed, 0.75s) cubic-bezier(0.35, 0.05, 0.7, 0.95) infinite;
     }
 
     @keyframes autoHammerStrike {
@@ -253,25 +275,23 @@
       100% { transform: rotate(28deg); }
     }
 
-    /* Визуальная кувалда игрока (бьёт при тапе) */
     .sledgehammer-rig {
       position: absolute;
       left: 14px;
-      top: 44px;
+      top: 46px;
       width: 108px;
       height: 136px;
       pointer-events: none;
       z-index: 6;
       transform-origin: 22px 118px;
-      transform: rotate(-28deg);
+      transform: rotate(-28deg) scale(var(--tool-scale, 0.8));
       transition: transform 0.08s ease-out;
     }
 
     .sledgehammer-rig.hit {
-      transform: rotate(34deg) translate(10px, 8px);
+      transform: rotate(34deg) translate(10px, 8px) scale(var(--tool-scale, 0.8));
     }
 
-    /* Сам камень */
     .rock-stage {
       position: relative;
       z-index: 3;
@@ -352,7 +372,7 @@
       position: absolute;
       pointer-events: none;
       z-index: 9;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       color: #fde047;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
@@ -392,12 +412,72 @@
 
     .rate-val {
       margin-top: 3px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       color: #fef08a;
     }
 
-    /* Улучшения */
+    .bottom-leaderboard {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .lb-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #fde68a;
+    }
+
+    .lb-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lb-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.34);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .lb-row.me {
+      background: rgba(234, 88, 12, 0.24);
+      border-color: rgba(251, 146, 60, 0.75);
+      color: #fff7ed;
+    }
+
+    .lb-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lb-rank {
+      width: 22px;
+      text-align: center;
+      color: var(--amber);
+      font-weight: 900;
+    }
+
+    .lb-score {
+      color: #4ade80;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Списки Улучшений, Печки, Склада, Топа */
     .list-wrap {
       padding: 12px;
       display: flex;
@@ -405,7 +485,7 @@
       gap: 10px;
     }
 
-    .upgrade-card {
+    .upgrade-card, .furnace-card {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -440,27 +520,76 @@
       color: var(--muted);
     }
 
-    .upgrade-btn {
+    .upgrade-next-tier {
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #7dd3fc;
+    }
+
+    .cost-breakdown {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cost-pill {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 7px;
+      background: rgba(0, 0, 0, 0.36);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .cost-pill.ok {
+      border-color: rgba(74, 222, 128, 0.55);
+      color: #bbf7d0;
+    }
+
+    .cost-pill.lack {
+      border-color: rgba(248, 113, 113, 0.55);
+      color: #fecaca;
+    }
+
+    .upgrade-btn, .smelt-btn {
       margin-top: 10px;
       width: 100%;
       border: none;
       border-radius: 9px;
       padding: 10px 12px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 900;
       cursor: pointer;
       background: linear-gradient(180deg, var(--green-light), var(--green));
       color: #052e16;
     }
 
-    .upgrade-btn.res-mode {
-      background: linear-gradient(180deg, #38bdf8, #0284c7);
-      color: #062030;
+    .smelt-btn.fire {
+      background: linear-gradient(180deg, #fb923c, #ea580c);
+      color: #ffffff;
     }
 
-    .upgrade-btn:disabled {
+    .upgrade-btn:disabled, .smelt-btn:disabled {
       opacity: 0.35;
       cursor: not-allowed;
+    }
+
+    .smelt-progress-wrap {
+      margin-top: 8px;
+      background: #140f0c;
+      border: 1px solid #452715;
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+    }
+
+    .smelt-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ea580c, #fbbf24);
+      transition: width 0.15s linear;
     }
 
     /* Склад */
@@ -488,6 +617,15 @@
     .sell-all-btn:disabled {
       opacity: 0.38;
       cursor: not-allowed;
+    }
+
+    .section-subhead {
+      font-size: 12px;
+      font-weight: 900;
+      color: #fde68a;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-top: 2px;
     }
 
     .ore-card {
@@ -558,6 +696,25 @@
       cursor: not-allowed;
     }
 
+    .top-banner-card {
+      background: linear-gradient(135deg, #3b2412, #221710);
+      border: 1px solid #78350f;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .top-banner-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fde68a;
+    }
+
+    .top-banner-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     .footer-reset {
       display: flex;
       justify-content: flex-end;
@@ -574,7 +731,6 @@
       cursor: pointer;
     }
 
-    /* Нижнее меню */
     .bottom-nav {
       position: fixed;
       left: 0;
@@ -583,26 +739,27 @@
       z-index: 30;
       background: rgba(20, 18, 16, 0.96);
       border-top: 2px solid var(--border);
-      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
     }
 
     .nav-grid {
       max-width: 520px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
     }
 
     .nav-btn {
       background: #26211e;
       border: 1px solid var(--border);
       color: var(--muted);
-      border-radius: 9px;
-      padding: 9px 6px;
-      font-size: 12px;
+      border-radius: 8px;
+      padding: 8px 2px;
+      font-size: 10px;
       font-weight: 800;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .nav-btn.active {
@@ -617,7 +774,7 @@
     <header class="top-hud">
       <div class="hud-row">
         <div class="stat-chip">🪙 <span id="hudCoins">0</span></div>
-        <div class="stat-chip">⛏️ Ур. <span id="hudRigLvl">1</span></div>
+        <div class="stat-chip">💥 <span id="hudStonesBroken">0</span> кам.</div>
         <div class="stat-chip" id="hudStorage">0 / 1 200 кг</div>
       </div>
 
@@ -631,12 +788,16 @@
       <div class="alert-box hidden" id="alertBox"></div>
     </header>
 
-    <!-- Экран 1: Кликер с кувалдой, автокликером и разрушением камня -->
+    <!-- Экран 1: Кликер + рандом камни + топ игроков снизу -->
     <section id="view-clicker">
       <div class="clicker-screen">
         <div class="vein-card">
           <div class="vein-top">
-            <span id="stoneTitle">Камень #1 • Поверхность</span>
+            <span id="stoneTitle">Камень #1 • Глиняный камень</span>
+            <span class="rarity-badge" id="stoneRarityBadge">Обычный</span>
+          </div>
+          <div class="vein-top" style="margin-bottom: 6px; color: var(--muted);">
+            <span id="stoneDropHint">Ресурсы: Глина, Камень</span>
             <span id="stoneHpText">220 / 220 HP</span>
           </div>
           <div class="hp-bar">
@@ -646,20 +807,17 @@
 
         <div class="tap-arena" id="tapArena">
           <div class="arena-status-tag" id="arenaStatusTag">🔨 В работе</div>
+          <div class="tool-tier-pill" id="toolTierPill">Маленький молоток</div>
 
-          <!-- Визуальная кувалда игрока -->
           <div class="sledgehammer-rig" id="sledgehammerRig">
             <svg width="108" height="136" viewBox="0 0 108 136" fill="none">
-              <!-- Рукоять -->
-              <line x1="22" y1="118" x2="72" y2="34" stroke="#b45309" stroke-width="8" stroke-linecap="round" />
-              <line x1="22" y1="118" x2="72" y2="34" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
-              <!-- Боёк кувалды -->
-              <rect x="52" y="14" width="44" height="24" rx="5" transform="rotate(28 52 14)" fill="#64748b" stroke="#0f172a" stroke-width="3" />
-              <rect x="82" y="26" width="12" height="22" rx="3" transform="rotate(28 82 26)" fill="#94a3b8" stroke="#0f172a" stroke-width="2.5" />
+              <line x1="24" y1="118" x2="70" y2="38" stroke="#b45309" stroke-width="7.5" stroke-linecap="round" />
+              <line x1="24" y1="118" x2="70" y2="38" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" />
+              <rect id="hammerHeadMain" x="54" y="18" width="38" height="20" rx="5" transform="rotate(28 54 18)" fill="#94a3b8" stroke="#0f172a" stroke-width="3" />
+              <rect id="hammerHeadTip" x="78" y="28" width="11" height="18" rx="3" transform="rotate(28 78 28)" fill="#cbd5e1" stroke="#0f172a" stroke-width="2.4" />
             </svg>
           </div>
 
-          <!-- Визуальный автокликер -->
           <div class="autohammer-rig" id="autohammerRig">
             <div class="autohammer-pivot">
               <line x1="64" y1="16" x2="26" y2="88" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
@@ -671,39 +829,45 @@
           <div class="rock-stage">
             <button class="rock-tap-btn" id="tapRockBtn" type="button">
               <svg width="146" height="122" viewBox="0 0 146 122" fill="none">
-                <polygon points="24,104 12,62 38,22 84,12 128,34 136,82 104,110 56,112" fill="#78716c" stroke="#1c1917" stroke-width="4" />
+                <polygon id="rockBodyPoly" points="24,104 12,62 38,22 84,12 128,34 136,82 104,110 56,112" fill="#78716c" stroke="#1c1917" stroke-width="4" />
                 <polygon points="38,22 84,12 106,42 62,52 24,54" fill="#a8a29e" opacity="0.72" />
                 <polygon points="84,12 128,34 108,64 74,48" fill="#57534e" opacity="0.65" />
-                <!-- Трещины появляются по мере потери HP -->
                 <g id="rockCracks" stroke="#1c1917" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity="0">
                   <polyline points="78,24 68,48 82,64 70,88" />
                   <polyline points="68,48 46,58" />
                   <polyline points="82,64 106,72" />
                 </g>
-                <!-- Рудные вкрапления -->
                 <circle cx="48" cy="78" r="6" fill="#fbbf24" stroke="#451a03" stroke-width="1.5" />
                 <circle cx="96" cy="88" r="5" fill="#38bdf8" stroke="#082f49" stroke-width="1.5" />
               </svg>
-              <span class="rock-caption">УДАР КУВАЛДОЙ</span>
-              <span class="rock-sub" id="tapPowerHint">−22 HP • +18 кг (−4 ⚡)</span>
+              <span class="rock-caption" id="tapActionLabel">УДАР МОЛОТКОМ</span>
+              <span class="rock-sub" id="tapPowerHint">−16 HP • +8 кг (−4 ⚡)</span>
             </button>
           </div>
         </div>
 
         <div class="rates-grid">
           <div class="rate-box">
-            <div class="rate-title">Удар кувалдой</div>
-            <div class="rate-val" id="statTap">−22 HP / +18 кг</div>
+            <div class="rate-title">Инструмент (Ур. <span id="toolLvlLabel">1</span>)</div>
+            <div class="rate-val" id="statTap">−16 HP / +8 кг</div>
           </div>
           <div class="rate-box">
             <div class="rate-title">Автокликер</div>
-            <div class="rate-val" id="statAuto">−14 HP / +10 кг/сек</div>
+            <div class="rate-val" id="statAuto">−14 HP / +10 кг/с</div>
           </div>
+        </div>
+
+        <div class="bottom-leaderboard">
+          <div class="lb-header">
+            <span>🏆 Топ по сломанным камням</span>
+            <span id="myRankSummary">Место: —</span>
+          </div>
+          <div class="lb-list" id="homeLeaderboardList"></div>
         </div>
       </div>
     </section>
 
-    <!-- Экран 2: Улучшения -->
+    <!-- Экран 2: Улучшения (включая прокачку появления камней/шансов и оплату монетами + ресами/слитками) -->
     <section class="hidden" id="view-upgrades">
       <div class="list-wrap" id="upgradesList"></div>
       <div class="footer-reset">
@@ -711,7 +875,12 @@
       </div>
     </section>
 
-    <!-- Экран 3: Склад -->
+    <!-- Экран 3: Печка для плавки руды в слитки перед крафтом -->
+    <section class="hidden" id="view-furnace">
+      <div class="list-wrap" id="furnaceList"></div>
+    </section>
+
+    <!-- Экран 4: Склад (руды + переплавленные слитки) -->
     <section class="hidden" id="view-storage">
       <div class="storage-top">
         <strong style="font-size: 14px;" id="storageSummary">Склад</strong>
@@ -719,13 +888,26 @@
       </div>
       <div class="list-wrap" id="storageList"></div>
     </section>
+
+    <!-- Экран 5: Отдельное меню Топа игроков -->
+    <section class="hidden" id="view-top">
+      <div class="list-wrap">
+        <div class="top-banner-card">
+          <div class="top-banner-title">🏆 Рейтинг разрушителей камней</div>
+          <div class="top-banner-sub">Позиции считаются по количеству полностью разбитых камней.</div>
+        </div>
+        <div class="lb-list" id="fullLeaderboardList"></div>
+      </div>
+    </section>
   </div>
 
   <nav class="bottom-nav">
     <div class="nav-grid">
       <button class="nav-btn active" data-view="clicker" type="button">🔨 Кликер</button>
-      <button class="nav-btn" data-view="upgrades" type="button">⬆️ Улучшения</button>
+      <button class="nav-btn" data-view="upgrades" type="button">⬆️ Улучш.</button>
+      <button class="nav-btn" data-view="furnace" type="button">🔥 Печка</button>
       <button class="nav-btn" data-view="storage" type="button">📦 Склад</button>
+      <button class="nav-btn" data-view="top" type="button">🏆 Топ</button>
     </div>
   </nav>
 
@@ -735,34 +917,112 @@
       window.Telegram.WebApp.expand();
     }
 
-    const SAVE_KEY = "deep_clicker_hard_v1";
+    const SAVE_KEY = "deep_clicker_rng_furnace_v1";
 
     const ORES = [
-      { id: "dirt", name: "Земля", pricePerTon: 14, color: "#9a3412", accent: "#c2410c" },
-      { id: "stone", name: "Камень", pricePerTon: 32, color: "#9ca3af", accent: "#4b5563" },
-      { id: "coal", name: "Уголь", pricePerTon: 72, color: "#334155", accent: "#64748b" },
-      { id: "iron", name: "Железная руда", pricePerTon: 150, color: "#78716c", accent: "#e7e5e4" },
-      { id: "gold", name: "Золотая руда", pricePerTon: 330, color: "#854d0e", accent: "#facc15" }
+      { id: "dirt", name: "Глина", pricePerTon: 14, color: "#9a3412", accent: "#c2410c", isMetal: false },
+      { id: "stone", name: "Камень", pricePerTon: 32, color: "#9ca3af", accent: "#4b5563", isMetal: false },
+      { id: "coal", name: "Уголь", pricePerTon: 72, color: "#334155", accent: "#64748b", isMetal: false },
+      { id: "iron_ore", name: "Железная руда", pricePerTon: 150, color: "#78716c", accent: "#e7e5e4", isMetal: true, ingotId: "iron_ingot", ingotName: "Железный слиток", smeltSec: 3.0 },
+      { id: "gold_ore", name: "Золотая руда", pricePerTon: 330, color: "#854d0e", accent: "#facc15", isMetal: true, ingotId: "gold_ingot", ingotName: "Золотой слиток", smeltSec: 4.5 }
     ];
 
-    const LAYERS = [
-      { name: "Поверхность", pool: [["dirt", 0.75], ["stone", 0.25]] },
-      { name: "Каменный пласт", pool: [["dirt", 0.28], ["stone", 0.52], ["coal", 0.2]] },
-      { name: "Угольная жила", pool: [["stone", 0.24], ["coal", 0.48], ["iron", 0.28]] },
-      { name: "Рудный разлом", pool: [["coal", 0.2], ["iron", 0.5], ["gold", 0.3]] },
-      { name: "Глубокое ядро", pool: [["iron", 0.35], ["gold", 0.65]] }
+    const INGOTS = [
+      { id: "iron_ingot", name: "Железный слиток", pricePerTon: 290, color: "#cbd5e1", accent: "#f8fafc" },
+      { id: "gold_ingot", name: "Золотой слиток", pricePerTon: 640, color: "#eab308", accent: "#fef08a" }
     ];
 
-    function oreSvg(ore) {
+    /* Типы рандомных камней: шансы спавна зависят от прокачки stoneSpawn */
+    const STONE_TYPES = [
+      {
+        id: "clay_rock",
+        name: "Глиняный камень",
+        rarity: "Обычный",
+        color: "#78716c",
+        badgeBg: "rgba(120,113,108,0.3)",
+        badgeColor: "#e7e5e4",
+        hpMult: 1.0,
+        baseWeight: 100,
+        spawnGain: -0.9,
+        drops: [
+          { id: "dirt", w: 68 },
+          { id: "stone", w: 26 },
+          { id: "coal", w: 6 },
+          { id: "iron_ore", w: 0 },
+          { id: "gold_ore", w: 0 }
+        ]
+      },
+      {
+        id: "coal_vein",
+        name: "Угольный камень",
+        rarity: "Необычный",
+        color: "#475569",
+        badgeBg: "rgba(56,189,248,0.2)",
+        badgeColor: "#7dd3fc",
+        hpMult: 1.25,
+        baseWeight: 42,
+        spawnGain: 0.45,
+        drops: [
+          { id: "dirt", w: 25 },
+          { id: "stone", w: 35 },
+          { id: "coal", w: 32 },
+          { id: "iron_ore", w: 8 },
+          { id: "gold_ore", w: 0 }
+        ]
+      },
+      {
+        id: "iron_vein",
+        name: "Железорудный камень",
+        rarity: "Редкий",
+        color: "#64748b",
+        badgeBg: "rgba(250,204,21,0.2)",
+        badgeColor: "#fde047",
+        hpMult: 1.55,
+        baseWeight: 18,
+        spawnGain: 0.35,
+        drops: [
+          { id: "dirt", w: 10 },
+          { id: "stone", w: 24 },
+          { id: "coal", w: 24 },
+          { id: "iron_ore", w: 34 },
+          { id: "gold_ore", w: 8 }
+        ]
+      },
+      {
+        id: "gold_core",
+        name: "Золотоносный монолит",
+        rarity: "Эпический",
+        color: "#92400e",
+        badgeBg: "rgba(245,158,11,0.28)",
+        badgeColor: "#fbbf24",
+        hpMult: 1.95,
+        baseWeight: 7,
+        spawnGain: 0.25,
+        drops: [
+          { id: "dirt", w: 4 },
+          { id: "stone", w: 12 },
+          { id: "coal", w: 18 },
+          { id: "iron_ore", w: 28 },
+          { id: "gold_ore", w: 38 }
+        ]
+      }
+    ];
+
+    const RIVAL_PLAYERS = [
+      { name: "БурМастер", stones: 4 },
+      { name: "Камнелом_99", stones: 11 },
+      { name: "РудокопКЗ", stones: 24 },
+      { name: "ГлубокийСлой", stones: 48 },
+      { name: "ТитанКайла", stones: 95 },
+      { name: "КорольНедр", stones: 180 }
+    ];
+
+    function itemSvg(color, accent) {
       return `<svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-        <polygon points="5,20 5,10 13,5 23,9 22,20 14,23" fill="${ore.color}" stroke="#1c1917" stroke-width="2" />
-        <circle cx="12" cy="13" r="3" fill="${ore.accent}" />
-        <circle cx="18" cy="16" r="2.2" fill="${ore.accent}" />
+        <polygon points="5,20 5,10 13,5 23,9 22,20 14,23" fill="${color}" stroke="#1c1917" stroke-width="2" />
+        <circle cx="12" cy="13" r="3" fill="${accent}" />
+        <circle cx="18" cy="16" r="2.2" fill="${accent}" />
       </svg>`;
-    }
-
-    function getStoneMaxHp(stoneIndex) {
-      return Math.round(220 * Math.pow(1.36, stoneIndex - 1));
     }
 
     function defaultState() {
@@ -771,15 +1031,55 @@
         energy: 80,
         resting: false,
         stoneIndex: 1,
+        stonesBroken: 0,
+        stoneTypeId: "clay_rock",
+        stoneMaxHp: 220,
         stoneHp: 220,
-        inv: { dirt: 0, stone: 0, coal: 0, iron: 0, gold: 0 },
+        inv: {
+          dirt: 0,
+          stone: 0,
+          coal: 0,
+          iron_ore: 0,
+          gold_ore: 0,
+          iron_ingot: 0,
+          gold_ingot: 0
+        },
         upgrades: {
           hammer: 1,
           autoclicker: 1,
+          stoneSpawn: 1,
           stamina: 1,
           warehouse: 1
+        },
+        furnace: {
+          activeOreId: null,
+          batchKg: 0,
+          progressSec: 0,
+          requiredSec: 3
         }
       };
+    }
+
+    function getStoneTypeById(id) {
+      return STONE_TYPES.find((t) => t.id === id) || STONE_TYPES[0];
+    }
+
+    function rollRandomStoneType(spawnLvl) {
+      const weights = STONE_TYPES.map((t) => {
+        const mult = Math.max(0.25, 1 + (spawnLvl - 1) * t.spawnGain);
+        return Math.max(1, t.baseWeight * mult);
+      });
+      const total = weights.reduce((a, b) => a + b, 0);
+      let r = Math.random() * total;
+      for (let i = 0; i < STONE_TYPES.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return STONE_TYPES[i];
+      }
+      return STONE_TYPES[0];
+    }
+
+    function calcStoneMaxHp(stoneIndex, stoneType) {
+      return Math.round(220 * Math.pow(1.32, stoneIndex - 1) * stoneType.hpMult);
     }
 
     function loadState() {
@@ -787,16 +1087,23 @@
       try {
         const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}");
         const sIdx = Math.max(1, Number(raw.stoneIndex) || 1);
-        const maxHp = getStoneMaxHp(sIdx);
+        const stType = getStoneTypeById(raw.stoneTypeId);
+        const maxHp = typeof raw.stoneMaxHp === "number" && raw.stoneMaxHp > 0
+          ? raw.stoneMaxHp
+          : calcStoneMaxHp(sIdx, stType);
         const hp = typeof raw.stoneHp === "number" ? Math.max(0, Math.min(maxHp, raw.stoneHp)) : maxHp;
         return {
           ...base,
           ...raw,
           stoneIndex: sIdx,
+          stonesBroken: Math.max(0, Number(raw.stonesBroken) || 0),
+          stoneTypeId: stType.id,
+          stoneMaxHp: maxHp,
           stoneHp: hp,
           resting: Boolean(raw.resting),
           inv: { ...base.inv, ...(raw.inv || {}) },
-          upgrades: { ...base.upgrades, ...(raw.upgrades || {}) }
+          upgrades: { ...base.upgrades, ...(raw.upgrades || {}) },
+          furnace: { ...base.furnace, ...(raw.furnace || {}) }
         };
       } catch {
         return base;
@@ -824,6 +1131,24 @@
       return `${Math.round(kg).toLocaleString("ru-RU")} кг`;
     }
 
+    function getHammerTierInfo() {
+      const lvl = state.upgrades.hammer;
+      const stage = Math.floor((lvl - 1) / 10);
+      if (stage === 0) {
+        return { stage: 0, name: "Маленький молоток", shortAction: "УДАР МОЛОТКОМ", scale: 0.78, headColor: "#94a3b8", tipColor: "#cbd5e1", kgMult: 0.55 };
+      }
+      if (stage === 1) {
+        return { stage: 1, name: "Стальной молоток", shortAction: "УДАР МОЛОТКОМ II", scale: 0.92, headColor: "#38bdf8", tipColor: "#bae6fd", kgMult: 1.0 };
+      }
+      if (stage === 2) {
+        return { stage: 2, name: "Тяжёлая кувалда", shortAction: "УДАР КУВАЛДОЙ", scale: 1.06, headColor: "#f59e0b", tipColor: "#fef08a", kgMult: 1.55 };
+      }
+      if (stage === 3) {
+        return { stage: 3, name: "Боевая кувалда", shortAction: "МОЩНЫЙ УДАР", scale: 1.18, headColor: "#ef4444", tipColor: "#fecaca", kgMult: 2.2 };
+      }
+      return { stage, name: `Сверхмолот МК-${stage + 1}`, shortAction: "ПРОБОЙНОЙ УДАР", scale: 1.26, headColor: "#a855f7", tipColor: "#f3e8ff", kgMult: 2.2 + (stage - 3) * 0.65 };
+    }
+
     function getMaxEnergy() {
       return 80 + (state.upgrades.stamina - 1) * 25;
     }
@@ -837,53 +1162,94 @@
     }
 
     function getTapDamage() {
-      return Math.round(22 * Math.pow(1.42, state.upgrades.hammer - 1));
+      const tier = getHammerTierInfo();
+      return Math.round(16 * Math.pow(1.34, state.upgrades.hammer - 1) * (0.85 + tier.stage * 0.15));
     }
 
     function getTapKg() {
-      return Math.round(18 * Math.pow(1.38, state.upgrades.hammer - 1));
+      const tier = getHammerTierInfo();
+      return Math.max(2, Math.round(14 * Math.pow(1.34, state.upgrades.hammer - 1) * tier.kgMult));
     }
 
     function getTapEnergyCost() {
       return 4;
     }
 
+    function getAutoRestFactor() {
+      return state.resting ? 0.42 : 1.0;
+    }
+
     function getAutoDps() {
-      return Math.round(14 * Math.pow(1.38, state.upgrades.autoclicker - 1));
+      const base = 14 * Math.pow(1.42, state.upgrades.autoclicker - 1);
+      return Math.max(2, Math.round(base * getAutoRestFactor()));
     }
 
     function getAutoKgPerSec() {
-      return Math.round(10 * Math.pow(1.35, state.upgrades.autoclicker - 1));
+      const base = 10 * Math.pow(1.38, state.upgrades.autoclicker - 1);
+      return Math.max(1, Math.round(base * getAutoRestFactor()));
     }
 
-    function getOverallLevel() {
-      return Math.min(
-        state.upgrades.hammer,
-        state.upgrades.autoclicker,
-        state.upgrades.stamina,
-        state.upgrades.warehouse
-      );
+    /* Прокачка появления камней: повышает шанс редких камней и редких руд */
+    function getRareDropBoost() {
+      return Math.min(0.65, (state.upgrades.stoneSpawn - 1) * 0.045);
     }
 
-    function getCurrentLayer() {
-      const idx = Math.min(LAYERS.length - 1, Math.floor((state.stoneIndex - 1) / 3));
-      return LAYERS[idx];
-    }
-
-    /* Более жёсткая прогрессия цен и переход на ресурсы со 2-го уровня */
+    /* Каждые 2 уровня улучшения требуют слитки (если они уже доступны), иначе породу/руду */
     function getUpgradeCost(key) {
       const lvl = state.upgrades[key];
-      const base = { hammer: 35, autoclicker: 50, stamina: 40, warehouse: 45 }[key];
-      if (lvl < 2) {
-        return { type: "coins", coins: base };
+      const baseCoins = { hammer: 100, autoclicker: 120, stoneSpawn: 110, stamina: 100, warehouse: 110 }[key];
+      const coins = Math.round(baseCoins * Math.pow(1.45, lvl - 1));
+
+      if (lvl >= 3 && (state.inv.iron_ingot || 0) >= 20) {
+        const ingot = lvl >= 6 && (state.inv.gold_ingot || 0) >= 15 ? INGOTS[1] : INGOTS[0];
+        const kg = Math.round(35 * Math.pow(1.35, lvl - 3));
+        return { coins, kind: "ingot", item: ingot, kg };
       }
-      const ore = ORES[Math.min(ORES.length - 1, lvl - 2)];
-      const kg = Math.round(260 * Math.pow(1.58, lvl - 2));
-      return { type: "ore", ore, kg };
+
+      const oreIdx = Math.min(2, Math.floor((lvl - 1) / 2));
+      const ore = ORES[oreIdx];
+      const baseKg = { hammer: 140, autoclicker: 160, stoneSpawn: 140, stamina: 130, warehouse: 150 }[key];
+      const kg = Math.round(baseKg * Math.pow(1.42, lvl - 1));
+      return { coins, kind: "ore", item: ore, kg };
     }
 
-    function getSalePrice(ore, kg) {
-      return Math.max(1, Math.round((kg / 1000) * ore.pricePerTon));
+    function getSalePrice(pricePerTon, kg) {
+      return Math.max(1, Math.round((kg / 1000) * pricePerTon));
+    }
+
+    function buildLeaderboard() {
+      const tgUser = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe
+        ? window.Telegram.WebApp.initDataUnsafe.user
+        : null;
+      const myName = tgUser && tgUser.first_name ? `${tgUser.first_name} (Вы)` : "Вы";
+
+      const combined = [
+        ...RIVAL_PLAYERS.map((p) => ({ name: p.name, stones: p.stones, isMe: false })),
+        { name: myName, stones: state.stonesBroken, isMe: true }
+      ];
+
+      combined.sort((a, b) => b.stones - a.stones);
+      return combined;
+    }
+
+    function renderLeaderboards() {
+      const board = buildLeaderboard();
+      const myIdx = board.findIndex((item) => item.isMe);
+      document.getElementById("myRankSummary").textContent =
+        myIdx >= 0 ? `Место: #${myIdx + 1} из ${board.length}` : "Место: —";
+
+      const makeHtml = (items) => items.map((row, idx) => `
+        <div class="lb-row ${row.isMe ? "me" : ""}">
+          <div class="lb-left">
+            <span class="lb-rank">#${idx + 1}</span>
+            <span>${row.name}</span>
+          </div>
+          <span class="lb-score">${fmtNum(row.stones)} кам.</span>
+        </div>
+      `).join("");
+
+      document.getElementById("homeLeaderboardList").innerHTML = makeHtml(board.slice(0, 5));
+      document.getElementById("fullLeaderboardList").innerHTML = makeHtml(board);
     }
 
     function spawnShards(count, isBreak) {
@@ -936,18 +1302,26 @@
       if (free <= 0) return 0;
 
       const taken = Math.min(free, kgAmount);
-      const layer = getCurrentLayer();
-      const roll = Math.random();
-      let acc = 0;
-      let chosenId = layer.pool[layer.pool.length - 1][0];
+      const stoneType = getStoneTypeById(state.stoneTypeId);
+      const boost = getRareDropBoost();
 
-      for (const [id, w] of layer.pool) {
-        acc += w;
-        if (roll <= acc) {
-          chosenId = id;
+      const weights = stoneType.drops.map((d, idx) => {
+        if (idx >= 2) return Math.max(2, d.w * (1 + boost * 2.2));
+        return Math.max(1, d.w * (1 - boost * 0.65));
+      });
+
+      const total = weights.reduce((a, b) => a + b, 0);
+      let roll = Math.random() * total;
+      let chosenId = stoneType.drops[0].id;
+
+      for (let i = 0; i < stoneType.drops.length; i++) {
+        roll -= weights[i];
+        if (roll <= 0) {
+          chosenId = stoneType.drops[i].id;
           break;
         }
       }
+
       state.inv[chosenId] = (state.inv[chosenId] || 0) + taken;
       return taken;
     }
@@ -963,13 +1337,17 @@
       btn.classList.add("shatter");
       spawnShards(18, true);
 
-      const bonusCoins = Math.round(12 * Math.pow(1.22, state.stoneIndex - 1));
+      state.stonesBroken += 1;
+      const bonusCoins = Math.round(18 * Math.pow(1.24, state.stoneIndex - 1));
       state.coins += bonusCoins;
-      spawnPopup(`РАЗРУШЕН! +${bonusCoins} 🪙`, rect.width * 0.5, rect.height * 0.45, "#4ade80");
+      spawnPopup(`КАМЕНЬ СЛОМАН! +${bonusCoins} 🪙`, rect.width * 0.5, rect.height * 0.45, "#4ade80");
 
       setTimeout(() => {
         state.stoneIndex += 1;
-        state.stoneHp = getStoneMaxHp(state.stoneIndex);
+        const nextType = rollRandomStoneType(state.upgrades.stoneSpawn);
+        state.stoneTypeId = nextType.id;
+        state.stoneMaxHp = calcStoneMaxHp(state.stoneIndex, nextType);
+        state.stoneHp = state.stoneMaxHp;
         btn.classList.remove("shatter");
         isShattering = false;
         saveState();
@@ -978,7 +1356,7 @@
     }
 
     function applyDamageToStone(dmg, kgGain, popX, popY, fromTap) {
-      if (isShattering || state.resting || getUsedKg() >= getStorageCapKg()) return;
+      if (isShattering || getUsedKg() >= getStorageCapKg()) return;
 
       const gained = collectOre(kgGain);
       state.stoneHp = Math.max(0, state.stoneHp - dmg);
@@ -1008,6 +1386,22 @@
       setTimeout(() => rig.classList.remove("hit"), 120);
     }
 
+    function startSmelt(ore) {
+      const f = state.furnace;
+      if (f.activeOreId) return;
+      const avail = state.inv[ore.id] || 0;
+      const batch = Math.min(avail, 100);
+      if (batch <= 0) return;
+
+      state.inv[ore.id] -= batch;
+      f.activeOreId = ore.id;
+      f.batchKg = batch;
+      f.progressSec = 0;
+      f.requiredSec = ore.smeltSec || 3;
+      saveState();
+      render();
+    }
+
     function render() {
       const maxE = getMaxEnergy();
       state.energy = Math.min(maxE, Math.max(0, state.energy));
@@ -1022,10 +1416,11 @@
       const capKg = getStorageCapKg();
       const isFull = usedKg >= capKg;
       const tapCost = getTapEnergyCost();
-      const canWork = !state.resting && !isFull && state.energy > 0;
+      const canTap = !state.resting && !isFull && state.energy >= tapCost && !isShattering;
+      const autoActive = !isFull && !isShattering;
 
       document.getElementById("hudCoins").textContent = fmtNum(state.coins);
-      document.getElementById("hudRigLvl").textContent = String(getOverallLevel());
+      document.getElementById("hudStonesBroken").textContent = fmtNum(state.stonesBroken);
 
       const hudStorage = document.getElementById("hudStorage");
       hudStorage.textContent = `${fmtKg(usedKg)} / ${fmtKg(capKg)}`;
@@ -1043,32 +1438,58 @@
       alertBox.classList.remove("hidden", "rest", "full");
       if (isFull) {
         alertBox.classList.add("full");
-        alertBox.textContent = "Склад заполнен! Продайте породу и руду, чтобы продолжить добычу.";
+        alertBox.textContent = "Склад заполнен! Продайте породу или переплавьте/продайте ресурсы.";
       } else if (state.resting) {
         alertBox.classList.add("rest");
-        alertBox.textContent = "Усталость! Кувалда и автокликер отдыхают сами — дождитесь восстановления до 65%.";
+        alertBox.textContent = "Кувалда на отдыхе — автокликер продолжает бить медленнее, силы восстанавливаются сами.";
       } else {
         alertBox.classList.add("hidden");
       }
 
-      const layer = getCurrentLayer();
-      const maxHp = getStoneMaxHp(state.stoneIndex);
-      document.getElementById("stoneTitle").textContent = `Камень #${state.stoneIndex} • ${layer.name}`;
+      const stoneType = getStoneTypeById(state.stoneTypeId);
+      const maxHp = Math.max(1, state.stoneMaxHp);
+      document.getElementById("stoneTitle").textContent = `Камень #${state.stoneIndex} • ${stoneType.name}`;
       document.getElementById("stoneHpText").textContent = `${Math.ceil(state.stoneHp)} / ${maxHp} HP`;
-      const hpPct = Math.max(0, Math.min(100, (state.stoneHp / Math.max(1, maxHp)) * 100));
+
+      const badge = document.getElementById("stoneRarityBadge");
+      badge.textContent = stoneType.rarity;
+      badge.style.background = stoneType.badgeBg;
+      badge.style.color = stoneType.badgeColor;
+
+      const dropNames = stoneType.drops
+        .filter((d) => d.w > 0)
+        .slice(0, 3)
+        .map((d) => ORES.find((o) => o.id === d.id)?.name || d.id);
+      document.getElementById("stoneDropHint").textContent = `Ресурсы: ${dropNames.join(", ")}`;
+      document.getElementById("rockBodyPoly").setAttribute("fill", stoneType.color);
+
+      const hpPct = Math.max(0, Math.min(100, (state.stoneHp / maxHp) * 100));
       document.getElementById("stoneHpFill").style.width = `${hpPct}%`;
 
-      // Визуальные трещины на камне по мере падения HP
       const crackOpacity = hpPct > 75 ? 0 : hpPct > 45 ? 0.55 : 1;
       document.getElementById("rockCracks").setAttribute("opacity", String(crackOpacity));
 
       const statusTag = document.getElementById("arenaStatusTag");
       statusTag.classList.toggle("resting", state.resting || isFull);
       if (isFull) statusTag.textContent = "📦 Склад полон";
-      else if (state.resting) statusTag.textContent = "💤 Отдых";
+      else if (state.resting) statusTag.textContent = "💤 Отдых (авто медленно)";
       else statusTag.textContent = "🔨 В работе";
 
-      document.getElementById("autohammerRig").classList.toggle("swinging", canWork);
+      const tier = getHammerTierInfo();
+      document.getElementById("toolTierPill").textContent = tier.name;
+      document.getElementById("tapActionLabel").textContent = tier.shortAction;
+      document.getElementById("toolLvlLabel").textContent = String(state.upgrades.hammer);
+
+      const sledgeRig = document.getElementById("sledgehammerRig");
+      sledgeRig.style.setProperty("--tool-scale", String(tier.scale));
+      document.getElementById("hammerHeadMain").setAttribute("fill", tier.headColor);
+      document.getElementById("hammerHeadTip").setAttribute("fill", tier.tipColor);
+
+      const autoRig = document.getElementById("autohammerRig");
+      autoRig.classList.toggle("swinging", autoActive);
+      const baseSwing = Math.max(0.32, 0.78 - (state.upgrades.autoclicker - 1) * 0.05);
+      const swingSec = state.resting ? baseSwing * 1.9 : baseSwing;
+      autoRig.style.setProperty("--auto-speed", `${swingSec.toFixed(2)}s`);
 
       const tapDmg = getTapDamage();
       const tapKg = getTapKg();
@@ -1077,16 +1498,45 @@
 
       document.getElementById("tapPowerHint").textContent = `−${tapDmg} HP • +${fmtKg(tapKg)} (−${tapCost} ⚡)`;
       document.getElementById("statTap").textContent = `−${tapDmg} HP / +${fmtKg(tapKg)}`;
-      document.getElementById("statAuto").textContent = `−${autoDps} HP / +${fmtKg(autoKg)}/сек`;
+      document.getElementById("statAuto").textContent = state.resting
+        ? `медленно: −${autoDps} HP / +${fmtKg(autoKg)}/с`
+        : `−${autoDps} HP / +${fmtKg(autoKg)}/с`;
 
-      document.getElementById("tapRockBtn").disabled = !canWork || state.energy < tapCost || isShattering;
+      document.getElementById("tapRockBtn").disabled = !canTap;
 
-      // Улучшения (строго последовательно, с 2-го уровня — за ресурсы со склада)
+      const nextTierLvl = (Math.floor((state.upgrades.hammer - 1) / 10) + 1) * 10;
+      const rarePct = Math.round(getRareDropBoost() * 100);
       const upDefs = [
-        { key: "hammer", title: "Тяжёлая кувалда", effect: `Урон: −${tapDmg} HP • Добыча: +${fmtKg(tapKg)} за удар` },
-        { key: "autoclicker", title: "Автокликер-молот", effect: `Автоудар: −${autoDps} HP и +${fmtKg(autoKg)}/сек` },
-        { key: "stamina", title: "Выносливость", effect: `Запас сил: ${maxE} (дольше работа без отдыха)` },
-        { key: "warehouse", title: "Складской отсек", effect: `Лимит склада: ${fmtKg(capKg)}` }
+        {
+          key: "hammer",
+          title: tier.name,
+          effect: `Урон: −${tapDmg} HP • Добыча: +${fmtKg(tapKg)} за удар`,
+          nextTier: `Новый инструмент на ${nextTierLvl} ур.`
+        },
+        {
+          key: "stoneSpawn",
+          title: "Георазведка камней",
+          effect: `Повышает шанс редких камней и редких руд: +${rarePct}%`,
+          nextTier: "Выше шанс угольных, железных и золотых камней"
+        },
+        {
+          key: "autoclicker",
+          title: "Автокликер-молот",
+          effect: `Работает всегда (медленнее при отдыхе): −${autoDps} HP и +${fmtKg(autoKg)}/с`,
+          nextTier: ""
+        },
+        {
+          key: "stamina",
+          title: "Выносливость",
+          effect: `Запас сил: ${maxE} (дольше работа без отдыха)`,
+          nextTier: ""
+        },
+        {
+          key: "warehouse",
+          title: "Складской отсек",
+          effect: `Лимит склада: ${fmtKg(capKg)}`,
+          nextTier: ""
+        }
       ];
 
       const upList = document.getElementById("upgradesList");
@@ -1095,13 +1545,11 @@
       upDefs.forEach((u) => {
         const lvl = state.upgrades[u.key];
         const req = getUpgradeCost(u.key);
-        const canBuy = req.type === "coins"
-          ? state.coins >= req.coins
-          : (state.inv[req.ore.id] || 0) >= req.kg;
-
-        const btnText = req.type === "coins"
-          ? `Открыть ${lvl + 1} ур. за ${fmtNum(req.coins)} 🪙`
-          : `Скрафтить ${lvl + 1} ур. за ${fmtKg(req.kg)} (${req.ore.name})`;
+        const haveCoins = state.coins >= req.coins;
+        const haveKg = state.inv[req.item.id] || 0;
+        const haveRes = haveKg >= req.kg;
+        const canBuy = haveCoins && haveRes;
+        const resIcon = req.kind === "ingot" ? "🏅" : "📦";
 
         const card = document.createElement("div");
         card.className = "upgrade-card";
@@ -1111,19 +1559,24 @@
             <span class="lvl-badge">Уровень ${lvl}</span>
           </div>
           <div class="upgrade-effect">${u.effect}</div>
-          <button class="upgrade-btn ${req.type === "ore" ? "res-mode" : ""}" type="button" ${canBuy ? "" : "disabled"}>
-            ${btnText}
+          ${u.nextTier ? `<div class="upgrade-next-tier">${u.nextTier}</div>` : ""}
+          <div class="cost-breakdown">
+            <span class="cost-pill ${haveCoins ? "ok" : "lack"}">
+              🪙 ${fmtNum(state.coins)} / ${fmtNum(req.coins)}
+            </span>
+            <span class="cost-pill ${haveRes ? "ok" : "lack"}">
+              ${resIcon} ${req.item.name}: ${fmtKg(haveKg)} / ${fmtKg(req.kg)}
+            </span>
+          </div>
+          <button class="upgrade-btn" type="button" ${canBuy ? "" : "disabled"}>
+            Улучшить до ${lvl + 1} ур. (${fmtNum(req.coins)} 🪙 + ${fmtKg(req.kg)} ${req.item.name})
           </button>
         `;
 
         card.querySelector("button").addEventListener("click", () => {
-          if (req.type === "coins") {
-            if (state.coins < req.coins) return;
-            state.coins -= req.coins;
-          } else {
-            if ((state.inv[req.ore.id] || 0) < req.kg) return;
-            state.inv[req.ore.id] -= req.kg;
-          }
+          if (state.coins < req.coins || (state.inv[req.item.id] || 0) < req.kg) return;
+          state.coins -= req.coins;
+          state.inv[req.item.id] -= req.kg;
           state.upgrades[u.key] += 1;
           saveState();
           render();
@@ -1132,54 +1585,114 @@
         upList.appendChild(card);
       });
 
-      // Склад: продажа по отдельности и продать всё
+      /* Печка: плавка руды в слитки перед крафтом */
+      const furnaceList = document.getElementById("furnaceList");
+      furnaceList.innerHTML = "";
+
+      const metalOres = ORES.filter((o) => o.isMetal);
+      metalOres.forEach((ore) => {
+        const avail = state.inv[ore.id] || 0;
+        const ingotsCount = state.inv[ore.ingotId] || 0;
+        const isSmeltingThis = state.furnace.activeOreId === ore.id;
+        const anySmelting = Boolean(state.furnace.activeOreId);
+        const pctSmelt = isSmeltingThis
+          ? Math.min(100, Math.round((state.furnace.progressSec / Math.max(0.1, state.furnace.requiredSec)) * 100))
+          : 0;
+        const batchToStart = Math.min(avail, 100);
+
+        const fCard = document.createElement("div");
+        fCard.className = "furnace-card";
+        fCard.innerHTML = `
+          <div class="upgrade-head">
+            <div class="upgrade-name">🔥 ${ore.name} → ${ore.ingotName}</div>
+            <span class="lvl-badge">Слитков: ${fmtKg(ingotsCount)}</span>
+          </div>
+          <div class="upgrade-effect">
+            В наличии руды: <strong>${fmtKg(avail)}</strong> • Время плавки партии: ${ore.smeltSec} сек.
+          </div>
+          ${isSmeltingThis ? `
+            <div class="upgrade-next-tier">Плавка партии ${fmtKg(state.furnace.batchKg)}: ${pctSmelt}%</div>
+            <div class="smelt-progress-wrap">
+              <div class="smelt-progress-fill" style="width:${pctSmelt}%"></div>
+            </div>
+          ` : ""}
+          <button class="smelt-btn fire" type="button" ${(!anySmelting && batchToStart > 0) ? "" : "disabled"}>
+            ${isSmeltingThis
+              ? `Идёт плавка (${pctSmelt}%)...`
+              : batchToStart > 0
+                ? `Заплавить ${fmtKg(batchToStart)} в слитки`
+                : `Нет ${ore.name.toLowerCase()} на складе`}
+          </button>
+        `;
+
+        fCard.querySelector("button").addEventListener("click", () => startSmelt(ore));
+        furnaceList.appendChild(fCard);
+      });
+
+      /* Склад */
       let totalSell = 0;
       ORES.forEach((ore) => {
         const kg = state.inv[ore.id] || 0;
-        if (kg > 0) totalSell += getSalePrice(ore, kg);
+        if (kg > 0) totalSell += getSalePrice(ore.pricePerTon, kg);
+      });
+      INGOTS.forEach((ing) => {
+        const kg = state.inv[ing.id] || 0;
+        if (kg > 0) totalSell += getSalePrice(ing.pricePerTon, kg);
       });
 
       const pct = Math.min(100, Math.round((usedKg / Math.max(1, capKg)) * 100));
       document.getElementById("storageSummary").textContent = `Склад • ${pct}% (${fmtKg(usedKg)} / ${fmtKg(capKg)})`;
 
       const sellAllBtn = document.getElementById("sellAllBtn");
-      sellAllBtn.disabled = usedKg <= 0;
-      sellAllBtn.textContent = usedKg > 0 ? `Продать всё (${fmtNum(totalSell)} 🪙)` : "Продать всё";
+      sellAllBtn.disabled = totalSell <= 0;
+      sellAllBtn.textContent = totalSell > 0 ? `Продать всё (${fmtNum(totalSell)} 🪙)` : "Продать всё";
 
       const stList = document.getElementById("storageList");
       stList.innerHTML = "";
 
-      ORES.forEach((ore) => {
-        const kg = state.inv[ore.id] || 0;
-        const price = kg > 0 ? getSalePrice(ore, kg) : 0;
+      const addStockSection = (title, items) => {
+        const head = document.createElement("div");
+        head.className = "section-subhead";
+        head.textContent = title;
+        stList.appendChild(head);
 
-        const row = document.createElement("div");
-        row.className = "ore-card";
-        row.innerHTML = `
-          <div class="ore-head">
-            <div class="ore-icon">${oreSvg(ore)}</div>
-            <div class="ore-title">${ore.name}</div>
-            <div class="ore-price">${ore.pricePerTon} 🪙 / т</div>
-          </div>
-          <div class="ore-foot">
-            <span class="ore-kg">${fmtKg(kg)}</span>
-            <button class="sell-one-btn" type="button" ${kg > 0 ? "" : "disabled"}>
-              ${kg > 0 ? `Продать (${fmtNum(price)} 🪙)` : "Продать"}
-            </button>
-          </div>
-        `;
+        items.forEach((item) => {
+          const kg = state.inv[item.id] || 0;
+          const price = kg > 0 ? getSalePrice(item.pricePerTon, kg) : 0;
 
-        row.querySelector("button").addEventListener("click", () => {
-          const cur = state.inv[ore.id] || 0;
-          if (cur <= 0) return;
-          state.coins += getSalePrice(ore, cur);
-          state.inv[ore.id] = 0;
-          saveState();
-          render();
+          const row = document.createElement("div");
+          row.className = "ore-card";
+          row.innerHTML = `
+            <div class="ore-head">
+              <div class="ore-icon">${itemSvg(item.color, item.accent)}</div>
+              <div class="ore-title">${item.name}</div>
+              <div class="ore-price">${item.pricePerTon} 🪙 / т</div>
+            </div>
+            <div class="ore-foot">
+              <span class="ore-kg">${fmtKg(kg)}</span>
+              <button class="sell-one-btn" type="button" ${kg > 0 ? "" : "disabled"}>
+                ${kg > 0 ? `Продать (${fmtNum(price)} 🪙)` : "Продать"}
+              </button>
+            </div>
+          `;
+
+          row.querySelector("button").addEventListener("click", () => {
+            const cur = state.inv[item.id] || 0;
+            if (cur <= 0) return;
+            state.coins += getSalePrice(item.pricePerTon, cur);
+            state.inv[item.id] = 0;
+            saveState();
+            render();
+          });
+
+          stList.appendChild(row);
         });
+      };
 
-        stList.appendChild(row);
-      });
+      addStockSection("Породы и руды", ORES);
+      addStockSection("Переплавленные слитки", INGOTS);
+
+      renderLeaderboards();
     }
 
     document.getElementById("tapRockBtn").addEventListener("click", (e) => {
@@ -1204,8 +1717,15 @@
       ORES.forEach((ore) => {
         const kg = state.inv[ore.id] || 0;
         if (kg > 0) {
-          sum += getSalePrice(ore, kg);
+          sum += getSalePrice(ore.pricePerTon, kg);
           state.inv[ore.id] = 0;
+        }
+      });
+      INGOTS.forEach((ing) => {
+        const kg = state.inv[ing.id] || 0;
+        if (kg > 0) {
+          sum += getSalePrice(ing.pricePerTon, kg);
+          state.inv[ing.id] = 0;
         }
       });
       if (sum > 0) {
@@ -1226,7 +1746,7 @@
         document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const view = btn.dataset.view;
-        ["clicker", "upgrades", "storage"].forEach((id) => {
+        ["clicker", "upgrades", "furnace", "storage", "top"].forEach((id) => {
           document.getElementById(`view-${id}`).classList.toggle("hidden", id !== view);
         });
       });
@@ -1238,15 +1758,44 @@
       ticks += 1;
       const maxE = getMaxEnergy();
 
+      /* Обновление плавки в печке */
+      if (state.furnace.activeOreId) {
+        state.furnace.progressSec += dt;
+        if (state.furnace.progressSec >= state.furnace.requiredSec) {
+          const ore = ORES.find((o) => o.id === state.furnace.activeOreId);
+          if (ore && ore.ingotId) {
+            state.inv[ore.ingotId] = (state.inv[ore.ingotId] || 0) + state.furnace.batchKg;
+          }
+          state.furnace.activeOreId = null;
+          state.furnace.batchKg = 0;
+          state.furnace.progressSec = 0;
+        }
+      }
+
       if (state.resting) {
-        // Во время отдыха энергия восстанавливается сама без кнопок
         state.energy = Math.min(maxE, state.energy + 7.5 * dt);
         if (state.energy >= maxE * 0.65) {
           state.resting = false;
         }
-      } else if (getUsedKg() < getStorageCapKg() && state.energy > 0 && !isShattering) {
-        // Автокликер тратит силы и бьёт по камню
-        state.energy = Math.max(0, state.energy - 2.4 * dt);
+        if (getUsedKg() < getStorageCapKg() && !isShattering) {
+          const arena = document.getElementById("tapArena");
+          const rect = arena.getBoundingClientRect();
+          const showPop = ticks % 6 === 0;
+          applyDamageToStone(
+            getAutoDps() * dt,
+            getAutoKgPerSec() * dt,
+            showPop ? rect.width * 0.56 : null,
+            showPop ? rect.height * 0.58 : null,
+            false
+          );
+        }
+      } else if (getUsedKg() < getStorageCapKg() && !isShattering) {
+        if (state.energy > 0) {
+          state.energy = Math.max(0, state.energy - 2.2 * dt);
+          if (state.energy <= 0) {
+            state.resting = true;
+          }
+        }
         const arena = document.getElementById("tapArena");
         const rect = arena.getBoundingClientRect();
         const showPop = ticks % 3 === 0;
@@ -1257,12 +1806,8 @@
           showPop ? rect.height * 0.58 : null,
           false
         );
-        if (state.energy <= 0) {
-          state.resting = true;
-        }
       } else {
-        // Лёгкое пассивное восстановление, когда добыча стоит
-        state.energy = Math.min(maxE, state.energy + 2.2 * dt);
+        state.energy = Math.min(maxE, state.energy + 2.5 * dt);
       }
 
       if (ticks % 4 === 0) saveState();
