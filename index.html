@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Глубинный Кликер</title>
+  <title>Глубинный Кликер — Кувалда и Отдых</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -19,6 +19,7 @@
       --green: #22c55e;
       --green-light: #4ade80;
       --red: #ef4444;
+      --amber: #fbbf24;
     }
 
     * {
@@ -52,7 +53,7 @@
       display: none !important;
     }
 
-    /* Верхняя панель */
+    /* Верхняя HUD-панель */
     .top-hud {
       position: sticky;
       top: 0;
@@ -66,19 +67,20 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .stat-chip {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.45);
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.48);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 10px;
-      padding: 6px 10px;
-      font-size: 13px;
+      padding: 6px 9px;
+      font-size: 12px;
       font-weight: 800;
+      white-space: nowrap;
     }
 
     .energy-wrap {
@@ -91,7 +93,7 @@
     .energy-track {
       position: relative;
       flex: 1;
-      height: 22px;
+      height: 24px;
       background: #0f172a;
       border: 2px solid #334155;
       border-radius: 999px;
@@ -102,7 +104,11 @@
       height: 100%;
       width: 100%;
       background: linear-gradient(90deg, #0284c7, #38bdf8);
-      transition: width 0.14s ease-out;
+      transition: width 0.14s ease-out, background 0.25s ease;
+    }
+
+    .energy-fill.resting {
+      background: linear-gradient(90deg, #b45309, #f59e0b);
     }
 
     .energy-label {
@@ -114,26 +120,8 @@
       font-size: 11px;
       font-weight: 900;
       color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
       font-variant-numeric: tabular-nums;
-    }
-
-    .refill-btn {
-      background: linear-gradient(180deg, #fb923c, #ea580c);
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 3px 0 #9a3412;
-      white-space: nowrap;
-    }
-
-    .refill-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 #9a3412;
     }
 
     .alert-box {
@@ -145,10 +133,10 @@
       text-align: center;
     }
 
-    .alert-box.warn {
-      background: rgba(2, 132, 199, 0.22);
-      border: 1px solid rgba(56, 189, 248, 0.6);
-      color: #bae6fd;
+    .alert-box.rest {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(251, 191, 36, 0.65);
+      color: #fde68a;
     }
 
     .alert-box.full {
@@ -159,11 +147,11 @@
 
     /* Главный экран кликера */
     .clicker-screen {
-      padding: 14px 12px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .vein-card {
@@ -183,88 +171,192 @@
       margin-bottom: 6px;
     }
 
-    .vein-bar {
-      height: 10px;
+    .hp-bar {
+      height: 12px;
       background: #120e0c;
       border-radius: 999px;
       overflow: hidden;
       border: 1px solid #3b312b;
     }
 
-    .vein-bar-fill {
+    .hp-bar-fill {
       height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #f59e0b, #fbbf24);
-      transition: width 0.2s ease;
+      width: 100%;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #4ade80);
+      transition: width 0.14s ease-out;
     }
 
     .tap-arena {
       position: relative;
       width: 100%;
-      min-height: 290px;
+      min-height: 315px;
       border-radius: 18px;
       background:
-        radial-gradient(circle at 50% 42%, rgba(245, 158, 11, 0.16), transparent 62%),
-        linear-gradient(180deg, #2b1b12 0%, #1d130d 100%);
+        radial-gradient(circle at 50% 56%, rgba(245, 158, 11, 0.15), transparent 62%),
+        linear-gradient(180deg, #2a1a11 0%, #1a110c 100%);
       border: 2px solid #523828;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 18px 12px;
+      justify-content: flex-end;
+      padding: 16px 12px 18px;
       overflow: hidden;
     }
 
+    .arena-status-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #fde68a;
+      z-index: 5;
+    }
+
+    .arena-status-tag.resting {
+      background: rgba(180, 83, 9, 0.85);
+      border-color: #fbbf24;
+      color: #fffbeb;
+    }
+
+    /* Визуальный автокликер (правый маятниковый боёк) */
+    .autohammer-rig {
+      position: absolute;
+      right: 14px;
+      top: 56px;
+      width: 78px;
+      height: 120px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .autohammer-pivot {
+      position: relative;
+      width: 78px;
+      height: 120px;
+      transform-origin: 64px 16px;
+      transform: rotate(22deg);
+    }
+
+    .autohammer-rig.swinging .autohammer-pivot {
+      animation: autoHammerStrike 0.75s cubic-bezier(0.35, 0.05, 0.7, 0.95) infinite;
+    }
+
+    @keyframes autoHammerStrike {
+      0% { transform: rotate(28deg); }
+      45% { transform: rotate(-38deg); }
+      58% { transform: rotate(-32deg); }
+      100% { transform: rotate(28deg); }
+    }
+
+    /* Визуальная кувалда игрока (бьёт при тапе) */
+    .sledgehammer-rig {
+      position: absolute;
+      left: 14px;
+      top: 44px;
+      width: 108px;
+      height: 136px;
+      pointer-events: none;
+      z-index: 6;
+      transform-origin: 22px 118px;
+      transform: rotate(-28deg);
+      transition: transform 0.08s ease-out;
+    }
+
+    .sledgehammer-rig.hit {
+      transform: rotate(34deg) translate(10px, 8px);
+    }
+
+    /* Сам камень */
+    .rock-stage {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 40px;
+    }
+
     .rock-tap-btn {
-      width: 166px;
-      height: 166px;
-      border-radius: 36px;
-      border: 3px solid #78350f;
-      background: linear-gradient(165deg, #4b382f 0%, #2b1f1a 65%, #1c1411 100%);
-      box-shadow:
-        0 10px 0 #120c0a,
-        0 16px 28px rgba(0, 0, 0, 0.65);
+      position: relative;
+      width: 174px;
+      height: 162px;
+      border: none;
+      background: transparent;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
       cursor: pointer;
-      transition: transform 0.07s ease, box-shadow 0.07s ease;
+      transition: transform 0.07s ease;
     }
 
-    .rock-tap-btn:active {
-      transform: translateY(6px) scale(0.97);
-      box-shadow:
-        0 4px 0 #120c0a,
-        0 8px 16px rgba(0, 0, 0, 0.55);
+    .rock-tap-btn.impact {
+      transform: scale(0.92) rotate(-2deg);
+    }
+
+    .rock-tap-btn.shatter {
+      animation: rockShatterAnim 0.34s ease-out forwards;
+    }
+
+    @keyframes rockShatterAnim {
+      0% { transform: scale(1); opacity: 1; }
+      55% { transform: scale(1.15); opacity: 0.7; }
+      100% { transform: scale(0.45); opacity: 0; }
     }
 
     .rock-tap-btn:disabled {
-      opacity: 0.45;
       cursor: not-allowed;
+      opacity: 0.72;
     }
 
-    .tap-caption {
-      font-size: 13px;
+    .rock-caption {
+      margin-top: 4px;
+      font-size: 12px;
       font-weight: 900;
       color: #fde68a;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
     }
 
-    .tap-sub {
+    .rock-sub {
       font-size: 11px;
-      font-weight: 700;
-      color: #d6c7bc;
+      font-weight: 800;
+      color: #e7e5e4;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    }
+
+    .shard-piece {
+      position: absolute;
+      pointer-events: none;
+      z-index: 8;
+      border-radius: 3px;
+      animation: shardBurst var(--dur, 0.75s) cubic-bezier(0.16, 0.82, 0.35, 1) forwards;
+    }
+
+    @keyframes shardBurst {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx, 40px), var(--ty, 45px)) scale(0.45) rotate(var(--rot, 220deg));
+      }
     }
 
     .float-popup {
       position: absolute;
       pointer-events: none;
+      z-index: 9;
       font-size: 14px;
       font-weight: 900;
       color: #fde047;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
-      animation: popUp 0.85s ease-out forwards;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+      animation: popUp 0.82s ease-out forwards;
     }
 
     @keyframes popUp {
@@ -274,7 +366,7 @@
       }
       100% {
         opacity: 0;
-        transform: translate(-50%, -58px) scale(1.08);
+        transform: translate(-50%, -56px) scale(1.08);
       }
     }
 
@@ -526,53 +618,86 @@
       <div class="hud-row">
         <div class="stat-chip">🪙 <span id="hudCoins">0</span></div>
         <div class="stat-chip">⛏️ Ур. <span id="hudRigLvl">1</span></div>
-        <div class="stat-chip" id="hudStorage">0 / 2 000 кг</div>
+        <div class="stat-chip" id="hudStorage">0 / 1 200 кг</div>
       </div>
 
       <div class="energy-wrap">
         <div class="energy-track">
           <div class="energy-fill" id="energyFill"></div>
-          <div class="energy-label" id="energyLabel">100 / 100</div>
+          <div class="energy-label" id="energyLabel">80 / 80</div>
         </div>
-        <button class="refill-btn" id="refillBtn" type="button">⚡ Заряд</button>
       </div>
 
       <div class="alert-box hidden" id="alertBox"></div>
     </header>
 
-    <!-- Экран 1: Кликер -->
+    <!-- Экран 1: Кликер с кувалдой, автокликером и разрушением камня -->
     <section id="view-clicker">
       <div class="clicker-screen">
         <div class="vein-card">
           <div class="vein-top">
-            <span id="layerTitle">Слой 1 • Поверхность</span>
-            <span id="layerProgressText">0 / 5 000 кг</span>
+            <span id="stoneTitle">Камень #1 • Поверхность</span>
+            <span id="stoneHpText">220 / 220 HP</span>
           </div>
-          <div class="vein-bar">
-            <div class="vein-bar-fill" id="layerBarFill"></div>
+          <div class="hp-bar">
+            <div class="hp-bar-fill" id="stoneHpFill"></div>
           </div>
         </div>
 
         <div class="tap-arena" id="tapArena">
-          <button class="rock-tap-btn" id="tapRockBtn" type="button">
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-              <polygon points="14,48 10,24 26,10 50,16 54,42 36,54" fill="#9ca3af" stroke="#1f2937" stroke-width="3.5" />
-              <polygon points="26,10 50,16 34,28 20,22" fill="#d1d5db" opacity="0.65" />
-              <circle cx="38" cy="36" r="5" fill="#fbbf24" />
+          <div class="arena-status-tag" id="arenaStatusTag">🔨 В работе</div>
+
+          <!-- Визуальная кувалда игрока -->
+          <div class="sledgehammer-rig" id="sledgehammerRig">
+            <svg width="108" height="136" viewBox="0 0 108 136" fill="none">
+              <!-- Рукоять -->
+              <line x1="22" y1="118" x2="72" y2="34" stroke="#b45309" stroke-width="8" stroke-linecap="round" />
+              <line x1="22" y1="118" x2="72" y2="34" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+              <!-- Боёк кувалды -->
+              <rect x="52" y="14" width="44" height="24" rx="5" transform="rotate(28 52 14)" fill="#64748b" stroke="#0f172a" stroke-width="3" />
+              <rect x="82" y="26" width="12" height="22" rx="3" transform="rotate(28 82 26)" fill="#94a3b8" stroke="#0f172a" stroke-width="2.5" />
             </svg>
-            <span class="tap-caption">ДОБЫТЬ ПОРОДУ</span>
-            <span class="tap-sub" id="tapPowerHint">+25 кг за клик</span>
-          </button>
+          </div>
+
+          <!-- Визуальный автокликер -->
+          <div class="autohammer-rig" id="autohammerRig">
+            <div class="autohammer-pivot">
+              <line x1="64" y1="16" x2="26" y2="88" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+              <circle cx="64" cy="16" r="7" fill="#38bdf8" stroke="#0f172a" stroke-width="2.5" />
+              <rect x="10" y="82" width="26" height="18" rx="4" transform="rotate(26 10 82)" fill="#ea580c" stroke="#1c1917" stroke-width="2.5" />
+            </div>
+          </div>
+
+          <div class="rock-stage">
+            <button class="rock-tap-btn" id="tapRockBtn" type="button">
+              <svg width="146" height="122" viewBox="0 0 146 122" fill="none">
+                <polygon points="24,104 12,62 38,22 84,12 128,34 136,82 104,110 56,112" fill="#78716c" stroke="#1c1917" stroke-width="4" />
+                <polygon points="38,22 84,12 106,42 62,52 24,54" fill="#a8a29e" opacity="0.72" />
+                <polygon points="84,12 128,34 108,64 74,48" fill="#57534e" opacity="0.65" />
+                <!-- Трещины появляются по мере потери HP -->
+                <g id="rockCracks" stroke="#1c1917" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity="0">
+                  <polyline points="78,24 68,48 82,64 70,88" />
+                  <polyline points="68,48 46,58" />
+                  <polyline points="82,64 106,72" />
+                </g>
+                <!-- Рудные вкрапления -->
+                <circle cx="48" cy="78" r="6" fill="#fbbf24" stroke="#451a03" stroke-width="1.5" />
+                <circle cx="96" cy="88" r="5" fill="#38bdf8" stroke="#082f49" stroke-width="1.5" />
+              </svg>
+              <span class="rock-caption">УДАР КУВАЛДОЙ</span>
+              <span class="rock-sub" id="tapPowerHint">−22 HP • +18 кг (−4 ⚡)</span>
+            </button>
+          </div>
         </div>
 
         <div class="rates-grid">
           <div class="rate-box">
-            <div class="rate-title">За клик</div>
-            <div class="rate-val" id="statTap">+25 кг</div>
+            <div class="rate-title">Удар кувалдой</div>
+            <div class="rate-val" id="statTap">−22 HP / +18 кг</div>
           </div>
           <div class="rate-box">
-            <div class="rate-title">Автодобыча</div>
-            <div class="rate-val" id="statAuto">+10 кг/сек</div>
+            <div class="rate-title">Автокликер</div>
+            <div class="rate-val" id="statAuto">−14 HP / +10 кг/сек</div>
           </div>
         </div>
       </div>
@@ -598,7 +723,7 @@
 
   <nav class="bottom-nav">
     <div class="nav-grid">
-      <button class="nav-btn active" data-view="clicker" type="button">⛏️ Кликер</button>
+      <button class="nav-btn active" data-view="clicker" type="button">🔨 Кликер</button>
       <button class="nav-btn" data-view="upgrades" type="button">⬆️ Улучшения</button>
       <button class="nav-btn" data-view="storage" type="button">📦 Склад</button>
     </div>
@@ -610,22 +735,22 @@
       window.Telegram.WebApp.expand();
     }
 
-    const SAVE_KEY = "deep_clicker_save_v1";
+    const SAVE_KEY = "deep_clicker_hard_v1";
 
     const ORES = [
-      { id: "dirt", name: "Земля", pricePerTon: 15, color: "#9a3412", accent: "#c2410c" },
-      { id: "stone", name: "Камень", pricePerTon: 35, color: "#9ca3af", accent: "#4b5563" },
-      { id: "coal", name: "Уголь", pricePerTon: 75, color: "#334155", accent: "#64748b" },
-      { id: "iron", name: "Железная руда", pricePerTon: 155, color: "#78716c", accent: "#e7e5e4" },
-      { id: "gold", name: "Золотая руда", pricePerTon: 340, color: "#854d0e", accent: "#facc15" }
+      { id: "dirt", name: "Земля", pricePerTon: 14, color: "#9a3412", accent: "#c2410c" },
+      { id: "stone", name: "Камень", pricePerTon: 32, color: "#9ca3af", accent: "#4b5563" },
+      { id: "coal", name: "Уголь", pricePerTon: 72, color: "#334155", accent: "#64748b" },
+      { id: "iron", name: "Железная руда", pricePerTon: 150, color: "#78716c", accent: "#e7e5e4" },
+      { id: "gold", name: "Золотая руда", pricePerTon: 330, color: "#854d0e", accent: "#facc15" }
     ];
 
     const LAYERS = [
-      { title: "Слой 1 • Поверхность", targetKg: 5000, pool: [["dirt", 0.72], ["stone", 0.28]] },
-      { title: "Слой 2 • Каменный пласт", targetKg: 18000, pool: [["dirt", 0.3], ["stone", 0.5], ["coal", 0.2]] },
-      { title: "Слой 3 • Угольная жила", targetKg: 55000, pool: [["stone", 0.25], ["coal", 0.48], ["iron", 0.27]] },
-      { title: "Слой 4 • Рудный разлом", targetKg: 160000, pool: [["coal", 0.2], ["iron", 0.5], ["gold", 0.3]] },
-      { title: "Слой 5 • Глубокое ядро", targetKg: 450000, pool: [["iron", 0.35], ["gold", 0.65]] }
+      { name: "Поверхность", pool: [["dirt", 0.75], ["stone", 0.25]] },
+      { name: "Каменный пласт", pool: [["dirt", 0.28], ["stone", 0.52], ["coal", 0.2]] },
+      { name: "Угольная жила", pool: [["stone", 0.24], ["coal", 0.48], ["iron", 0.28]] },
+      { name: "Рудный разлом", pool: [["coal", 0.2], ["iron", 0.5], ["gold", 0.3]] },
+      { name: "Глубокое ядро", pool: [["iron", 0.35], ["gold", 0.65]] }
     ];
 
     function oreSvg(ore) {
@@ -636,16 +761,22 @@
       </svg>`;
     }
 
+    function getStoneMaxHp(stoneIndex) {
+      return Math.round(220 * Math.pow(1.36, stoneIndex - 1));
+    }
+
     function defaultState() {
       return {
         coins: 0,
-        energy: 100,
-        minedInLayer: 0,
+        energy: 80,
+        resting: false,
+        stoneIndex: 1,
+        stoneHp: 220,
         inv: { dirt: 0, stone: 0, coal: 0, iron: 0, gold: 0 },
         upgrades: {
-          pickaxe: 1,
-          rig: 1,
-          battery: 1,
+          hammer: 1,
+          autoclicker: 1,
+          stamina: 1,
           warehouse: 1
         }
       };
@@ -655,9 +786,15 @@
       const base = defaultState();
       try {
         const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}");
+        const sIdx = Math.max(1, Number(raw.stoneIndex) || 1);
+        const maxHp = getStoneMaxHp(sIdx);
+        const hp = typeof raw.stoneHp === "number" ? Math.max(0, Math.min(maxHp, raw.stoneHp)) : maxHp;
         return {
           ...base,
           ...raw,
+          stoneIndex: sIdx,
+          stoneHp: hp,
+          resting: Boolean(raw.resting),
           inv: { ...base.inv, ...(raw.inv || {}) },
           upgrades: { ...base.upgrades, ...(raw.upgrades || {}) }
         };
@@ -667,6 +804,7 @@
     }
 
     let state = loadState();
+    let isShattering = false;
 
     function saveState() {
       try {
@@ -687,47 +825,60 @@
     }
 
     function getMaxEnergy() {
-      return 100 + (state.upgrades.battery - 1) * 35;
+      return 80 + (state.upgrades.stamina - 1) * 25;
     }
 
     function getStorageCapKg() {
-      return Math.round(2000 * Math.pow(1.45, state.upgrades.warehouse - 1));
+      return Math.round(1200 * Math.pow(1.38, state.upgrades.warehouse - 1));
     }
 
     function getUsedKg() {
       return Object.values(state.inv).reduce((a, b) => a + (b || 0), 0);
     }
 
+    function getTapDamage() {
+      return Math.round(22 * Math.pow(1.42, state.upgrades.hammer - 1));
+    }
+
     function getTapKg() {
-      return Math.round(25 * Math.pow(1.48, state.upgrades.pickaxe - 1));
+      return Math.round(18 * Math.pow(1.38, state.upgrades.hammer - 1));
+    }
+
+    function getTapEnergyCost() {
+      return 4;
+    }
+
+    function getAutoDps() {
+      return Math.round(14 * Math.pow(1.38, state.upgrades.autoclicker - 1));
     }
 
     function getAutoKgPerSec() {
-      return Math.round(10 * Math.pow(1.42, state.upgrades.rig - 1));
+      return Math.round(10 * Math.pow(1.35, state.upgrades.autoclicker - 1));
     }
 
     function getOverallLevel() {
       return Math.min(
-        state.upgrades.pickaxe,
-        state.upgrades.rig,
-        state.upgrades.battery,
+        state.upgrades.hammer,
+        state.upgrades.autoclicker,
+        state.upgrades.stamina,
         state.upgrades.warehouse
       );
     }
 
     function getCurrentLayer() {
-      const idx = Math.min(LAYERS.length - 1, getOverallLevel() - 1);
+      const idx = Math.min(LAYERS.length - 1, Math.floor((state.stoneIndex - 1) / 3));
       return LAYERS[idx];
     }
 
+    /* Более жёсткая прогрессия цен и переход на ресурсы со 2-го уровня */
     function getUpgradeCost(key) {
       const lvl = state.upgrades[key];
-      const base = { pickaxe: 20, rig: 30, battery: 25, warehouse: 25 }[key];
-      if (lvl < 3) {
-        return { type: "coins", coins: Math.round(base * Math.pow(1.75, lvl - 1)) };
+      const base = { hammer: 35, autoclicker: 50, stamina: 40, warehouse: 45 }[key];
+      if (lvl < 2) {
+        return { type: "coins", coins: base };
       }
-      const ore = ORES[Math.min(ORES.length - 1, lvl - 3)];
-      const kg = Math.round(180 * Math.pow(1.5, lvl - 3));
+      const ore = ORES[Math.min(ORES.length - 1, lvl - 2)];
+      const kg = Math.round(260 * Math.pow(1.58, lvl - 2));
       return { type: "ore", ore, kg };
     }
 
@@ -735,95 +886,207 @@
       return Math.max(1, Math.round((kg / 1000) * ore.pricePerTon));
     }
 
-    function addMinedKg(amount, clientX, clientY) {
-      if (amount <= 0) return;
-      const cap = getStorageCapKg();
-      const used = getUsedKg();
-      const free = Math.max(0, cap - used);
-      if (free <= 0) return;
+    function spawnShards(count, isBreak) {
+      const arena = document.getElementById("tapArena");
+      const rect = arena.getBoundingClientRect();
+      const cx = rect.width * 0.5;
+      const cy = rect.height * 0.64;
 
-      const taken = Math.min(free, amount);
+      for (let i = 0; i < count; i++) {
+        const shard = document.createElement("div");
+        shard.className = "shard-piece";
+        const size = isBreak ? 8 + Math.round(Math.random() * 8) : 6 + Math.round(Math.random() * 5);
+        shard.style.width = `${size}px`;
+        shard.style.height = `${Math.max(5, Math.round(size * 0.75))}px`;
+        shard.style.background = i % 3 === 0 ? "#fbbf24" : i % 2 === 0 ? "#a8a29e" : "#57534e";
+        shard.style.border = "1px solid #1c1917";
+        shard.style.left = `${cx + (Math.random() * 44 - 22)}px`;
+        shard.style.top = `${cy + (Math.random() * 34 - 17)}px`;
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = isBreak ? 55 + Math.random() * 75 : 26 + Math.random() * 42;
+        const tx = Math.round(Math.cos(angle) * dist);
+        const ty = Math.round(Math.sin(angle) * dist - (isBreak ? 18 : 10));
+        shard.style.setProperty("--tx", `${tx}px`);
+        shard.style.setProperty("--ty", `${ty}px`);
+        shard.style.setProperty("--rot", `${Math.round((Math.random() - 0.5) * 480)}deg`);
+        shard.style.setProperty("--dur", `${(isBreak ? 0.85 : 0.55) + Math.random() * 0.25}s`);
+
+        arena.appendChild(shard);
+        setTimeout(() => shard.remove(), 1150);
+      }
+    }
+
+    function spawnPopup(text, x, y, color) {
+      const arena = document.getElementById("tapArena");
+      const rect = arena.getBoundingClientRect();
+      const el = document.createElement("div");
+      el.className = "float-popup";
+      el.textContent = text;
+      if (color) el.style.color = color;
+      el.style.left = `${Math.max(42, Math.min(rect.width - 42, x))}px`;
+      el.style.top = `${Math.max(46, Math.min(rect.height - 34, y))}px`;
+      arena.appendChild(el);
+      setTimeout(() => el.remove(), 840);
+    }
+
+    function collectOre(kgAmount) {
+      if (kgAmount <= 0) return 0;
+      const free = Math.max(0, getStorageCapKg() - getUsedKg());
+      if (free <= 0) return 0;
+
+      const taken = Math.min(free, kgAmount);
       const layer = getCurrentLayer();
       const roll = Math.random();
       let acc = 0;
       let chosenId = layer.pool[layer.pool.length - 1][0];
 
-      for (const [id, weight] of layer.pool) {
-        acc += weight;
+      for (const [id, w] of layer.pool) {
+        acc += w;
         if (roll <= acc) {
           chosenId = id;
           break;
         }
       }
-
       state.inv[chosenId] = (state.inv[chosenId] || 0) + taken;
-      state.minedInLayer += taken;
+      return taken;
+    }
 
-      if (clientX != null && clientY != null) {
-        const arena = document.getElementById("tapArena");
-        const rect = arena.getBoundingClientRect();
-        const popup = document.createElement("div");
-        popup.className = "float-popup";
-        popup.textContent = `+${fmtKg(taken)}`;
-        popup.style.left = `${Math.max(36, Math.min(rect.width - 36, clientX - rect.left))}px`;
-        popup.style.top = `${Math.max(36, Math.min(rect.height - 36, clientY - rect.top))}px`;
-        arena.appendChild(popup);
-        setTimeout(() => popup.remove(), 860);
+    function shatterAndSpawnNextStone() {
+      if (isShattering) return;
+      isShattering = true;
+
+      const btn = document.getElementById("tapRockBtn");
+      const arena = document.getElementById("tapArena");
+      const rect = arena.getBoundingClientRect();
+
+      btn.classList.add("shatter");
+      spawnShards(18, true);
+
+      const bonusCoins = Math.round(12 * Math.pow(1.22, state.stoneIndex - 1));
+      state.coins += bonusCoins;
+      spawnPopup(`РАЗРУШЕН! +${bonusCoins} 🪙`, rect.width * 0.5, rect.height * 0.45, "#4ade80");
+
+      setTimeout(() => {
+        state.stoneIndex += 1;
+        state.stoneHp = getStoneMaxHp(state.stoneIndex);
+        btn.classList.remove("shatter");
+        isShattering = false;
+        saveState();
+        render();
+      }, 340);
+    }
+
+    function applyDamageToStone(dmg, kgGain, popX, popY, fromTap) {
+      if (isShattering || state.resting || getUsedKg() >= getStorageCapKg()) return;
+
+      const gained = collectOre(kgGain);
+      state.stoneHp = Math.max(0, state.stoneHp - dmg);
+
+      const btn = document.getElementById("tapRockBtn");
+      btn.classList.remove("impact");
+      void btn.offsetWidth;
+      btn.classList.add("impact");
+      setTimeout(() => btn.classList.remove("impact"), 85);
+
+      spawnShards(fromTap ? 5 : 2, false);
+      if (popX != null && popY != null) {
+        const label = gained > 0 ? `−${dmg} HP • +${fmtKg(gained)}` : `−${dmg} HP`;
+        spawnPopup(label, popX, popY, fromTap ? "#fde047" : "#7dd3fc");
       }
+
+      if (state.stoneHp <= 0) {
+        shatterAndSpawnNextStone();
+      }
+    }
+
+    function triggerHammerVisual() {
+      const rig = document.getElementById("sledgehammerRig");
+      rig.classList.remove("hit");
+      void rig.offsetWidth;
+      rig.classList.add("hit");
+      setTimeout(() => rig.classList.remove("hit"), 120);
     }
 
     function render() {
       const maxE = getMaxEnergy();
       state.energy = Math.min(maxE, Math.max(0, state.energy));
 
+      if (state.energy <= 0 && !state.resting) {
+        state.resting = true;
+      } else if (state.resting && state.energy >= maxE * 0.65) {
+        state.resting = false;
+      }
+
       const usedKg = getUsedKg();
       const capKg = getStorageCapKg();
       const isFull = usedKg >= capKg;
-      const tapCost = 2;
+      const tapCost = getTapEnergyCost();
+      const canWork = !state.resting && !isFull && state.energy > 0;
 
       document.getElementById("hudCoins").textContent = fmtNum(state.coins);
       document.getElementById("hudRigLvl").textContent = String(getOverallLevel());
+
       const hudStorage = document.getElementById("hudStorage");
       hudStorage.textContent = `${fmtKg(usedKg)} / ${fmtKg(capKg)}`;
       hudStorage.style.color = isFull ? "#f87171" : "#4ade80";
 
       const ePct = Math.max(0, Math.min(100, (state.energy / Math.max(1, maxE)) * 100));
-      document.getElementById("energyFill").style.width = `${ePct}%`;
-      document.getElementById("energyLabel").textContent = `${Math.floor(state.energy)} / ${maxE}`;
+      const eFill = document.getElementById("energyFill");
+      eFill.style.width = `${ePct}%`;
+      eFill.classList.toggle("resting", state.resting);
+      document.getElementById("energyLabel").textContent = state.resting
+        ? `ОТДЫХ • ${Math.floor(state.energy)} / ${maxE}`
+        : `${Math.floor(state.energy)} / ${maxE}`;
 
       const alertBox = document.getElementById("alertBox");
-      alertBox.classList.remove("hidden", "warn", "full");
+      alertBox.classList.remove("hidden", "rest", "full");
       if (isFull) {
         alertBox.classList.add("full");
-        alertBox.textContent = "Склад заполнен! Перейдите на склад и продайте добытое.";
-      } else if (state.energy < tapCost) {
-        alertBox.classList.add("warn");
-        alertBox.textContent = "Не хватает энергии — нажмите «Заряд» или подождите восстановления.";
+        alertBox.textContent = "Склад заполнен! Продайте породу и руду, чтобы продолжить добычу.";
+      } else if (state.resting) {
+        alertBox.classList.add("rest");
+        alertBox.textContent = "Усталость! Кувалда и автокликер отдыхают сами — дождитесь восстановления до 65%.";
       } else {
         alertBox.classList.add("hidden");
       }
 
       const layer = getCurrentLayer();
-      document.getElementById("layerTitle").textContent = layer.title;
-      const lPct = Math.min(100, Math.round((state.minedInLayer / layer.targetKg) * 100));
-      document.getElementById("layerBarFill").style.width = `${lPct}%`;
-      document.getElementById("layerProgressText").textContent = `${fmtKg(state.minedInLayer)} / ${fmtKg(layer.targetKg)}`;
+      const maxHp = getStoneMaxHp(state.stoneIndex);
+      document.getElementById("stoneTitle").textContent = `Камень #${state.stoneIndex} • ${layer.name}`;
+      document.getElementById("stoneHpText").textContent = `${Math.ceil(state.stoneHp)} / ${maxHp} HP`;
+      const hpPct = Math.max(0, Math.min(100, (state.stoneHp / Math.max(1, maxHp)) * 100));
+      document.getElementById("stoneHpFill").style.width = `${hpPct}%`;
 
+      // Визуальные трещины на камне по мере падения HP
+      const crackOpacity = hpPct > 75 ? 0 : hpPct > 45 ? 0.55 : 1;
+      document.getElementById("rockCracks").setAttribute("opacity", String(crackOpacity));
+
+      const statusTag = document.getElementById("arenaStatusTag");
+      statusTag.classList.toggle("resting", state.resting || isFull);
+      if (isFull) statusTag.textContent = "📦 Склад полон";
+      else if (state.resting) statusTag.textContent = "💤 Отдых";
+      else statusTag.textContent = "🔨 В работе";
+
+      document.getElementById("autohammerRig").classList.toggle("swinging", canWork);
+
+      const tapDmg = getTapDamage();
       const tapKg = getTapKg();
+      const autoDps = getAutoDps();
       const autoKg = getAutoKgPerSec();
-      document.getElementById("tapPowerHint").textContent = `+${fmtKg(tapKg)} за клик (−${tapCost} ⚡)`;
-      document.getElementById("statTap").textContent = `+${fmtKg(tapKg)}`;
-      document.getElementById("statAuto").textContent = `+${fmtKg(autoKg)}/сек`;
 
-      const tapBtn = document.getElementById("tapRockBtn");
-      tapBtn.disabled = isFull || state.energy < tapCost;
+      document.getElementById("tapPowerHint").textContent = `−${tapDmg} HP • +${fmtKg(tapKg)} (−${tapCost} ⚡)`;
+      document.getElementById("statTap").textContent = `−${tapDmg} HP / +${fmtKg(tapKg)}`;
+      document.getElementById("statAuto").textContent = `−${autoDps} HP / +${fmtKg(autoKg)}/сек`;
 
-      // Список последовательных улучшений
+      document.getElementById("tapRockBtn").disabled = !canWork || state.energy < tapCost || isShattering;
+
+      // Улучшения (строго последовательно, с 2-го уровня — за ресурсы со склада)
       const upDefs = [
-        { key: "pickaxe", title: "Ударный инструмент", effect: `Сила клика: ${fmtKg(tapKg)}` },
-        { key: "rig", title: "Авто-бур", effect: `Автодобыча: ${fmtKg(autoKg)}/сек` },
-        { key: "battery", title: "Энергоячейка", effect: `Ёмкость энергии: ${maxE}` },
-        { key: "warehouse", title: "Отсек склада", effect: `Вместимость: ${fmtKg(capKg)}` }
+        { key: "hammer", title: "Тяжёлая кувалда", effect: `Урон: −${tapDmg} HP • Добыча: +${fmtKg(tapKg)} за удар` },
+        { key: "autoclicker", title: "Автокликер-молот", effect: `Автоудар: −${autoDps} HP и +${fmtKg(autoKg)}/сек` },
+        { key: "stamina", title: "Выносливость", effect: `Запас сил: ${maxE} (дольше работа без отдыха)` },
+        { key: "warehouse", title: "Складской отсек", effect: `Лимит склада: ${fmtKg(capKg)}` }
       ];
 
       const upList = document.getElementById("upgradesList");
@@ -837,8 +1100,8 @@
           : (state.inv[req.ore.id] || 0) >= req.kg;
 
         const btnText = req.type === "coins"
-          ? `Улучшить до ${lvl + 1} ур. за ${fmtNum(req.coins)} 🪙`
-          : `Улучшить до ${lvl + 1} ур. за ${fmtKg(req.kg)} (${req.ore.name})`;
+          ? `Открыть ${lvl + 1} ур. за ${fmtNum(req.coins)} 🪙`
+          : `Скрафтить ${lvl + 1} ур. за ${fmtKg(req.kg)} (${req.ore.name})`;
 
         const card = document.createElement("div");
         card.className = "upgrade-card";
@@ -920,17 +1183,18 @@
     }
 
     document.getElementById("tapRockBtn").addEventListener("click", (e) => {
-      const tapCost = 2;
-      if (state.energy < tapCost || getUsedKg() >= getStorageCapKg()) return;
-      state.energy = Math.max(0, state.energy - tapCost);
-      addMinedKg(getTapKg(), e.clientX, e.clientY);
-      saveState();
-      render();
-    });
+      const tapCost = getTapEnergyCost();
+      if (state.resting || isShattering || getUsedKg() >= getStorageCapKg() || state.energy < tapCost) return;
 
-    document.getElementById("refillBtn").addEventListener("click", () => {
-      const add = Math.round(getMaxEnergy() * 0.35);
-      state.energy = Math.min(getMaxEnergy(), state.energy + add);
+      state.energy = Math.max(0, state.energy - tapCost);
+      triggerHammerVisual();
+
+      const arena = document.getElementById("tapArena");
+      const rect = arena.getBoundingClientRect();
+      const px = e.clientX ? e.clientX - rect.left : rect.width * 0.5;
+      const py = e.clientY ? e.clientY - rect.top : rect.height * 0.62;
+
+      applyDamageToStone(getTapDamage(), getTapKg(), px, py, true);
       saveState();
       render();
     });
@@ -972,15 +1236,33 @@
     setInterval(() => {
       const dt = 0.25;
       ticks += 1;
-
       const maxE = getMaxEnergy();
-      if (state.energy < maxE) {
-        state.energy = Math.min(maxE, state.energy + 3.5 * dt);
-      }
 
-      if (state.energy >= 1 && getUsedKg() < getStorageCapKg()) {
-        state.energy = Math.max(0, state.energy - 0.8 * dt);
-        addMinedKg(getAutoKgPerSec() * dt);
+      if (state.resting) {
+        // Во время отдыха энергия восстанавливается сама без кнопок
+        state.energy = Math.min(maxE, state.energy + 7.5 * dt);
+        if (state.energy >= maxE * 0.65) {
+          state.resting = false;
+        }
+      } else if (getUsedKg() < getStorageCapKg() && state.energy > 0 && !isShattering) {
+        // Автокликер тратит силы и бьёт по камню
+        state.energy = Math.max(0, state.energy - 2.4 * dt);
+        const arena = document.getElementById("tapArena");
+        const rect = arena.getBoundingClientRect();
+        const showPop = ticks % 3 === 0;
+        applyDamageToStone(
+          getAutoDps() * dt,
+          getAutoKgPerSec() * dt,
+          showPop ? rect.width * 0.56 : null,
+          showPop ? rect.height * 0.58 : null,
+          false
+        );
+        if (state.energy <= 0) {
+          state.resting = true;
+        }
+      } else {
+        // Лёгкое пассивное восстановление, когда добыча стоит
+        state.energy = Math.min(maxE, state.energy + 2.2 * dt);
       }
 
       if (ticks % 4 === 0) saveState();
