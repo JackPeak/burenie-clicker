@@ -1,873 +1,1193 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Burenie Clicker</title>
-    <!-- Подключение официального скрипта Telegram WebApp -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-dark: #0f1115;
-            --panel-bg: #181c24;
-            --panel-border: #2a3140;
-            --accent-gold: #f59e0b;
-            --accent-orange: #ea580c;
-            --accent-cyan: #06b6d4;
-            --accent-red: #ef4444;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Burenie Clicker</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f1115;
+      --panel-bg: #181c24;
+      --panel-bg-2: #1f2430;
+      --panel-border: #2c3344;
+      --accent-gold: #f59e0b;
+      --accent-orange: #ea580c;
+      --accent-cyan: #06b6d4;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            height: 100dvh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: background 0.8s ease;
-        }
+    body {
+      margin: 0;
+      padding: 12px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1a202c 0%, var(--bg-dark) 65%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
 
-        /* Верхняя панель статистики */
-        .header {
-            padding: 12px 16px;
-            background: rgba(24, 28, 36, 0.9);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid var(--panel-border);
-            z-index: 10;
-        }
+    .app {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+    .top-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
 
-        .stat-box {
-            background: rgba(15, 17, 21, 0.7);
-            border: 1px solid var(--panel-border);
-            border-radius: 14px;
-            padding: 8px 14px;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .stat-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+    }
 
-        .stat-icon {
-            font-size: 20px;
-        }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
 
-        .stat-info {
-            display: flex;
-            flex-direction: column;
-        }
+    .stat-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
 
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .stat-value.cyan {
+      color: var(--accent-cyan);
+    }
 
-        .stat-value {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-main);
-        }
+    .stat-value.orange {
+      color: var(--accent-orange);
+    }
 
-        .stat-value.coins {
-            color: var(--accent-gold);
-        }
+    .stat-value.green {
+      color: var(--accent-green);
+    }
 
-        /* Индикатор слоя породы */
-        .layer-card {
-            background: rgba(15, 17, 21, 0.7);
-            border: 1px solid var(--panel-border);
-            border-radius: 14px;
-            padding: 8px 12px;
-        }
+    .stat-value.red {
+      color: var(--accent-red);
+    }
 
-        .layer-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--panel-bg);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+    }
 
-        .layer-name {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 9px 6px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
 
-        .layer-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
+    .tab-btn.active {
+      background: var(--accent-orange);
+      color: #fff;
+    }
 
-        .progress-track {
-            width: 100%;
-            height: 8px;
-            background: #1f2430;
-            border-radius: 99px;
-            overflow: hidden;
-        }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 12px;
+    }
 
-        .progress-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #10b981, #34d399);
-            border-radius: 99px;
-            transition: width 0.15s ease-out, background 0.5s ease;
-        }
+    .hidden {
+      display: none !important;
+    }
 
-        /* Центральная зона бурения */
-        .drill-arena {
-            position: relative;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
+    /* Зона бурения */
+    .drill-arena {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--panel-border);
+      background: linear-gradient(180deg, #151922 0%, #241914 42%, #3b2316 100%);
+      padding: 14px;
+    }
 
-        /* Декоративные стенки шахты */
-        .shaft-walls {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: 
-                linear-gradient(90deg, rgba(0,0,0,0.65) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.65) 100%),
-                repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 24px);
-        }
+    .drill-arena.broken-state {
+      border-color: rgba(239, 68, 68, 0.75);
+      background: linear-gradient(180deg, #271316 0%, #331618 48%, #2a1816 100%);
+    }
 
-        .drill-wrapper {
-            position: relative;
-            width: 190px;
-            height: 220px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.08s ease;
-            z-index: 2;
-        }
+    .layer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
 
-        .drill-wrapper:active {
-            transform: scale(0.95) translateY(6px);
-        }
+    .layer-name {
+      font-weight: 700;
+    }
 
-        .drill-wrapper.shaking {
-            animation: drillShake 0.12s infinite;
-        }
+    .hp-bar-wrap {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 10px;
+    }
 
-        @keyframes drillShake {
-            0% { transform: translate(-2px, 2px) scale(0.97); }
-            50% { transform: translate(2px, 5px) scale(0.96); }
-            100% { transform: translate(-1px, 3px) scale(0.97); }
-        }
+    .hp-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-gold));
+      transition: width 0.12s ease;
+    }
 
-        .drill-svg {
-            width: 165px;
-            height: 200px;
-            filter: drop-shadow(0 12px 24px rgba(0,0,0,0.7));
-        }
+    .heat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
 
-        /* Анимация вращения лопастей шнека */
-        .drill-blades {
-            transform-origin: center;
-            transition: opacity 0.2s;
-        }
+    .heat-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
 
-        .drilling-active .drill-blades {
-            animation: bladeSpin 0.18s linear infinite;
-        }
+    .heat-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold), var(--accent-red));
+      transition: width 0.12s ease;
+    }
 
-        @keyframes bladeSpin {
-            0% { transform: translateY(-4px); }
-            50% { transform: translateY(4px); }
-            100% { transform: translateY(-4px); }
-        }
+    .warning-banner {
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      color: #fecaca;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
-        .tap-hint {
-            margin-top: 8px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.65);
-            background: rgba(0, 0, 0, 0.35);
-            padding: 5px 12px;
-            border-radius: 99px;
-            pointer-events: none;
-            z-index: 2;
-        }
+    .drill-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 205px;
+      cursor: pointer;
+    }
 
-        /* Шкала перегрева */
-        .heat-container {
-            width: 85%;
-            max-width: 340px;
-            margin-top: 14px;
-            z-index: 2;
-            pointer-events: none;
-        }
+    .drill-rig {
+      font-size: 64px;
+      line-height: 1;
+      filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
+      transition: transform 0.08s ease;
+      z-index: 2;
+    }
 
-        .heat-label-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+    .drill-rig.drilling {
+      animation: drillShake 0.14s infinite alternate;
+    }
 
-        .heat-track {
-            width: 100%;
-            height: 12px;
-            background: rgba(0, 0, 0, 0.55);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 99px;
-            overflow: hidden;
-        }
+    .drill-rig.broken {
+      filter: grayscale(0.4) drop-shadow(0 6px 12px rgba(239, 68, 68, 0.45));
+      transform: rotate(16deg);
+    }
 
-        .heat-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #06b6d4, #f59e0b, #ef4444);
-            border-radius: 99px;
-            transition: width 0.1s linear;
-        }
+    @keyframes drillShake {
+      0% { transform: translate(-3px, 2px) rotate(-3deg) scale(1.04); }
+      100% { transform: translate(3px, -2px) rotate(3deg) scale(1.04); }
+    }
 
-        .overheated-badge {
-            display: none;
-            position: absolute;
-            top: 20px;
-            background: rgba(239, 68, 68, 0.95);
-            color: white;
-            font-weight: 800;
-            font-size: 13px;
-            padding: 8px 16px;
-            border-radius: 99px;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
-            animation: pulseAlert 0.6s infinite alternate;
-            z-index: 5;
-        }
+    .rock-surface {
+      margin-top: 8px;
+      width: 100%;
+      max-width: 295px;
+      min-height: 54px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.05) 10px,
+        rgba(0, 0, 0, 0.22) 10px,
+        rgba(0, 0, 0, 0.22) 20px
+      );
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fde68a;
+      z-index: 2;
+    }
 
-        .overheated-badge.visible {
-            display: block;
-        }
+    .rock-surface.broken {
+      border-color: rgba(239, 68, 68, 0.65);
+      color: #fca5a5;
+    }
 
-        @keyframes pulseAlert {
-            from { transform: scale(0.96); }
-            to { transform: scale(1.04); }
-        }
+    .rock-surface.hit {
+      animation: rockPulse 0.12s ease;
+    }
 
-        /* Всплывающие цифры и частицы */
-        .floating-text {
-            position: absolute;
-            font-weight: 900;
-            font-size: 18px;
-            color: #fbbf24;
-            text-shadow: 0 2px 6px rgba(0,0,0,0.85);
-            pointer-events: none;
-            z-index: 15;
-            animation: floatUp 0.75s ease-out forwards;
-        }
+    @keyframes rockPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.96, 0.92); }
+      100% { transform: scale(1); }
+    }
 
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
-            30% { transform: translate(-50%, -18px) scale(1.1); }
-            100% { opacity: 0; transform: translate(-50%, -55px) scale(0.95); }
-        }
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 14px;
+      z-index: 4;
+      animation: flyParticle 0.55s ease-out forwards;
+    }
 
-        .particle {
-            position: absolute;
-            width: 7px;
-            height: 7px;
-            border-radius: 2px;
-            pointer-events: none;
-            z-index: 12;
-        }
+    @keyframes flyParticle {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(0.6) rotate(var(--rot));
+      }
+    }
 
-        /* Нижняя панель магазина улучшений */
-        .shop-panel {
-            background: var(--panel-bg);
-            border-top: 1px solid var(--panel-border);
-            border-radius: 20px 20px 0 0;
-            padding: 12px 14px 18px;
-            z-index: 10;
-            box-shadow: 0 -8px 25px rgba(0,0,0,0.45);
-        }
+    .floating-text {
+      position: absolute;
+      pointer-events: none;
+      font-weight: 800;
+      font-size: 13px;
+      color: #fef08a;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+      z-index: 5;
+      max-width: 250px;
+      text-align: center;
+      animation: floatUp 0.8s ease-out forwards;
+    }
 
-        .shop-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -48px);
+      }
+    }
 
-        .auto-income-badge {
-            font-size: 11px;
-            color: #34d399;
-            background: rgba(16, 185, 129, 0.15);
-            padding: 3px 8px;
-            border-radius: 99px;
-            text-transform: none;
-        }
+    .hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
 
-        .upgrades-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
+    /* Инвентарь */
+    .inv-summary {
+      background: var(--panel-bg-2);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-        .upgrade-btn {
-            background: #222733;
-            border: 1px solid #323a4b;
-            border-radius: 14px;
-            padding: 10px 8px;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
+    .inv-summary strong {
+      color: var(--text-main);
+    }
 
-        .upgrade-btn:active:not(:disabled) {
-            transform: scale(0.95);
-        }
+    .sell-all-btn {
+      width: 100%;
+      margin-bottom: 10px;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #86efac;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-        .upgrade-btn:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
+    .sell-all-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
 
-        .upgrade-btn.affordable {
-            border-color: rgba(245, 158, 11, 0.65);
-            background: linear-gradient(180deg, #272d3d 0%, #222631 100%);
-        }
+    .inv-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-        .upg-icon {
-            font-size: 22px;
-            margin-bottom: 4px;
-        }
+    .inv-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-bg-2);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
 
-        .upg-name {
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 2px;
-        }
+    .inv-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .upg-lvl {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
+    .inv-icon {
+      font-size: 22px;
+    }
 
-        .upg-cost {
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--accent-gold);
-            background: rgba(0, 0, 0, 0.35);
-            padding: 3px 8px;
-            border-radius: 8px;
-            width: 100%;
-        }
-    </style>
+    .inv-title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .inv-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .inv-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inv-count {
+      font-weight: 700;
+      font-size: 14px;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .sell-btn {
+      background: rgba(34, 197, 94, 0.16);
+      border: 1px solid rgba(34, 197, 94, 0.45);
+      color: #86efac;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .sell-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Модули и тиры */
+    .modules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .module-card {
+      background: var(--panel-bg-2);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .module-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .module-name {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .tier-badge {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fcd34d;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .module-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .module-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .upg-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1.25;
+    }
+
+    .upg-btn.lvl {
+      background: var(--accent-cyan);
+      color: #061318;
+    }
+
+    .upg-btn.tier {
+      background: var(--accent-gold);
+      color: #1c1202;
+    }
+
+    .upg-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .small-btn {
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <div class="app">
+    <div class="top-stats">
+      <div class="stat-card">
+        <div class="stat-label">МОНЕТЫ</div>
+        <div class="stat-value" id="coinsVal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ГЛУБИНА</div>
+        <div class="stat-value cyan" id="depthVal">0 м</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">АВТО/СЕК</div>
+        <div class="stat-value orange" id="dpsVal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">СКЛАД</div>
+        <div class="stat-value green" id="storageVal">0/50</div>
+      </div>
+    </div>
 
-    <!-- Верхняя панель: Монеты, Глубина и Слой породы -->
-    <header class="header">
-        <div class="stats-row">
-            <div class="stat-box">
-                <span class="stat-icon">🪙</span>
-                <div class="stat-info">
-                    <span class="stat-label">Баланс</span>
-                    <span class="stat-value coins" id="coinsDisplay">0</span>
-                </div>
-            </div>
-            <div class="stat-box">
-                <span class="stat-icon">📏</span>
-                <div class="stat-info">
-                    <span class="stat-label">Глубина</span>
-                    <span class="stat-value" id="depthDisplay">0 м</span>
-                </div>
-            </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="drill">⛏️ Бурение</button>
+      <button class="tab-btn" data-tab="inventory">🎒 Инвентарь</button>
+      <button class="tab-btn" data-tab="modules">⚙️ Модули</button>
+    </div>
+
+    <!-- ВКЛАДКА 1: БУРЕНИЕ -->
+    <div class="panel" id="tab-drill">
+      <div class="drill-arena" id="drillArena">
+        <div class="layer-header">
+          <span class="layer-name" id="layerName">Слой 1: Верхняя земля</span>
+          <span id="layerHpText">60 / 60</span>
+        </div>
+        <div class="hp-bar-wrap">
+          <div class="hp-bar-fill" id="layerHpBar"></div>
         </div>
 
-        <div class="layer-card">
-            <div class="layer-header">
-                <span class="layer-name">
-                    <span class="layer-dot" id="layerDot" style="background: #8b5a2b;"></span>
-                    <span id="layerName">Слой 1: Чернозём</span>
-                </span>
-                <span id="layerHpText">100 / 100</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="layerProgress"></div>
-            </div>
+        <div class="heat-row">
+          <span id="heatStatus">Температура мотора: Норма</span>
+          <span id="heatPercent">0%</span>
         </div>
-    </header>
-
-    <!-- Центральная интерактивная область бурения -->
-    <main class="drill-arena" id="drillArena">
-        <div class="shaft-walls"></div>
-
-        <div class="overheated-badge" id="overheatBadge">🔥 ПЕРЕГРЕВ! ОСТЫВАНИЕ...</div>
-
-        <div class="drill-wrapper" id="drillWrapper">
-            <!-- Векторная графика промышленного бура -->
-            <svg class="drill-svg" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Верхняя гидравлическая платформа -->
-                <rect x="45" y="10" width="110" height="24" rx="6" fill="#374151" stroke="#6B7280" stroke-width="3"/>
-                <rect x="65" y="34" width="70" height="32" rx="4" fill="#F59E0B" stroke="#B45309" stroke-width="3"/>
-                <!-- Предупреждающие полосы -->
-                <path d="M75 34L65 66M95 34L85 66M115 34L105 66M135 34L125 66" stroke="#1F2937" stroke-width="5"/>
-                <!-- Редуктор -->
-                <rect x="55" y="66" width="90" height="22" rx="5" fill="#4B5563" stroke="#9CA3AF" stroke-width="2"/>
-                
-                <!-- Основной конус шнека -->
-                <polygon points="62,88 138,88 100,225" fill="url(#drillMetal)" stroke="#4B5563" stroke-width="3"/>
-                
-                <!-- Спиральные лопасти бура -->
-                <g class="drill-blades">
-                    <path d="M56 105 L144 118 L140 130 L58 117 Z" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
-                    <path d="M66 138 L134 150 L130 161 L69 149 Z" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
-                    <path d="M77 170 L123 180 L119 190 L80 180 Z" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
-                    <path d="M88 198 L112 205 L108 213 L91 206 Z" fill="#EF4444"/>
-                </g>
-
-                <!-- Блики металла -->
-                <line x1="82" y1="92" x2="96" y2="210" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
-
-                <defs>
-                    <linearGradient id="drillMetal" x1="62" y1="88" x2="138" y2="88" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stop-color="#374151"/>
-                        <stop offset="45%" stop-color="#9CA3AF"/>
-                        <stop offset="100%" stop-color="#1F2937"/>
-                    </linearGradient>
-                </defs>
-            </svg>
+        <div class="heat-bar-wrap">
+          <div class="heat-bar-fill" id="heatBar"></div>
         </div>
 
-        <div class="tap-hint" id="tapHint">Нажимай по экрану, чтобы бурить!</div>
+        <div class="warning-banner hidden" id="warningBanner"></div>
 
-        <!-- Индикатор температуры бура -->
-        <div class="heat-container">
-            <div class="heat-label-row">
-                <span>🌡️ Температура бура</span>
-                <span id="heatText">0%</span>
-            </div>
-            <div class="heat-track">
-                <div class="heat-fill" id="heatFill"></div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Магазин улучшений -->
-    <section class="shop-panel">
-        <div class="shop-title">
-            <span>⚙️ Улучшения бура</span>
-            <span class="auto-income-badge" id="autoIncomeBadge">Авто: 0/сек</span>
+        <div class="drill-stage" id="drillStage">
+          <div class="drill-rig" id="drillRig">🔩</div>
+          <div class="rock-surface" id="rockSurface">Нажми, чтобы бурить</div>
         </div>
 
-        <div class="upgrades-grid">
-            <button class="upgrade-btn" id="upgPowerBtn">
-                <span class="upg-icon">⛏️</span>
-                <span class="upg-name">Мощность</span>
-                <span class="upg-lvl" id="powerLvlText">Ур. 1 (+1)</span>
-                <span class="upg-cost" id="powerCostText">🪙 15</span>
-            </button>
+        <div class="hint">При 100% заполнении склада бур начинает перегреваться и при 100% жара ломается — вовремя забирайте руду!</div>
+      </div>
 
-            <button class="upgrade-btn" id="upgCoolBtn">
-                <span class="upg-icon">❄️</span>
-                <span class="upg-name">Охлаждение</span>
-                <span class="upg-lvl" id="coolLvlText">Ур. 1</span>
-                <span class="upg-cost" id="coolCostText">🪙 25</span>
-            </button>
+      <div class="footer-bar">
+        <span class="hint" id="saveStatus" style="margin:0;">Автосохранение активно</span>
+        <button class="small-btn" id="resetBtn">Сбросить прогресс</button>
+      </div>
+    </div>
 
-            <button class="upgrade-btn" id="upgAutoBtn">
-                <span class="upg-icon">🤖</span>
-                <span class="upg-name">Авто-бур</span>
-                <span class="upg-lvl" id="autoLvlText">Ур. 0</span>
-                <span class="upg-cost" id="autoCostText">🪙 50</span>
-            </button>
-        </div>
-    </section>
+    <!-- ВКЛАДКА 2: ИНВЕНТАРЬ -->
+    <div class="panel hidden" id="tab-inventory">
+      <div class="inv-summary" id="invSummary"></div>
+      <button class="sell-all-btn" id="sellAllEverythingBtn">Разгрузить и продать всё</button>
+      <div class="inv-list" id="inventoryList"></div>
+    </div>
 
-    <script>
-        // Инициализация Telegram WebApp API
-        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg) {
-            tg.ready();
-            tg.expand(); // Разворачиваем игру на весь экран в Telegram
-            try {
-                tg.setHeaderColor('#0f1115');
-                tg.setBackgroundColor('#0f1115');
-            } catch (e) {}
+    <!-- ВКЛАДКА 3: МОДУЛИ И ТИРЫ -->
+    <div class="panel hidden" id="tab-modules">
+      <div class="modules-list" id="modulesList"></div>
+    </div>
+  </div>
+
+  <script>
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
+
+    const STORAGE_KEY = "burenie_clicker_save_v3";
+
+    const RESOURCES = [
+      { id: "dirt", name: "Земля", icon: "🟫", value: 1 },
+      { id: "stone", name: "Камень", icon: "🪨", value: 3 },
+      { id: "coal", name: "Уголь", icon: "⬛", value: 7 },
+      { id: "iron", name: "Железная руда", icon: "⛓️", value: 16 },
+      { id: "gold", name: "Золотая руда", icon: "🪙", value: 35 }
+    ];
+
+    const LAYERS = [
+      { name: "Верхняя земля", baseHp: 60, depthStep: 10, drops: [{ id: "dirt", min: 2, max: 4 }, { id: "stone", min: 0, max: 1 }] },
+      { name: "Плотный грунт и камень", baseHp: 150, depthStep: 15, drops: [{ id: "dirt", min: 1, max: 3 }, { id: "stone", min: 2, max: 5 }] },
+      { name: "Угольный пласт", baseHp: 340, depthStep: 20, drops: [{ id: "stone", min: 2, max: 4 }, { id: "coal", min: 2, max: 5 }] },
+      { name: "Рудная жила", baseHp: 750, depthStep: 25, drops: [{ id: "coal", min: 2, max: 4 }, { id: "iron", min: 2, max: 5 }] },
+      { name: "Глубинный горизонт", baseHp: 1600, depthStep: 35, drops: [{ id: "iron", min: 2, max: 5 }, { id: "gold", min: 1, max: 4 }] }
+    ];
+
+    function defaultState() {
+      return {
+        coins: 0,
+        depth: 0,
+        layerIndex: 0,
+        layerHp: 60,
+        layerMaxHp: 60,
+        heat: 0,
+        overheated: false,
+        brokenUntil: 0,
+        inventory: {
+          dirt: 0,
+          stone: 0,
+          coal: 0,
+          iron: 0,
+          gold: 0
+        },
+        modules: {
+          drill: { level: 1, tier: 1 },
+          collector: { level: 1, tier: 1 },
+          cooler: { level: 1, tier: 1 },
+          storage: { level: 1, tier: 1 }
         }
+      };
+    }
 
-        // Конфигурация подземных слоёв
-        const LAYERS = [
-            { name: "Чернозём", color: "#78350f", bg: "#1c140d", baseHp: 60, rewardMult: 1 },
-            { name: "Плотная глина", color: "#b45309", bg: "#23170d", baseHp: 150, rewardMult: 2 },
-            { name: "Известняк", color: "#9ca3af", bg: "#1c1f24", baseHp: 350, rewardMult: 4 },
-            { name: "Гранит", color: "#64748b", bg: "#151922", baseHp: 800, rewardMult: 7 },
-            { name: "Базальт", color: "#3b82f6", bg: "#0f172a", baseHp: 1800, rewardMult: 12 },
-            { name: "Магма", color: "#ef4444", bg: "#280d0d", baseHp: 4000, rewardMult: 20 },
-            { name: "Ядро Земли", color: "#f59e0b", bg: "#2b1905", baseHp: 10000, rewardMult: 35 }
-        ];
+    let state = loadState();
 
-        // Состояние игры (загружается из localStorage)
-        let state = {
-            coins: 0,
-            depth: 0,
-            layerIndex: 0,
-            layerHp: 60,
-            layerMaxHp: 60,
-            powerLvl: 1,
-            coolLvl: 1,
-            autoLvl: 0,
-            heat: 0,
-            isOverheated: false
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        const base = defaultState();
+        return {
+          ...base,
+          ...parsed,
+          inventory: { ...base.inventory, ...(parsed.inventory || {}) },
+          modules: {
+            drill: { ...base.modules.drill, ...(parsed.modules && parsed.modules.drill) },
+            collector: { ...base.modules.collector, ...(parsed.modules && parsed.modules.collector) },
+            cooler: { ...base.modules.cooler, ...(parsed.modules && parsed.modules.cooler) },
+            storage: { ...base.modules.storage, ...(parsed.modules && parsed.modules.storage) }
+          }
         };
+      } catch {
+        return defaultState();
+      }
+    }
 
-        // Загрузка сохранения
-        function loadGame() {
-            try {
-                const saved = localStorage.getItem('burenie_clicker_save_v1');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed, heat: 0, isOverheated: false };
-                }
-            } catch (e) {
-                console.warn('Не удалось загрузить сохранение:', e);
-            }
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {}
+    }
+
+    function getTierMultiplier(tier) {
+      return Math.pow(1.85, tier - 1);
+    }
+
+    function getStorageCapacity() {
+      const s = state.modules.storage;
+      const baseCap = 50 + (s.level - 1) * 25;
+      const tierMult = Math.pow(1.9, s.tier - 1);
+      return Math.round(baseCap * tierMult);
+    }
+
+    function getUsedStorage() {
+      return Object.values(state.inventory).reduce((sum, n) => sum + (n || 0), 0);
+    }
+
+    function isStorageFull() {
+      return getUsedStorage() >= getStorageCapacity();
+    }
+
+    function isDrillBroken() {
+      return state.brokenUntil > Date.now();
+    }
+
+    function getRepairRemainingSec() {
+      if (!isDrillBroken()) return 0;
+      return Math.max(0.1, (state.brokenUntil - Date.now()) / 1000);
+    }
+
+    function getRepairDurationSec() {
+      const d = state.modules.drill;
+      const effectiveDrillLvl = d.level + (d.tier - 1) * 5;
+      return Math.round(8 + (effectiveDrillLvl - 1) * 3.5);
+    }
+
+    function breakDrill() {
+      const durationSec = getRepairDurationSec();
+      state.brokenUntil = Date.now() + durationSec * 1000;
+      state.overheated = true;
+      state.heat = 100;
+    }
+
+    function getSellBonusMult() {
+      const s = state.modules.storage;
+      return 1 + (s.tier - 1) * 0.15 + (s.level - 1) * 0.02;
+    }
+
+    function getDrillPower() {
+      const m = state.modules.drill;
+      return (8 + (m.level - 1) * 5) * getTierMultiplier(m.tier);
+    }
+
+    function getCollectorBonus() {
+      const m = state.modules.collector;
+      return 1 + (m.level - 1) * 0.25 + (m.tier - 1) * 0.65;
+    }
+
+    function getAutoDps() {
+      const m = state.modules.collector;
+      const d = state.modules.drill;
+      const baseAuto = (m.level - 1) * 3 + (m.tier - 1) * 14 + (d.tier - 1) * 6;
+      if (isDrillBroken() || state.overheated) return 0;
+      const heatFactor = state.heat > 75 ? 0.6 : 1;
+      return baseAuto * heatFactor;
+    }
+
+    function getHeatPerHit() {
+      const c = state.modules.cooler;
+      const coolReduction = Math.max(0.25, 1 - (c.level - 1) * 0.08 - (c.tier - 1) * 0.22);
+      const baseHeat = 7 * coolReduction;
+      return isStorageFull() ? Math.max(14, baseHeat * 2.6) : baseHeat;
+    }
+
+    function getCoolingPerSec() {
+      const c = state.modules.cooler;
+      const baseCool = 9 + (c.level - 1) * 4 + (c.tier - 1) * 12;
+      return isStorageFull() && !isDrillBroken() ? baseCool * 0.25 : baseCool;
+    }
+
+    function getLevelUpgradeCost(key) {
+      const mod = state.modules[key];
+      const baseCosts = { drill: 25, collector: 35, cooler: 30, storage: 20 };
+      const baseCost = baseCosts[key] || 25;
+      return Math.round(baseCost * Math.pow(1.45, mod.level - 1) * getTierMultiplier(mod.tier));
+    }
+
+    function getTierUpgradeCost(key) {
+      const mod = state.modules[key];
+      const reqLevel = mod.tier * 5;
+      const baseTierCosts = { drill: 180, collector: 220, cooler: 200, storage: 160 };
+      const baseTierCost = baseTierCosts[key] || 180;
+      return {
+        reqLevel,
+        cost: Math.round(baseTierCost * Math.pow(3.2, mod.tier - 1))
+      };
+    }
+
+    function getCurrentLayerConfig() {
+      return LAYERS[state.layerIndex % LAYERS.length];
+    }
+
+    function syncLayerHpMax() {
+      const cfg = getCurrentLayerConfig();
+      const cycle = Math.floor(state.layerIndex / LAYERS.length);
+      const scale = Math.pow(1.55, state.layerIndex) * (1 + cycle * 0.25);
+      state.layerMaxHp = Math.max(50, Math.round(cfg.baseHp * scale));
+      if (state.layerHp > state.layerMaxHp) {
+        state.layerHp = state.layerMaxHp;
+      }
+    }
+
+    function spawnVisuals(clientX, clientY, labelText) {
+      const stage = document.getElementById("drillStage");
+      const rect = stage.getBoundingClientRect();
+      const x = clientX ? clientX - rect.left : rect.width * 0.5;
+      const y = clientY ? clientY - rect.top : rect.height * 0.45;
+
+      const rig = document.getElementById("drillRig");
+      const rock = document.getElementById("rockSurface");
+      rig.classList.remove("drilling");
+      rock.classList.remove("hit");
+      void rig.offsetWidth;
+      void rock.offsetWidth;
+      if (!isDrillBroken()) {
+        rig.classList.add("drilling");
+      }
+      rock.classList.add("hit");
+
+      clearTimeout(window._drillAnimTimer);
+      window._drillAnimTimer = setTimeout(() => {
+        rig.classList.remove("drilling");
+      }, 220);
+
+      const particles = isDrillBroken() ? ["💥", "🔥", "⚠️"] : ["🪨", "🟫", "✨", "💥"];
+      for (let i = 0; i < 4; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.textContent = particles[Math.floor(Math.random() * particles.length)];
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        p.style.setProperty("--dx", `${(Math.random() - 0.5) * 120}px`);
+        p.style.setProperty("--dy", `${-20 - Math.random() * 75}px`);
+        p.style.setProperty("--rot", `${(Math.random() - 0.5) * 240}deg`);
+        stage.appendChild(p);
+        setTimeout(() => p.remove(), 560);
+      }
+
+      if (labelText) {
+        const ft = document.createElement("div");
+        ft.className = "floating-text";
+        ft.textContent = labelText;
+        ft.style.left = `${Math.min(rect.width - 55, Math.max(55, x + (Math.random() - 0.5) * 30))}px`;
+        ft.style.top = `${Math.max(18, y - 12)}px`;
+        stage.appendChild(ft);
+        setTimeout(() => ft.remove(), 810);
+      }
+    }
+
+    function collectLayerLoot() {
+      const cfg = getCurrentLayerConfig();
+      const bonus = getCollectorBonus();
+      const cap = getStorageCapacity();
+      let freeSpace = Math.max(0, cap - getUsedStorage());
+      const summary = [];
+      let overflowed = false;
+
+      cfg.drops.forEach((drop) => {
+        const raw = drop.min + Math.floor(Math.random() * (drop.max - drop.min + 1));
+        const wanted = Math.round(raw * bonus);
+        if (wanted <= 0) return;
+
+        const taken = Math.min(wanted, freeSpace);
+        if (taken < wanted) overflowed = true;
+
+        if (taken > 0) {
+          state.inventory[drop.id] = (state.inventory[drop.id] || 0) + taken;
+          freeSpace -= taken;
+          const resObj = RESOURCES.find((r) => r.id === drop.id);
+          if (resObj) summary.push(`+${taken} ${resObj.icon}`);
         }
+      });
 
-        function saveGame() {
-            try {
-                localStorage.setItem('burenie_clicker_save_v1', JSON.stringify(state));
-            } catch (e) {}
+      state.depth += cfg.depthStep;
+      state.layerIndex += 1;
+      syncLayerHpMax();
+      state.layerHp = state.layerMaxHp;
+
+      if (overflowed && summary.length === 0) {
+        return "Склад 100%! Бур греется!";
+      }
+      if (overflowed) {
+        return `${summary.join(" ")} (склад 100%!)`;
+      }
+      return summary.join(" ");
+    }
+
+    function applyDamage(amount, clientX, clientY, isManual) {
+      if (isDrillBroken()) {
+        if (isManual) {
+          spawnVisuals(clientX, clientY, `🛠️ Ремонт: ${getRepairRemainingSec().toFixed(1)} сек`);
+          render();
         }
+        return;
+      }
 
-        // Расчёт характеристик от уровней
-        function getDrillPower() {
-            return Math.floor(state.powerLvl * (1 + (state.powerLvl - 1) * 0.25));
+      if (isManual && state.overheated) {
+        spawnVisuals(clientX, clientY, "🔥 ПЕРЕГРЕВ!");
+        render();
+        return;
+      }
+
+      const fullBeforeHit = isStorageFull();
+
+      if (isManual) {
+        state.heat = Math.min(100, state.heat + getHeatPerHit());
+      } else if (fullBeforeHit) {
+        state.heat = Math.min(100, state.heat + 6.5);
+      }
+
+      if (state.heat >= 100) {
+        if (fullBeforeHit) {
+          breakDrill();
+          spawnVisuals(clientX, clientY, `💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`);
+          saveState();
+          render();
+          return;
+        } else {
+          state.overheated = true;
         }
+      }
 
-        function getPowerCost() {
-            return Math.floor(15 * Math.pow(1.45, state.powerLvl - 1));
+      const heatPenalty = state.heat > 75 && !state.overheated ? 0.75 : 1;
+      const dmg = Math.max(1, Math.round(amount * heatPenalty));
+      state.layerHp -= dmg;
+
+      let lootLabel = fullBeforeHit ? `-${dmg} 🔥` : `-${dmg}`;
+      if (state.layerHp <= 0) {
+        const lootText = collectLayerLoot();
+        lootLabel = lootText ? `Слой пройден! ${lootText}` : "Слой пройден!";
+      }
+
+      if (isManual || Math.random() < 0.35) {
+        spawnVisuals(clientX, clientY, lootLabel);
+      }
+
+      saveState();
+      render();
+    }
+
+    function render() {
+      const cfg = getCurrentLayerConfig();
+      const used = getUsedStorage();
+      const cap = getStorageCapacity();
+      const full = isStorageFull();
+      const broken = isDrillBroken();
+
+      document.getElementById("coinsVal").textContent = Math.floor(state.coins).toLocaleString("ru-RU");
+      document.getElementById("depthVal").textContent = `${state.depth} м`;
+      document.getElementById("dpsVal").textContent = getAutoDps().toFixed(1).replace(/\.0$/, "");
+
+      const storageEl = document.getElementById("storageVal");
+      storageEl.textContent = `${used}/${cap}`;
+      storageEl.className = full ? "stat-value red" : "stat-value green";
+
+      document.getElementById("layerName").textContent = `Слой ${state.layerIndex + 1}: ${cfg.name}`;
+      const hpClamped = Math.max(0, Math.ceil(state.layerHp));
+      document.getElementById("layerHpText").textContent = `${hpClamped} / ${state.layerMaxHp}`;
+      const hpPct = Math.max(0, Math.min(100, (state.layerHp / state.layerMaxHp) * 100));
+      document.getElementById("layerHpBar").style.width = `${hpPct}%`;
+
+      const heatPct = Math.round(state.heat);
+      document.getElementById("heatPercent").textContent = `${heatPct}%`;
+      document.getElementById("heatBar").style.width = `${heatPct}%`;
+
+      if (broken) {
+        document.getElementById("heatStatus").textContent = `Бур сломан! Починка: ${getRepairRemainingSec().toFixed(1)} сек`;
+      } else if (state.overheated) {
+        document.getElementById("heatStatus").textContent = "Мотор перегрет! Охлаждение...";
+      } else if (full) {
+        document.getElementById("heatStatus").textContent = "Склад 100%! Бур сильно греется!";
+      } else if (heatPct > 75) {
+        document.getElementById("heatStatus").textContent = "Высокая температура (урон снижен)";
+      } else {
+        document.getElementById("heatStatus").textContent = "Температура мотора: Норма";
+      }
+
+      const arena = document.getElementById("drillArena");
+      const rig = document.getElementById("drillRig");
+      const rock = document.getElementById("rockSurface");
+      const warn = document.getElementById("warningBanner");
+
+      arena.classList.toggle("broken-state", broken);
+      rig.classList.toggle("broken", broken);
+      rock.classList.toggle("broken", broken);
+
+      if (broken) {
+        rig.textContent = "🛠️";
+        warn.classList.remove("hidden");
+        warn.textContent = `Бур заклинило из-за переполненного склада! Ремонт: ${getRepairRemainingSec().toFixed(1)} сек (длительность зависит от уровня бура).`;
+        rock.textContent = `Ожидание починки (${getRepairRemainingSec().toFixed(1)} сек)...`;
+      } else if (full) {
+        rig.textContent = "🔩";
+        warn.classList.remove("hidden");
+        warn.textContent = "Склад заполнен на 100%! Заберите руду в инвентаре, иначе бур перегреется и сломается.";
+        rock.textContent = state.overheated
+          ? "Ждите охлаждения мотора..."
+          : `ОПАСНОСТЬ ПОЛОМКИ! Разгрузите склад (${used}/${cap})`;
+      } else {
+        rig.textContent = "🔩";
+        warn.classList.add("hidden");
+        rock.textContent = state.overheated
+          ? "Ждите охлаждения мотора..."
+          : `Удар: ${Math.round(getDrillPower())} | Сбор: ×${getCollectorBonus().toFixed(2)} | Склад: ${used}/${cap}`;
+      }
+
+      renderInventory();
+      renderModules();
+    }
+
+    function renderInventory() {
+      const used = getUsedStorage();
+      const cap = getStorageCapacity();
+      const bonusPct = Math.round((getSellBonusMult() - 1) * 100);
+
+      document.getElementById("invSummary").innerHTML = `
+        <span>Заполнено: <strong>${used} / ${cap}</strong></span>
+        <span>Наценка склада: <strong>+${bonusPct}%</strong></span>
+      `;
+
+      const sellAllEverythingBtn = document.getElementById("sellAllEverythingBtn");
+      sellAllEverythingBtn.disabled = used <= 0;
+
+      const container = document.getElementById("inventoryList");
+      container.innerHTML = "";
+
+      RESOURCES.forEach((res) => {
+        const count = state.inventory[res.id] || 0;
+        const unitPrice = Math.max(res.value, Math.round(res.value * getSellBonusMult()));
+        const row = document.createElement("div");
+        row.className = "inv-item";
+        row.innerHTML = `
+          <div class="inv-left">
+            <div class="inv-icon">${res.icon}</div>
+            <div>
+              <div class="inv-title">${res.name}</div>
+              <div class="inv-sub">Цена продажи: ${unitPrice} монет/шт</div>
+            </div>
+          </div>
+          <div class="inv-right">
+            <div class="inv-count">${count}</div>
+            <button class="sell-btn" ${count <= 0 ? "disabled" : ""}>Забрать</button>
+          </div>
+        `;
+        const btn = row.querySelector(".sell-btn");
+        btn.addEventListener("click", () => {
+          if (count <= 0) return;
+          state.coins += count * unitPrice;
+          state.inventory[res.id] = 0;
+          saveState();
+          render();
+        });
+        container.appendChild(row);
+      });
+    }
+
+    function renderModules() {
+      const container = document.getElementById("modulesList");
+      container.innerHTML = "";
+
+      const defs = [
+        {
+          key: "drill",
+          title: "⛏️ Бур",
+          desc: `Урон за удар: ${Math.round(getDrillPower())} | Время ремонта при поломке: ${getRepairDurationSec()} сек.`
+        },
+        {
+          key: "collector",
+          title: "📦 Сборник руды",
+          desc: `Множитель добычи: ×${getCollectorBonus().toFixed(2)} | Автобурение: ${getAutoDps().toFixed(1)}/сек. Собирает больше породы и руды.`
+        },
+        {
+          key: "cooler",
+          title: "❄️ Мотор охлаждения",
+          desc: `Нагрев за клик: +${getHeatPerHit().toFixed(1)}% | Охлаждение: ${getCoolingPerSec().toFixed(0)}%/сек. Защищает от перегрева.`
+        },
+        {
+          key: "storage",
+          title: "🗄️ Хранилище на буре",
+          desc: `Вместимость: ${getStorageCapacity()} ед. | Наценка продажи: +${Math.round((getSellBonusMult() - 1) * 100)}%. Позволяет бурить дольше без переполнения.`
         }
+      ];
 
-        function getCoolCost() {
-            return Math.floor(25 * Math.pow(1.55, state.coolLvl - 1));
-        }
+      defs.forEach((def) => {
+        const mod = state.modules[def.key];
+        const lvlCost = getLevelUpgradeCost(def.key);
+        const tierInfo = getTierUpgradeCost(def.key);
+        const canBuyLvl = state.coins >= lvlCost;
+        const canBuyTier = mod.level >= tierInfo.reqLevel && state.coins >= tierInfo.cost;
 
-        function getAutoCost() {
-            return Math.floor(50 * Math.pow(1.6, state.autoLvl));
-        }
+        const card = document.createElement("div");
+        card.className = "module-card";
+        card.innerHTML = `
+          <div class="module-top">
+            <div class="module-name">${def.title} (Ур. ${mod.level})</div>
+            <div class="tier-badge">ТИР ${mod.tier}</div>
+          </div>
+          <div class="module-desc">${def.desc}</div>
+          <div class="module-actions">
+            <button class="upg-btn lvl" ${canBuyLvl ? "" : "disabled"}>
+              Улучшить ур.<br/>(${lvlCost} монет)
+            </button>
+            <button class="upg-btn tier" ${canBuyTier ? "" : "disabled"}>
+              Тир ${mod.tier + 1} (с ${tierInfo.reqLevel} ур.)<br/>(${tierInfo.cost} монет)
+            </button>
+          </div>
+        `;
 
-        function getAutoDps() {
-            if (state.autoLvl === 0) return 0;
-            return Math.floor(state.autoLvl * 2 * (1 + state.autoLvl * 0.15));
-        }
-
-        // Форматирование больших чисел
-        function formatNum(num) {
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e4) return (num / 1e3).toFixed(1) + 'K';
-            return Math.floor(num).toString();
-        }
-
-        // Вибрация при нажатии в Telegram
-        function triggerHaptic(style = 'light') {
-            if (tg && tg.HapticFeedback) {
-                try {
-                    tg.HapticFeedback.impactOccurred(style);
-                } catch (e) {}
-            }
-        }
-
-        // DOM-элементы
-        const coinsDisplay = document.getElementById('coinsDisplay');
-        const depthDisplay = document.getElementById('depthDisplay');
-        const layerDot = document.getElementById('layerDot');
-        const layerName = document.getElementById('layerName');
-        const layerHpText = document.getElementById('layerHpText');
-        const layerProgress = document.getElementById('layerProgress');
-        const drillArena = document.getElementById('drillArena');
-        const drillWrapper = document.getElementById('drillWrapper');
-        const heatFill = document.getElementById('heatFill');
-        const heatText = document.getElementById('heatText');
-        const overheatBadge = document.getElementById('overheatBadge');
-        const autoIncomeBadge = document.getElementById('autoIncomeBadge');
-
-        const upgPowerBtn = document.getElementById('upgPowerBtn');
-        const upgCoolBtn = document.getElementById('upgCoolBtn');
-        const upgAutoBtn = document.getElementById('upgAutoBtn');
-
-        let spinTimeout = null;
-
-        // Основная логика нанесения урона породе
-        function mineRock(damage, isManual = true, clickX = null, clickY = null) {
-            const currentLayer = LAYERS[state.layerIndex % LAYERS.length];
-            const cycleMultiplier = Math.floor(state.layerIndex / LAYERS.length) + 1;
-
-            state.layerHp -= damage;
-            const earnedCoins = Math.max(1, Math.round((damage * 0.6) * currentLayer.rewardMult));
-            state.coins += earnedCoins;
-
-            // Визуальные эффекты при ручном клике
-            if (isManual && clickX !== null && clickY !== null) {
-                spawnFloatingText(clickX, clickY, `+${formatNum(earnedCoins)} 🪙`);
-                spawnParticles(clickX, clickY, currentLayer.color);
-            }
-
-            // Проверка пробития текущего слоя
-            if (state.layerHp <= 0) {
-                state.depth += 10;
-                state.layerIndex += 1;
-                const nextLayer = LAYERS[state.layerIndex % LAYERS.length];
-                const nextCycle = Math.floor(state.layerIndex / LAYERS.length) + 1;
-                state.layerMaxHp = Math.floor(nextLayer.baseHp * Math.pow(2.2, nextCycle - 1));
-                state.layerHp = state.layerMaxHp;
-
-                // Бонус за прохождение слоя
-                const depthBonus = earnedCoins * 5;
-                state.coins += depthBonus;
-                if (isManual) {
-                    triggerHaptic('heavy');
-                    const rect = drillArena.getBoundingClientRect();
-                    spawnFloatingText(rect.width / 2, rect.height / 2 - 40, `ГЛУБЖЕ! +${formatNum(depthBonus)} 🪙`);
-                }
-            }
-
-            updateUI();
-        }
-
-        // Обработка нажатия по буру
-        function handleDrillTap(e) {
-            if (state.isOverheated) {
-                triggerHaptic('rigid');
-                return;
-            }
-
-            // Определяем координаты нажатия
-            const rect = drillArena.getBoundingClientRect();
-            let clientX = rect.left + rect.width / 2;
-            let clientY = rect.top + rect.height / 2;
-
-            if (e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else if (e.clientX !== undefined) {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-
-            const relX = clientX - rect.left;
-            const relY = clientY - rect.top;
-
-            // Нагрев бура (уменьшается с прокачкой охлаждения)
-            const heatPerTap = Math.max(2.2, 8.5 - (state.coolLvl - 1) * 0.65);
-            state.heat = Math.min(100, state.heat + heatPerTap);
-
-            if (state.heat >= 100) {
-                state.isOverheated = true;
-                overheatBadge.classList.add('visible');
-                triggerHaptic('error');
-            } else {
-                triggerHaptic('medium');
-            }
-
-            // Анимация вибрации и вращения бура
-            drillWrapper.classList.add('drilling-active', 'shaking');
-            clearTimeout(spinTimeout);
-            spinTimeout = setTimeout(() => {
-                drillWrapper.classList.remove('drilling-active', 'shaking');
-            }, 220);
-
-            mineRock(getDrillPower(), true, relX, relY);
-        }
-
-        // Всплывающий текст монет
-        function spawnFloatingText(x, y, text) {
-            const el = document.createElement('div');
-            el.className = 'floating-text';
-            el.textContent = text;
-            el.style.left = `${x + (Math.random() * 24 - 12)}px`;
-            el.style.top = `${y - 10}px`;
-            drillArena.appendChild(el);
-            setTimeout(() => el.remove(), 750);
-        }
-
-        // Разлетающиеся осколки породы
-        function spawnParticles(x, y, color) {
-            for (let i = 0; i < 6; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.backgroundColor = i % 2 === 0 ? color : '#fbbf24';
-                p.style.left = `${x}px`;
-                p.style.top = `${y}px`;
-                drillArena.appendChild(p);
-
-                const angle = (Math.PI * 2 * i) / 6 + (Math.random() * 0.5);
-                const velocity = 35 + Math.random() * 45;
-                const tx = Math.cos(angle) * velocity;
-                const ty = Math.sin(angle) * velocity - 20;
-
-                p.animate([
-                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                    { transform: `translate(${tx}px, ${ty}px) scale(0.2)`, opacity: 0 }
-                ], {
-                    duration: 450,
-                    easing: 'ease-out'
-                }).onfinish = () => p.remove();
-            }
-        }
-
-        // Покупка улучшений
-        upgPowerBtn.addEventListener('click', () => {
-            const cost = getPowerCost();
-            if (state.coins >= cost) {
-                state.coins -= cost;
-                state.powerLvl += 1;
-                triggerHaptic('light');
-                saveGame();
-                updateUI();
-            }
+        card.querySelector(".upg-btn.lvl").addEventListener("click", () => {
+          if (state.coins < lvlCost) return;
+          state.coins -= lvlCost;
+          mod.level += 1;
+          saveState();
+          render();
         });
 
-        upgCoolBtn.addEventListener('click', () => {
-            const cost = getCoolCost();
-            if (state.coins >= cost) {
-                state.coins -= cost;
-                state.coolLvl += 1;
-                state.heat = Math.max(0, state.heat - 30);
-                triggerHaptic('light');
-                saveGame();
-                updateUI();
-            }
+        card.querySelector(".upg-btn.tier").addEventListener("click", () => {
+          if (mod.level < tierInfo.reqLevel || state.coins < tierInfo.cost) return;
+          state.coins -= tierInfo.cost;
+          mod.tier += 1;
+          saveState();
+          render();
         });
 
-        upgAutoBtn.addEventListener('click', () => {
-            const cost = getAutoCost();
-            if (state.coins >= cost) {
-                state.coins -= cost;
-                state.autoLvl += 1;
-                triggerHaptic('light');
-                saveGame();
-                updateUI();
-            }
-        });
+        container.appendChild(card);
+      });
+    }
 
-        // Привязка событий касания и клика
-        drillArena.addEventListener('pointerdown', handleDrillTap);
-
-        // Обновление интерфейса
-        function updateUI() {
-            const currentLayer = LAYERS[state.layerIndex % LAYERS.length];
-            const cycle = Math.floor(state.layerIndex / LAYERS.length) + 1;
-
-            coinsDisplay.textContent = formatNum(state.coins);
-            depthDisplay.textContent = `${formatNum(state.depth)} м`;
-
-            layerDot.style.background = currentLayer.color;
-            layerName.textContent = `Слой ${state.layerIndex + 1}: ${currentLayer.name}${cycle > 1 ? ` (x${cycle})` : ''}`;
-            layerHpText.textContent = `${formatNum(Math.max(0, state.layerHp))} / ${formatNum(state.layerMaxHp)}`;
-
-            const hpPercent = Math.max(0, Math.min(100, (state.layerHp / state.layerMaxHp) * 100));
-            layerProgress.style.width = `${hpPercent}%`;
-            layerProgress.style.background = currentLayer.color;
-            document.body.style.backgroundColor = currentLayer.bg;
-
-            // Температура
-            heatFill.style.width = `${state.heat}%`;
-            heatText.textContent = `${Math.round(state.heat)}%`;
-
-            // Кнопки магазина
-            const pCost = getPowerCost();
-            document.getElementById('powerLvlText').textContent = `Ур. ${state.powerLvl} (+${formatNum(getDrillPower())})`;
-            document.getElementById('powerCostText').textContent = `🪙 ${formatNum(pCost)}`;
-            upgPowerBtn.disabled = state.coins < pCost;
-            upgPowerBtn.classList.toggle('affordable', state.coins >= pCost);
-
-            const cCost = getCoolCost();
-            document.getElementById('coolLvlText').textContent = `Ур. ${state.coolLvl}`;
-            document.getElementById('coolCostText').textContent = `🪙 ${formatNum(cCost)}`;
-            upgCoolBtn.disabled = state.coins < cCost;
-            upgCoolBtn.classList.toggle('affordable', state.coins >= cCost);
-
-            const aCost = getAutoCost();
-            const autoDps = getAutoDps();
-            document.getElementById('autoLvlText').textContent = `Ур. ${state.autoLvl}`;
-            document.getElementById('autoCostText').textContent = `🪙 ${formatNum(aCost)}`;
-            upgAutoBtn.disabled = state.coins < aCost;
-            upgAutoBtn.classList.toggle('affordable', state.coins >= aCost);
-
-            autoIncomeBadge.textContent = `Авто-бур: ${formatNum(autoDps)}/сек`;
+    document.getElementById("sellAllEverythingBtn").addEventListener("click", () => {
+      let totalCoins = 0;
+      RESOURCES.forEach((res) => {
+        const count = state.inventory[res.id] || 0;
+        if (count > 0) {
+          const unitPrice = Math.max(res.value, Math.round(res.value * getSellBonusMult()));
+          totalCoins += count * unitPrice;
+          state.inventory[res.id] = 0;
         }
+      });
+      if (totalCoins > 0) {
+        state.coins += totalCoins;
+        saveState();
+        render();
+      }
+    });
 
-        // Игровой цикл: охлаждение бура (10 раз в секунду)
-        setInterval(() => {
-            if (state.heat > 0) {
-                const coolRate = state.isOverheated
-                    ? (3.2 + state.coolLvl * 0.35) // Остывание при перегреве (~3 сек)
-                    : (1.8 + state.coolLvl * 0.4);
-                state.heat = Math.max(0, state.heat - coolRate);
-
-                if (state.isOverheated && state.heat <= 15) {
-                    state.isOverheated = false;
-                    overheatBadge.classList.remove('visible');
-                }
-                heatFill.style.width = `${state.heat}%`;
-                heatText.textContent = `${Math.round(state.heat)}%`;
-            }
-        }, 100);
-
-        // Игровой цикл: работа авто-бура и автосохранение (раз в секунду)
-        setInterval(() => {
-            const dps = getAutoDps();
-            if (dps > 0) {
-                mineRock(dps, false);
-            }
-            saveGame();
-        }, 1000);
-
-        // Запуск при загрузке
-        window.addEventListener('load', () => {
-            loadGame();
-            updateUI();
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const target = btn.dataset.tab;
+        ["drill", "inventory", "modules"].forEach((id) => {
+          document.getElementById(`tab-${id}`).classList.toggle("hidden", id !== target);
         });
-    </script>
+      });
+    });
+
+    document.getElementById("drillStage").addEventListener("click", (e) => {
+      applyDamage(getDrillPower(), e.clientX, e.clientY, true);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      state = defaultState();
+      syncLayerHpMax();
+      saveState();
+      render();
+    });
+
+    setInterval(() => {
+      let changed = false;
+
+      if (state.brokenUntil > 0 && Date.now() >= state.brokenUntil) {
+        state.brokenUntil = 0;
+        state.overheated = false;
+        state.heat = 0;
+        saveState();
+        changed = true;
+      }
+
+      if (isDrillBroken()) {
+        render();
+        return;
+      }
+
+      if (state.heat > 0) {
+        state.heat = Math.max(0, state.heat - getCoolingPerSec() * 0.25);
+        if (state.overheated && state.heat <= 20) {
+          state.overheated = false;
+        }
+        changed = true;
+      }
+
+      const dps = getAutoDps();
+      if (dps > 0) {
+        applyDamage(dps * 0.25, null, null, false);
+        changed = false;
+      }
+
+      if (changed) {
+        render();
+      }
+    }, 250);
+
+    syncLayerHpMax();
+    render();
+  </script>
 </body>
 </html>
