@@ -66,49 +66,63 @@
         linear-gradient(180deg, #5c2818 0%, #4a1f12 45%, #3b170d 100%);
       display:flex; flex-direction:column; justify-content:space-between; padding:12px 10px;
     }
+    .face-bed {
+      position:absolute; left:0; right:0; bottom:56px; height:24px;
+      background:linear-gradient(180deg, rgba(120,53,15,0) 0%, rgba(41,16,8,0.88) 70%, #1c0b05 100%);
+      pointer-events:none; z-index:2;
+    }
     .rig-area {
       position:relative; margin:auto 0; display:flex; flex-direction:column; align-items:center; z-index:3;
     }
-    .rig-svg { width:240px; height:225px; overflow:visible; }
+    .rig-svg { width:240px; height:235px; overflow:visible; }
 
-    /* Механика анимации в стиле «Бурило»:
-       1) корпус слегка вибрирует на месте
-       2) боковые ковши сводятся/работают
-       3) шток с буром плавно отпускается вниз, бьёт в забой и резко отскакивает наверх */
-    .rig-svg.spin .chassis { animation:chassisVib .12s steps(2, end) infinite; }
-    @keyframes chassisVib {
+    /* Реалистичный цикл бурения: подача вниз в забой, ударные толчки на глубине, подъём */
+    .rig-svg.spin .chassis { animation:rigFeed 1.8s cubic-bezier(.42,.0,.58,1) infinite; }
+    @keyframes rigFeed {
       0% { transform:translate(0px, 0px); }
-      50% { transform:translate(-1px, 1px); }
-      100% { transform:translate(1px, 0px); }
+      45% { transform:translate(0px, 24px); }
+      52% { transform:translate(-1.5px, 27px); }
+      59% { transform:translate(1.5px, 23px); }
+      66% { transform:translate(-1px, 27px); }
+      73% { transform:translate(1px, 24px); }
+      100% { transform:translate(0px, 0px); }
     }
 
     .claw-left { transform-box:fill-box; transform-origin:right center; }
     .claw-right { transform-box:fill-box; transform-origin:left center; }
-    .rig-svg.spin .claw-left { animation:clawWorkL .9s ease-in-out infinite; }
-    .rig-svg.spin .claw-right { animation:clawWorkR .9s ease-in-out infinite; }
-    @keyframes clawWorkL {
-      0%, 100% { transform:translateX(0) rotate(0deg); }
-      50% { transform:translateX(6px) rotate(-8deg); }
+    .rig-svg.spin .claw-left { animation:bucketDigL 1.8s ease-in-out infinite; }
+    .rig-svg.spin .claw-right { animation:bucketDigR 1.8s ease-in-out infinite; }
+    @keyframes bucketDigL {
+      0% { transform:translateX(0) rotate(0deg); }
+      45% { transform:translateX(8px) rotate(-12deg); }
+      75% { transform:translateX(5px) rotate(-6deg); }
+      100% { transform:translateX(0) rotate(0deg); }
     }
-    @keyframes clawWorkR {
-      0%, 100% { transform:translateX(0) rotate(0deg); }
-      50% { transform:translateX(-6px) rotate(8deg); }
+    @keyframes bucketDigR {
+      0% { transform:translateX(0) rotate(0deg); }
+      45% { transform:translateX(-8px) rotate(12deg); }
+      75% { transform:translateX(-5px) rotate(6deg); }
+      100% { transform:translateX(0) rotate(0deg); }
     }
 
     .bit-feed { transform-box:fill-box; transform-origin:top center; }
-    .rig-svg.spin .bit-feed { animation:bitFeedCycle 1.2s cubic-bezier(.32,.02,.82,.65) infinite; }
-    @keyframes bitFeedCycle {
+    .rig-svg.spin .bit-feed { animation:drillPlunge 1.8s cubic-bezier(.35,.05,.72,.9) infinite; }
+    @keyframes drillPlunge {
       0% { transform:translateY(0px); }
-      68% { transform:translateY(28px); }
-      78% { transform:translateY(23px); }
+      45% { transform:translateY(42px); }
+      52% { transform:translateY(46px); }
+      59% { transform:translateY(40px); }
+      66% { transform:translateY(46px); }
+      73% { transform:translateY(41px); }
       100% { transform:translateY(0px); }
     }
 
     .spiral-flutes { transform-box:fill-box; transform-origin:center; }
-    .rig-svg.spin .spiral-flutes { animation:fluteStep .16s steps(2, end) infinite; }
-    @keyframes fluteStep {
-      0% { transform:translateY(0px); }
-      100% { transform:translateY(4px); }
+    .rig-svg.spin .spiral-flutes { animation:augerTwist .14s linear infinite; }
+    @keyframes augerTwist {
+      0% { transform:translateY(0px) scaleX(1); }
+      50% { transform:translateY(3px) scaleX(0.92); }
+      100% { transform:translateY(6px) scaleX(1); }
     }
 
     .mine-info {
@@ -117,12 +131,13 @@
     }
 
     .falling-ore {
-      position:absolute; pointer-events:none; font-size:14px; z-index:2;
-      animation:oreDrop 1.05s linear forwards;
+      position:absolute; pointer-events:none; font-size:14px; z-index:4;
+      animation:oreScatter .95s cubic-bezier(.2,.7,.4,1) forwards;
     }
-    @keyframes oreDrop {
-      0% { opacity:0.95; transform:translateY(0) rotate(0deg); }
-      100% { opacity:0; transform:translateY(340px) rotate(220deg); }
+    @keyframes oreScatter {
+      0% { opacity:0.95; transform:translate(0, 0) scale(1) rotate(0deg); }
+      45% { opacity:1; transform:translate(var(--sx, 14px), 75px) scale(1.15) rotate(110deg); }
+      100% { opacity:0; transform:translate(var(--sx2, 24px), 260px) scale(0.85) rotate(240deg); }
     }
 
     .energy-dock { display:flex; align-items:center; gap:0; margin-top:8px; z-index:5; }
@@ -267,7 +282,7 @@
     <div id="p-mine">
       <div class="mine-view" id="mineStage">
         <div class="rig-area">
-          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 235" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g class="chassis">
               <path d="M80 56 H42 V102 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
               <path d="M160 56 H198 V102 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
@@ -283,7 +298,7 @@
               <rect x="94" y="78" width="52" height="20" fill="#475569" stroke="#1e293b" stroke-width="2.5"/>
             </g>
 
-            <rect x="115" y="98" width="10" height="44" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
+            <rect x="115" y="98" width="10" height="58" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
 
             <g class="bit-feed">
               <rect x="113" y="102" width="14" height="34" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
@@ -297,6 +312,8 @@
           </svg>
           <div class="mine-info" id="mineInfo">Верхняя земля • ~23 кг/сек</div>
         </div>
+
+        <div class="face-bed"></div>
 
         <div class="energy-dock">
           <div class="tube-pipe"></div>
@@ -348,7 +365,7 @@
 
   <script>
     if (window.Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); }
-    const KEY = "burilo_mech_v6";
+    const KEY = "burilo_real_feed_v7";
 
     const RES = [
       { id: "dirt", name: "Земля", icon: "🟫", perTon: 12, desc: "Верхний рыхлый слой породы." },
@@ -458,13 +475,16 @@
     function spawnFallingOre(resId) {
       const stage = document.getElementById("mineStage");
       const rObj = RES.find((x) => x.id === resId);
+      const dir = (Math.random() - 0.5) * 2;
       const el = document.createElement("div");
       el.className = "falling-ore";
       el.textContent = rObj ? rObj.icon : "🪨";
-      el.style.left = `${16 + Math.random() * 68}%`;
-      el.style.top = "14px";
+      el.style.left = `${44 + Math.random() * 12}%`;
+      el.style.top = "215px";
+      el.style.setProperty("--sx", `${Math.round(dir * 34)}px`);
+      el.style.setProperty("--sx2", `${Math.round(dir * 52)}px`);
       stage.appendChild(el);
-      setTimeout(() => el.remove(), 1060);
+      setTimeout(() => el.remove(), 970);
     }
 
     function renderOdometer() {
@@ -603,7 +623,7 @@
         const h = horizon();
         st.depth = Number((st.depth + h.v * dt).toFixed(1));
         const droppedId = addMass(h.kg * motorFactor() * bucketMult() * (1 + st.depth / 250) * dt);
-        if (tick % 3 === 0 && droppedId) spawnFallingOre(droppedId);
+        if (tick % 2 === 0 && droppedId) spawnFallingOre(droppedId);
       }
       if (tick % 4 === 0) save();
       render();
