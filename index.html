@@ -4,146 +4,347 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Burenie Clicker</title>
+  <title>#БУРИЛО</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg:#0f1115; --p1:#181c24; --p2:#1f2430; --b:#2c3344;
-      --gold:#f59e0b; --ora:#ea580c; --cyn:#06b6d4; --grn:#22c55e; --red:#ef4444;
-      --txt:#f3f4f6; --mut:#9ca3af;
+      --bg:#1c1917; --b:#44403c;
+      --gold:#f59e0b; --ora:#ea580c; --cyn:#38bdf8; --grn:#4ade80; --red:#f87171;
+      --txt:#fafaf9; --mut:#a8a29e;
     }
     * { box-sizing:border-box; user-select:none; -webkit-tap-highlight-color:transparent; }
-    body { margin:0; padding:10px 12px 132px; font-family:system-ui,sans-serif; background:var(--bg); color:var(--txt); }
-    .app { max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:10px; }
-    .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-    .card { background:var(--p1); border:1px solid var(--b); border-radius:10px; padding:7px 4px; text-align:center; }
-    .lbl { font-size:10px; color:var(--mut); }
-    .val { font-size:12px; font-weight:700; color:var(--gold); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .cyn{color:var(--cyn)} .ora{color:var(--ora)} .grn{color:var(--grn)} .red{color:var(--red)}
-    .panel { background:var(--p1); border:1px solid var(--b); border-radius:12px; padding:12px; }
+    body { margin:0; padding:0 0 84px; font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--txt); }
+    .app { max-width:520px; margin:0 auto; }
+
+    /* Верхняя панель */
+    .top-bar {
+      position:sticky; top:0; z-index:20;
+      background:linear-gradient(180deg,#3b1d12 0%,#23130d 100%);
+      border-bottom:2px solid #572d1c; padding:8px 10px;
+    }
+    .top-row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .hud-box {
+      display:flex; align-items:center; gap:10px; background:#00000088;
+      border:1px solid #ffffff22; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:800;
+    }
+    .sub-hud {
+      margin-top:6px; display:flex; justify-content:space-between; align-items:center; gap:8px;
+    }
+    .odometer { display:flex; align-items:center; gap:2px; }
+    .odometer span {
+      background:#111827; color:#fde047; border:1px solid #4b5563; border-radius:4px;
+      padding:2px 5px; font-size:12px; font-weight:900; font-variant-numeric:tabular-nums;
+    }
+    .odometer .unit { background:#166534; color:#bbf7d0; border-color:#22c55e; }
+
+    /* Тахометр оборотов как на скриншоте справа под глубиной */
+    .rpm-gauge {
+      display:flex; align-items:center; gap:6px; background:#1f2937d9;
+      border:1px solid #4b5563; border-radius:999px; padding:2px 4px 2px 10px;
+    }
+    .rpm-num { font-size:11px; font-weight:900; color:#f9fafb; font-variant-numeric:tabular-nums; }
+    .rpm-dial {
+      position:relative; width:24px; height:24px; border-radius:50%;
+      background:conic-gradient(#38bdf8 0deg 140deg, #f59e0b 140deg 230deg, #ef4444 230deg 280deg, #334155 280deg 360deg);
+      border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center;
+    }
+    .rpm-dial::after {
+      content:""; width:8px; height:8px; border-radius:50%; background:#1e293b;
+    }
+
+    .warn {
+      background:#0284c733; border:1px solid #38bdf888; color:#bae6fd;
+      font-size:11px; text-align:center; padding:5px 8px; border-radius:6px; margin-top:6px;
+    }
     .hidden { display:none!important; }
-    .row { display:flex; justify-content:space-between; font-size:12px; color:var(--mut); margin-bottom:4px; }
-    .bar { width:100%; height:9px; background:#0006; border-radius:99px; overflow:hidden; margin-bottom:8px; }
-    .fill-bat { height:100%; background:linear-gradient(90deg,var(--grn),var(--cyn)); transition:width .12s; }
-    .fill-heat { height:100%; background:linear-gradient(90deg,var(--cyn),var(--gold),var(--red)); transition:width .12s; }
-    .warn { background:#ef444433; border:1px solid #ef444488; color:#fecaca; border-radius:8px; padding:7px 10px; font-size:12px; text-align:center; margin-bottom:8px; }
-    .stage { position:relative; height:190px; border-radius:10px; border:1px solid #fff2; background:linear-gradient(180deg,#161b26,#2d1b12); display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:10px; overflow:hidden; cursor:pointer; }
-    .rig { font-size:44px; transition:transform .12s; }
-    .rig.spin { animation:shake .14s infinite alternate; }
-    @keyframes shake { from{transform:translateY(2px) rotate(-2deg)} to{transform:translateY(8px) rotate(2deg)} }
-    .ground { width:100%; background:#3b2113; border-top:2px solid #9a3412; border-radius:8px; padding:6px 8px; text-align:center; font-size:11px; color:#fde68a; font-weight:700; }
-    .btn { border:none; border-radius:10px; padding:10px; font-size:13px; font-weight:700; cursor:pointer; }
-    .btn-off { width:100%; margin-top:8px; background:var(--ora); color:#fff; }
-    .btn-off.is-off { background:var(--grn); color:#06180c; }
-    .list { display:flex; flex-direction:column; gap:8px; }
-    .item { display:flex; justify-content:space-between; align-items:center; background:var(--p2); border:1px solid var(--b); border-radius:10px; padding:10px; }
-    .sub { font-size:11px; color:var(--mut); }
-    .sell { background:#22c55e28; border:1px solid #22c55e77; color:#86efac; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer; }
-    .sell:disabled { opacity:.35; cursor:not-allowed; }
-    .m-act { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
-    .u-lvl { background:var(--cyn); color:#051217; }
-    .u-tier { background:var(--gold); color:#1c1202; }
-    .btn:disabled { opacity:.35; cursor:not-allowed; }
-    .dock { position:fixed; left:0; right:0; bottom:0; z-index:20; background:#12161ef5; border-top:1px solid var(--b); padding:8px 12px calc(8px + env(safe-area-inset-bottom)); }
-    .dock-in { max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
-    .slider-box { background:var(--p2); border:1px solid var(--b); border-radius:9px; padding:6px 10px; font-size:12px; }
-    .slider-box input { width:100%; accent-color:var(--ora); margin-top:3px; }
-    .nav { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .tab { background:var(--p2); border:1px solid var(--b); color:var(--mut); border-radius:9px; padding:9px 4px; font-size:12px; font-weight:700; cursor:pointer; }
+
+    /* Шахта как на скриншоте */
+    .mine-view {
+      position:relative; min-height:440px; overflow:hidden;
+      border-left:14px solid #9a3412; border-right:14px solid #9a3412;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(0,0,0,0.45) 0 10px, transparent 11px),
+        radial-gradient(circle at 78% 26%, rgba(148,163,184,0.35) 0 9px, transparent 10px),
+        radial-gradient(circle at 32% 42%, rgba(245,158,11,0.25) 0 8px, transparent 9px),
+        radial-gradient(circle at 82% 52%, rgba(0,0,0,0.45) 0 11px, transparent 12px),
+        repeating-linear-gradient(28deg, rgba(0,0,0,0.22) 0 2px, transparent 2px 26px),
+        repeating-linear-gradient(-34deg, rgba(0,0,0,0.22) 0 2px, transparent 2px 32px),
+        linear-gradient(180deg, #5c2818 0%, #4a1f12 45%, #3b170d 100%);
+      display:flex; flex-direction:column; justify-content:space-between; padding:12px 10px;
+    }
+    .rig-area {
+      position:relative; margin:auto 0; display:flex; flex-direction:column; align-items:center; z-index:3;
+    }
+    .rig-svg { width:240px; height:190px; }
+    .rig-svg.spin { animation:mineShake .13s infinite alternate; }
+    @keyframes mineShake {
+      0% { transform:translateY(0) rotate(-1deg); }
+      100% { transform:translateY(6px) rotate(1deg); }
+    }
+    .auger { transform-box:fill-box; transform-origin:center; }
+    .rig-svg.spin .auger { animation:augerSpin .14s linear infinite; }
+    @keyframes augerSpin {
+      0% { transform:translateY(0); }
+      100% { transform:translateY(5px); }
+    }
+    .mine-info {
+      background:#00000099; border:1px solid #ffffff24; border-radius:999px;
+      padding:4px 12px; font-size:11px; font-weight:700; color:#fde68a; margin-top:4px;
+    }
+
+    /* Падающая руда/порода в шахте */
+    .falling-ore {
+      position:absolute; pointer-events:none; font-size:14px; z-index:2;
+      animation:oreDrop 1.1s linear forwards;
+    }
+    @keyframes oreDrop {
+      0% { opacity:0.95; transform:translateY(0) rotate(0deg); }
+      100% { opacity:0; transform:translateY(340px) rotate(220deg); }
+    }
+
+    /* Колба энергии + кнопка справа как на скриншоте */
+    .energy-dock {
+      display:flex; align-items:center; gap:0; margin-top:8px; z-index:5;
+    }
+    .tube-pipe {
+      width:14px; height:14px; background:#ea580c; border:2px solid #1e293b;
+      border-radius:3px 0 0 3px; flex-shrink:0;
+    }
+    .tube-body {
+      position:relative; flex:1; height:36px; border-radius:10px 0 0 10px;
+      background:linear-gradient(180deg, rgba(226,232,240,0.28) 0%, rgba(15,23,42,0.75) 100%);
+      border:3px solid #1e293b; border-right:none; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .tube-fill {
+      position:absolute; left:0; top:0; bottom:0;
+      background:
+        radial-gradient(circle at 20% 35%, rgba(255,255,255,0.6) 0 2px, transparent 3px),
+        radial-gradient(circle at 65% 70%, rgba(255,255,255,0.5) 0 2.5px, transparent 3.5px),
+        radial-gradient(circle at 85% 30%, rgba(255,255,255,0.55) 0 1.5px, transparent 2.5px),
+        linear-gradient(180deg,#7dd3fc 0%,#0284c7 55%,#0369a1 100%);
+      transition:width .15s;
+    }
+    .tube-glass {
+      position:absolute; inset:2px 4px auto 4px; height:6px; border-radius:99px;
+      background:rgba(255,255,255,0.32); pointer-events:none;
+    }
+    .tube-label {
+      position:relative; z-index:2; background:#0284c7cc; padding:2px 10px; border-radius:99px;
+      font-size:12px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;
+      font-variant-numeric:tabular-nums;
+    }
+    .charge-btn {
+      width:52px; height:48px; border-radius:10px; background:#475569; border:3px solid #1e293b;
+      display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+      box-shadow:0 3px 0 #0f172a; transition:transform .07s;
+    }
+    .charge-btn:active { transform:scale(0.93) translateY(2px); }
+    .charge-knob {
+      width:30px; height:30px; border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #fb923c, #ea580c 65%, #9a3412 100%);
+      border:3px solid #fdba74; box-shadow:inset 0 0 0 3px #c2410c;
+    }
+
+    /* Детали / Склад / Буры */
+    .blueprint {
+      padding:12px 10px 14px; background-color:#f8fafc; color:#0f172a;
+      background-image:
+        linear-gradient(to right, rgba(148,163,184,0.22) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148,163,184,0.22) 1px, transparent 1px);
+      background-size:16px 16px;
+    }
+    .bp-title { text-align:center; font-size:24px; font-weight:900; letter-spacing:2px; color:#94a3b8; margin-bottom:6px; }
+    .parts-strip {
+      display:grid; grid-template-columns:repeat(5,1fr); gap:5px;
+      background:#292524; padding:8px 6px; border-top:2px solid var(--b);
+    }
+    .part-col { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .part-ico { font-size:18px; line-height:1; }
+    .part-lvl { font-size:11px; font-weight:900; padding:1px 7px; border-radius:4px; color:#fff; }
+    .part-name { font-size:9px; color:#e7e5e4; text-align:center; white-space:nowrap; }
+    .part-btn {
+      width:100%; border:none; border-radius:6px; padding:6px 2px;
+      background:linear-gradient(180deg,#4ade80,#16a34a); color:#052e16;
+      font-size:10px; font-weight:900; cursor:pointer;
+    }
+    .part-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+    .stor-head {
+      background:#4b5563; border-bottom:2px solid #374151; padding:8px 10px;
+      display:flex; justify-content:space-between; align-items:center; gap:8px;
+    }
+    .sell-all-green {
+      background:linear-gradient(180deg,#4ade80,#16a34a); color:#052e16; border:none;
+      border-radius:8px; padding:8px 14px; font-size:12px; font-weight:900; cursor:pointer;
+    }
+    .sell-all-green:disabled { opacity:.35; cursor:not-allowed; }
+    .stor-list { padding:10px; display:flex; flex-direction:column; gap:8px; }
+    .res-card { background:#f5f5f4; color:#1c1917; border-radius:10px; padding:10px; border:1px solid #d6d3d1; }
+    .res-top { font-weight:900; font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .res-bot { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .res-num { font-size:15px; font-weight:900; color:#15803d; }
+    .res-sell {
+      background:linear-gradient(180deg,#4ade80,#16a34a); color:#052e16; border:none;
+      border-radius:8px; padding:8px 14px; font-size:12px; font-weight:900; cursor:pointer;
+    }
+    .res-sell:disabled { opacity:.35; cursor:not-allowed; }
+
+    .drills-wrap { padding:10px; display:flex; flex-direction:column; gap:10px; }
+    .sec-lbl { text-align:center; font-size:12px; font-weight:700; color:#e7e5e4; }
+    .drill-card { background:#574b54; border:2px solid #786a74; border-radius:10px; padding:12px; }
+    .drill-card.recipe { background:#fffbeb; color:#1c1917; border-color:#78350f; }
+    .dc-head { display:flex; justify-content:space-between; align-items:center; }
+    .dc-title { font-size:16px; font-weight:900; }
+    .dc-watt { display:inline-block; margin-top:4px; background:#fef3c7; color:#78350f; border-radius:6px; padding:2px 8px; font-size:11px; font-weight:800; }
+    .dc-badge { background:#00000055; color:#e5e7eb; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; border:none; cursor:pointer; }
+    .dc-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    .dc-btn { border:none; border-radius:99px; padding:9px 10px; font-size:12px; font-weight:900; cursor:pointer; }
+    .dc-btn.coins { background:linear-gradient(180deg,#4ade80,#16a34a); color:#052e16; }
+    .dc-btn.ore { background:#ffffff; color:#0284c7; border:2px solid #bae6fd; }
+    .dc-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+    .nav-dock {
+      position:fixed; left:0; right:0; bottom:0; z-index:30;
+      background:#1c1917fa; border-top:2px solid var(--b); padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    }
+    .nav-in { max-width:520px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+    .tab {
+      background:#292524; border:1px solid var(--b); color:var(--mut); border-radius:8px;
+      padding:8px 4px; font-size:11px; font-weight:800; cursor:pointer;
+    }
     .tab.active { background:var(--ora); border-color:var(--ora); color:#fff; }
-    .foot { display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:11px; color:var(--mut); }
-    .rst { background:none; border:1px solid var(--b); color:var(--mut); border-radius:7px; padding:5px 9px; font-size:11px; cursor:pointer; }
+    .rst-row { display:flex; justify-content:flex-end; padding:6px 10px 0; }
+    .rst { background:none; border:1px solid var(--b); color:var(--mut); border-radius:6px; padding:4px 8px; font-size:10px; cursor:pointer; }
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="grid4">
-      <div class="card"><div class="lbl">МОНЕТЫ</div><div class="val" id="sCoins">0</div></div>
-      <div class="card"><div class="lbl">ГЛУБИНА</div><div class="val cyn" id="sDepth">0.0 м</div></div>
-      <div class="card"><div class="lbl">ЗАРЯД</div><div class="val ora" id="sBat">4.0 ч</div></div>
-      <div class="card"><div class="lbl">СКЛАД</div><div class="val grn" id="sStor">0/5 т</div></div>
-    </div>
+    <div class="top-bar">
+      <div class="top-row">
+        <div class="hud-box">
+          <span>🪙 <strong id="hCoins">0</strong></span>
+          <span>⚡ <strong id="hBat">4.0ч</strong></span>
+        </div>
+        <div class="hud-box">
+          <span style="color:var(--grn)" id="hStor">0/5 т</span>
+        </div>
+      </div>
 
-    <div class="panel" id="p-drill">
-      <div class="row"><span id="lBat">Батарея: 4.0 / 4.0 ч</span><span id="pBat">100%</span></div>
-      <div class="bar"><div class="fill-bat" id="bBat"></div></div>
-
-      <div class="row"><span id="lHeat">Нагрев: Норма</span><span id="pHeat">0%</span></div>
-      <div class="bar"><div class="fill-heat" id="bHeat"></div></div>
+      <div class="sub-hud">
+        <div class="rpm-gauge" title="Уровень мотора">
+          <span class="rpm-num" id="rpmTxt">1</span>
+          <div class="rpm-dial"></div>
+        </div>
+        <div class="odometer" id="depthOdo"></div>
+      </div>
 
       <div class="warn hidden" id="warnBox"></div>
+    </div>
 
-      <div class="stage" id="stage">
-        <div class="rig" id="rig">⛏️</div>
-        <div class="ground" id="groundTxt">Горизонт: Верхняя земля</div>
-      </div>
+    <!-- Вкладка 1: Шахта с колбой энергии и кнопкой заряда -->
+    <div id="p-mine">
+      <div class="mine-view" id="mineStage">
+        <div class="rig-area">
+          <svg class="rig-svg" id="mineRig" viewBox="0 0 240 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M80 62 H42 V112 H66" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
+            <path d="M160 62 H198 V112 H174" stroke="#fbbf24" stroke-width="8" stroke-linejoin="round"/>
+            <rect x="34" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
+            <rect x="172" y="106" width="34" height="36" rx="4" fill="#7c2d12" stroke="#1e293b" stroke-width="2.5"/>
+            <rect x="82" y="24" width="76" height="62" rx="5" fill="#6ee7b7" stroke="#1e293b" stroke-width="2.5"/>
+            <circle cx="104" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+            <circle cx="136" cy="54" r="14" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+            <rect x="94" y="86" width="52" height="24" fill="#475569" stroke="#1e293b" stroke-width="2.5"/>
+            <g class="auger">
+              <rect x="115" y="110" width="10" height="22" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+              <polygon points="104,132 136,132 120,182" fill="#cbd5e1" stroke="#1e293b" stroke-width="2.5"/>
+              <line x1="107" y1="145" x2="133" y2="152" stroke="#1e293b" stroke-width="4"/>
+              <line x1="110" y1="160" x2="130" y2="166" stroke="#1e293b" stroke-width="4"/>
+            </g>
+          </svg>
+          <div class="mine-info" id="mineInfo">Верхняя земля • ~23 кг/сек</div>
+        </div>
 
-      <button class="btn btn-off" id="toggleDrillBtn">🔌 ОТРУБИТЬ БУР</button>
-
-      <div class="foot">
-        <span>Тап по сцене — заряд АКБ</span>
-        <button class="rst" id="resetBtn">Сброс</button>
+        <div class="energy-dock">
+          <div class="tube-pipe"></div>
+          <div class="tube-body">
+            <div class="tube-fill" id="tubeFill" style="width:100%"></div>
+            <div class="tube-glass"></div>
+            <div class="tube-label" id="tubeLabel">04:00:00</div>
+          </div>
+          <button class="charge-btn" id="chargeBtn" title="Набрать энергию">
+            <div class="charge-knob"></div>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="panel hidden" id="p-inv">
-      <div class="row" style="margin-bottom:8px;"><span id="invCap">Склад: 0 / 5 т</span><span id="invSum">Сумма: 0</span></div>
-      <button class="sell" style="width:100%;padding:9px;margin-bottom:8px;" id="sellAllBtn">Забрать и продать всё</button>
-      <div class="list" id="invList"></div>
+    <!-- Вкладка 2: Детали и схема #БУРИЛО -->
+    <div class="hidden" id="p-rig">
+      <div class="blueprint">
+        <div class="bp-title">#БУРИЛО</div>
+        <div id="bpSummary" style="text-align:center;font-size:12px;font-weight:700;color:#334155;"></div>
+      </div>
+      <div class="parts-strip" id="partsStrip"></div>
+      <div class="rst-row"><button class="rst" id="resetBtn">Сброс прогресса</button></div>
     </div>
 
-    <div class="panel hidden" id="p-mod">
-      <div class="list" id="modList"></div>
+    <!-- Вкладка 3: Склад -->
+    <div class="hidden" id="p-stor">
+      <div class="stor-head">
+        <div>
+          <strong style="font-size:14px;">Склад</strong>
+          <span class="sub" id="storLvlTxt"> • 0 / 5 т</span>
+        </div>
+        <button class="sell-all-green" id="sellAllBtn">Продать всё</button>
+      </div>
+      <div class="stor-list" id="storList"></div>
+    </div>
+
+    <!-- Вкладка 4: Буры и рецепты -->
+    <div class="hidden" id="p-drills">
+      <div class="drills-wrap" id="drillsList"></div>
     </div>
   </div>
 
-  <div class="dock">
-    <div class="dock-in">
-      <div class="slider-box">
-        <div class="row" style="margin:0;">
-          <span>Мощность бура: <strong id="pwrVal">100%</strong></span>
-          <span id="pwrInfo">Нагрев ×1.00 • АКБ 100%</span>
-        </div>
-        <input type="range" id="pwrSlider" min="20" max="100" step="5" value="100" />
-      </div>
-      <div class="nav">
-        <button class="tab active" data-p="drill">⛏️ Бурение</button>
-        <button class="tab" data-p="inv">🎒 Инвентарь</button>
-        <button class="tab" data-p="mod">⚙️ Модули</button>
-      </div>
+  <div class="nav-dock">
+    <div class="nav-in">
+      <button class="tab active" data-t="mine">⛏️ Шахта</button>
+      <button class="tab" data-t="rig">🔧 Детали</button>
+      <button class="tab" data-t="stor">📦 Склад</button>
+      <button class="tab" data-t="drills">🛠️ Буры</button>
     </div>
   </div>
 
   <script>
     if (window.Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); }
-    const KEY = "burenie_compact_v1";
+    const KEY = "burilo_tube_v4";
 
     const RES = [
-      { id: "dirt", name: "Земля", icon: "🟫", perTon: 12 },
-      { id: "stone", name: "Камень", icon: "🪨", perTon: 28 },
-      { id: "coal", name: "Уголь", icon: "⬛", perTon: 65 },
-      { id: "iron", name: "Железная руда", icon: "⛓️", perTon: 140 },
-      { id: "gold", name: "Золотая руда", icon: "🪙", perTon: 320 }
+      { id: "dirt", name: "Земля", icon: "🟫", perTon: 12, desc: "Верхний рыхлый слой породы." },
+      { id: "stone", name: "Камень", icon: "🪨", perTon: 28, desc: "Плотная порода из шахты." },
+      { id: "coal", name: "Уголь", icon: "⬛", perTon: 65, desc: "Горючее ископаемое с глубины." },
+      { id: "iron", name: "Железная руда", icon: "⛓️", perTon: 140, desc: "Тяжёлая металлическая руда." },
+      { id: "gold", name: "Золотая руда", icon: "🪙", perTon: 320, desc: "Редкая жила высокой ценности." }
     ];
 
-    const HORIZONS = [
-      { d: 0, name: "Верхняя земля", v: 0.8, kg: 90, w: [["dirt", 0.8, 1.1], ["stone", 0.2, 0.9]] },
-      { d: 80, name: "Плотный грунт", v: 0.7, kg: 220, w: [["dirt", 0.4, 1.0], ["stone", 0.6, 1.1]] },
-      { d: 220, name: "Угольный пласт", v: 0.6, kg: 520, w: [["stone", 0.4, 0.95], ["coal", 0.6, 1.15]] },
-      { d: 450, name: "Рудная жила", v: 0.5, kg: 1240, w: [["coal", 0.35, 1.0], ["iron", 0.65, 1.2]] },
-      { d: 800, name: "Глубинный горизонт", v: 0.4, kg: 2900, w: [["iron", 0.5, 1.1], ["gold", 0.5, 1.25]] }
+    const DRILL_MODELS = [
+      { id: "br1", code: "БР-1 [1]", watt: 1, mult: 1.0, coinCost: 0, oreReq: null },
+      { id: "br2", code: "БР-2 [2]", watt: 3, mult: 1.5, coinCost: 120, oreReq: { id: "stone", kg: 400 } },
+      { id: "br25", code: "БР-25/7 [3]", watt: 10, mult: 2.6, coinCost: 650, oreReq: { id: "coal", kg: 1200 } },
+      { id: "br90", code: "БР-90X [4]", watt: 35, mult: 4.5, coinCost: 2800, oreReq: { id: "iron", kg: 4000 } }
     ];
 
     const defState = () => ({
-      coins: 0, depth: 0, energy: 4.0, power: 100, manualOff: false,
-      heat: 0, overheated: false, brokenUntil: 0,
+      coins: 0, depth: 0, energy: 4.0,
+      activeDrill: "br1", ownedDrills: ["br1"],
       inv: { dirt: 0, stone: 0, coal: 0, iron: 0, gold: 0 },
-      mod: {
-        drill: { lvl: 1, tier: 1 },
-        battery: { lvl: 1, tier: 1 },
-        collector: { lvl: 1, tier: 1 },
-        cooler: { lvl: 1, tier: 1 },
-        storage: { lvl: 1, tier: 1 }
+      parts: {
+        motor: { lvl: 1, col: "#16a34a" },
+        battery: { lvl: 1, col: "#0284c7" },
+        drill: { lvl: 1, col: "#ea580c" },
+        buckets: { lvl: 1, col: "#d97706" },
+        storage: { lvl: 1, col: "#15803d" }
       }
     });
 
@@ -153,13 +354,14 @@
         const b = defState(), p = JSON.parse(localStorage.getItem(KEY) || "{}");
         return {
           ...b, ...p,
+          ownedDrills: Array.isArray(p.ownedDrills) && p.ownedDrills.length ? p.ownedDrills : ["br1"],
           inv: { ...b.inv, ...(p.inv || {}) },
-          mod: {
-            drill: { ...b.mod.drill, ...(p.mod?.drill || {}) },
-            battery: { ...b.mod.battery, ...(p.mod?.battery || {}) },
-            collector: { ...b.mod.collector, ...(p.mod?.collector || {}) },
-            cooler: { ...b.mod.cooler, ...(p.mod?.cooler || {}) },
-            storage: { ...b.mod.storage, ...(p.mod?.storage || {}) }
+          parts: {
+            motor: { ...b.parts.motor, ...(p.parts?.motor || {}) },
+            battery: { ...b.parts.battery, ...(p.parts?.battery || {}) },
+            drill: { ...b.parts.drill, ...(p.parts?.drill || {}) },
+            buckets: { ...b.parts.buckets, ...(p.parts?.buckets || {}) },
+            storage: { ...b.parts.storage, ...(p.parts?.storage || {}) }
           }
         };
       } catch { return defState(); }
@@ -169,141 +371,158 @@
     const fmtMass = (kg) => kg >= 1e9 ? `${(kg/1e9).toFixed(2)} млн т` : kg >= 1e6 ? `${(kg/1e6).toFixed(2)} тыс. т` : kg >= 1000 ? `${(kg/1000).toFixed(2)} т` : `${Math.round(kg).toLocaleString("ru-RU")} кг`;
     const fmtCoins = (n) => n >= 1e9 ? `${(n/1e9).toFixed(2)} млрд` : n >= 1e6 ? `${(n/1e6).toFixed(2)} млн` : n >= 1e4 ? `${(n/1e3).toFixed(1)} тыс.` : `${Math.floor(n).toLocaleString("ru-RU")}`;
 
-    const batCapH = () => 4 * Math.pow(1.45, st.mod.battery.lvl - 1) * Math.pow(1.8, st.mod.battery.tier - 1);
-    const motorFactor = () => Math.pow(2, st.mod.drill.lvl - 1) * Math.pow(1.6, st.mod.drill.tier - 1);
+    function fmtClock(hours) {
+      const totalSec = Math.max(0, Math.floor(hours * 3600));
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    const curDrill = () => DRILL_MODELS.find((d) => d.id === st.activeDrill) || DRILL_MODELS[0];
+    const batCapH = () => 4 * Math.pow(1.45, st.parts.battery.lvl - 1);
+    const motorFactor = () => Math.pow(2, st.parts.motor.lvl - 1) * curDrill().mult;
     const remWorkH = () => st.energy / Math.max(0.1, motorFactor());
     const maxWorkH = () => batCapH() / Math.max(0.1, motorFactor());
     const drainPerSec = () => (4.0 / (4 * 3600)) * motorFactor();
-    const tapCharge = () => (0.15 + (st.mod.battery.lvl - 1) * 0.05) * Math.pow(1.5, st.mod.battery.tier - 1);
-    const storCapKg = () => Math.round((5000 + (st.mod.storage.lvl - 1) * 2500) * Math.pow(3.5, st.mod.storage.tier - 1));
+    const tapCharge = () => 0.15 + (st.parts.battery.lvl - 1) * 0.06;
+    const storCapKg = () => Math.round((5000 + (st.parts.storage.lvl - 1) * 3000) * Math.pow(1.25, st.parts.storage.lvl - 1));
     const usedKg = () => Object.values(st.inv).reduce((a, b) => a + (b || 0), 0);
     const isFull = () => usedKg() >= storCapKg();
-    const isBroken = () => st.brokenUntil > Date.now();
-    const repairSec = () => Math.max(0.1, (st.brokenUntil - Date.now()) / 1000);
-    const repairDur = () => Math.round(8 + ((st.mod.drill.lvl + (st.mod.drill.tier - 1) * 5) - 1) * 3.5);
-    const sellMult = () => 1 + (st.mod.storage.tier - 1) * 0.2 + (st.mod.storage.lvl - 1) * 0.03;
-    const colMult = () => 1 + (st.mod.collector.lvl - 1) * 0.3 + (st.mod.collector.tier - 1) * 0.9;
-    const pwrRatio = () => (st.power || 100) / 100;
+    const sellMult = () => 1 + (st.parts.storage.lvl - 1) * 0.05;
+    const bucketMult = () => 1 + (st.parts.buckets.lvl - 1) * 0.35 + (st.parts.drill.lvl - 1) * 0.15;
 
-    function heatGainSec() {
-      const c = st.mod.cooler;
-      const red = Math.max(0.25, 1 - (c.lvl - 1) * 0.08 - (c.tier - 1) * 0.22);
-      const base = 1.6 * red * (1 + (st.mod.drill.lvl - 1) * 0.14) * pwrRatio();
-      return isFull() ? Math.max(4.2, base * 3.0) : base;
-    }
-    function coolSec() {
-      const c = st.mod.cooler;
-      const base = 6 + (c.lvl - 1) * 3 + (c.tier - 1) * 9;
-      return isFull() && !isBroken() ? base * 0.2 : base;
-    }
-
-    const horizon = () => {
-      let cur = HORIZONS[0];
-      for (const h of HORIZONS) if (st.depth >= h.d) cur = h;
-      return cur;
-    };
-
+    const partCost = (k) => Math.round(({ motor: 25, battery: 25, drill: 30, buckets: 35, storage: 20 }[k] || 25) * Math.pow(1.45, st.parts[k].lvl - 1));
     const resCoins = (r, kg) => Math.max(1, Math.round((kg / 1000) * r.perTon * sellMult()));
 
-    const lvlCost = (k) => Math.round(({ drill: 25, battery: 25, collector: 35, cooler: 30, storage: 20 }[k] || 25) * Math.pow(1.45, st.mod[k].lvl - 1) * Math.pow(1.95, st.mod[k].tier - 1));
-    const tierInfo = (k) => ({ req: st.mod[k].tier * 5, cost: Math.round(({ drill: 180, battery: 170, collector: 220, cooler: 200, storage: 160 }[k] || 180) * Math.pow(3.2, st.mod[k].tier - 1)) });
+    function horizon() {
+      if (st.depth >= 800) return { name: "Глубинный горизонт", v: 0.4, kg: 2900, w: [["iron", 0.5, 1.1], ["gold", 0.5, 1.25]] };
+      if (st.depth >= 450) return { name: "Рудная жила", v: 0.5, kg: 1240, w: [["coal", 0.35, 1.0], ["iron", 0.65, 1.2]] };
+      if (st.depth >= 220) return { name: "Угольный пласт", v: 0.6, kg: 520, w: [["stone", 0.4, 0.95], ["coal", 0.6, 1.15]] };
+      if (st.depth >= 80) return { name: "Плотный грунт", v: 0.7, kg: 220, w: [["dirt", 0.4, 1.0], ["stone", 0.6, 1.1]] };
+      return { name: "Верхняя земля", v: 0.8, kg: 90, w: [["dirt", 0.8, 1.1], ["stone", 0.2, 0.9]] };
+    }
 
     function addMass(kgWant) {
-      if (kgWant <= 0) return;
+      if (kgWant <= 0) return null;
       const h = horizon(), free = Math.max(0, storCapKg() - usedKg());
       let r = Math.random(), acc = 0, pick = h.w[h.w.length - 1];
       for (const item of h.w) { acc += item[1]; if (r <= acc) { pick = item; break; } }
       const raw = Math.max(1, Math.round(kgWant * pick[2] * (0.85 + Math.random() * 0.35)));
       const take = Math.min(raw, free);
       if (take > 0) st.inv[pick[0]] = (st.inv[pick[0]] || 0) + take;
+      return pick[0];
+    }
+
+    function spawnFallingOre(resId) {
+      const stage = document.getElementById("mineStage");
+      const rObj = RES.find((x) => x.id === resId);
+      const el = document.createElement("div");
+      el.className = "falling-ore";
+      el.textContent = rObj ? rObj.icon : "🪨";
+      el.style.left = `${16 + Math.random() * 68}%`;
+      el.style.top = "14px";
+      stage.appendChild(el);
+      setTimeout(() => el.remove(), 1120);
+    }
+
+    function renderOdometer() {
+      const str = Math.floor(st.depth).toString().padStart(5, "0");
+      document.getElementById("depthOdo").innerHTML = str.split("").map((ch) => `<span>${ch}</span>`).join("") + `<span class="unit">M</span>`;
     }
 
     function render() {
       st.energy = Math.min(batCapH(), Math.max(0, st.energy));
-      const h = horizon(), u = usedKg(), cap = storCapKg(), full = isFull(), brk = isBroken();
+      const h = horizon(), u = usedKg(), cap = storCapKg(), full = isFull();
       const rem = remWorkH(), maxH = maxWorkH(), batPct = Math.max(0, Math.min(100, (st.energy / Math.max(0.01, batCapH())) * 100));
-      const active = !brk && !st.overheated && !st.manualOff && st.energy > 0;
+      const active = st.energy > 0;
 
-      document.getElementById("sCoins").textContent = fmtCoins(st.coins);
-      document.getElementById("sDepth").textContent = `${st.depth.toFixed(1)} м`;
-      document.getElementById("sBat").textContent = `${rem.toFixed(1)} ч`;
-      const sStor = document.getElementById("sStor");
-      sStor.textContent = `${fmtMass(u)}/${fmtMass(cap)}`;
-      sStor.className = full ? "val red" : "val grn";
-
-      document.getElementById("lBat").textContent = `Батарея: ${rem.toFixed(1)} / ${maxH.toFixed(1)} ч (×${motorFactor().toFixed(1)})`;
-      document.getElementById("pBat").textContent = `${Math.round(batPct)}%`;
-      document.getElementById("bBat").style.width = `${batPct}%`;
-
-      const hp = Math.round(st.heat);
-      document.getElementById("pHeat").textContent = `${hp}%`;
-      document.getElementById("bHeat").style.width = `${hp}%`;
-      document.getElementById("lHeat").textContent = brk ? `Сломан (${repairSec().toFixed(1)}с)` : st.manualOff ? "Бур отрублен" : st.overheated ? "Перегрев! Остывает..." : full ? "Склад 100%! Греет быстрее" : "Нагрев: Норма";
+      document.getElementById("hCoins").textContent = fmtCoins(st.coins);
+      document.getElementById("hBat").textContent = `${rem.toFixed(1)}ч`;
+      const hStor = document.getElementById("hStor");
+      hStor.textContent = `${fmtMass(u)}/${fmtMass(cap)}`;
+      hStor.style.color = full ? "var(--red)" : "var(--grn)";
+      document.getElementById("rpmTxt").textContent = String(st.parts.motor.lvl);
+      renderOdometer();
 
       const warn = document.getElementById("warnBox");
-      if (brk) { warn.classList.remove("hidden"); warn.textContent = `Бур сломан из-за перегрева при полном складе! Починка: ${repairSec().toFixed(1)} сек`; }
-      else if (st.manualOff) { warn.classList.remove("hidden"); warn.textContent = "Бур отрублен вручную — мотор остывает."; }
-      else if (st.energy <= 0) { warn.classList.remove("hidden"); warn.textContent = "Нет заряда. Тапайте по сцене для зарядки."; }
-      else if (full) { warn.classList.remove("hidden"); warn.textContent = "Склад заполнен на 100%! Нагрев идёт быстрее."; }
+      if (st.energy <= 0) { warn.classList.remove("hidden"); warn.textContent = "Энергия закончилась! Нажимайте оранжевую кнопку справа от колбы."; }
+      else if (full) { warn.classList.remove("hidden"); warn.textContent = "Склад заполнен на 100%! Продайте руду на складе."; }
       else warn.classList.add("hidden");
 
-      const kgSec = h.kg * motorFactor() * colMult() * pwrRatio() * (1 + st.depth / 250);
-      document.getElementById("groundTxt").textContent = `${h.name} • ~${fmtMass(kgSec)}/сек`;
-      document.getElementById("rig").classList.toggle("spin", active);
+      const kgSec = h.kg * motorFactor() * bucketMult() * (1 + st.depth / 250);
+      document.getElementById("mineInfo").textContent = `${h.name} • ~${fmtMass(kgSec)}/сек`;
+      document.getElementById("mineRig").classList.toggle("spin", active);
 
-      const tBtn = document.getElementById("toggleDrillBtn");
-      tBtn.textContent = st.manualOff ? "⚡ ВКЛЮЧИТЬ БУР" : "🔌 ОТРУБИТЬ БУР";
-      tBtn.classList.toggle("is-off", st.manualOff);
+      document.getElementById("tubeFill").style.width = `${batPct}%`;
+      document.getElementById("tubeLabel").textContent = fmtClock(rem);
 
-      document.getElementById("pwrSlider").value = String(st.power);
-      document.getElementById("pwrVal").textContent = `${st.power}%`;
-      document.getElementById("pwrInfo").textContent = `Нагрев ×${pwrRatio().toFixed(2)} • АКБ 100%`;
+      document.getElementById("bpSummary").textContent = `${curDrill().code} • Мотор ×${motorFactor().toFixed(1)} • Запас хода: ${rem.toFixed(1)}/${maxH.toFixed(1)} ч`;
 
-      // Инвентарь
-      let sum = 0;
-      RES.forEach((r) => { if (st.inv[r.id] > 0) sum += resCoins(r, st.inv[r.id]); });
-      document.getElementById("invCap").textContent = `Склад: ${fmtMass(u)} / ${fmtMass(cap)}`;
-      document.getElementById("invSum").textContent = `Сумма: ${fmtCoins(sum)}`;
-      document.getElementById("sellAllBtn").disabled = u <= 0;
-
-      const invList = document.getElementById("invList");
-      invList.innerHTML = "";
-      RES.forEach((r) => {
-        const kg = st.inv[r.id] || 0;
-        const el = document.createElement("div");
-        el.className = "item";
-        el.innerHTML = `<div><div><strong>${r.icon} ${r.name}</strong></div><div class="sub">${Math.round(r.perTon * sellMult())} / т</div></div><div style="display:flex;align-items:center;gap:8px;"><strong>${fmtMass(kg)}</strong><button class="sell" ${kg <= 0 ? "disabled" : ""}>Забрать</button></div>`;
-        el.querySelector("button").onclick = () => { st.coins += resCoins(r, kg); st.inv[r.id] = 0; save(); render(); };
-        invList.appendChild(el);
+      const defs = [
+        ["motor", "⚙️", "Мотор"],
+        ["battery", "⛽", "Энергоблок"],
+        ["drill", "⛏️", "Бур"],
+        ["buckets", "🚜", "Ковши"],
+        ["storage", "📦", "Хранилище"]
+      ];
+      const strip = document.getElementById("partsStrip");
+      strip.innerHTML = "";
+      defs.forEach(([k, ico, label]) => {
+        const p = st.parts[k], cost = partCost(k);
+        const col = document.createElement("div");
+        col.className = "part-col";
+        col.innerHTML = `<div class="part-ico">${ico}</div><div class="part-lvl" style="background:${p.col}">${p.lvl}</div><div class="part-name">${label}</div><button class="part-btn" ${st.coins >= cost ? "" : "disabled"}>▲ ${fmtCoins(cost)}</button>`;
+        col.querySelector("button").onclick = () => { if (st.coins < cost) return; st.coins -= cost; p.lvl += 1; save(); render(); };
+        strip.appendChild(col);
       });
 
-      // Модули
-      const mods = [
-        ["drill", "⛏️ Бур и мотор", `Мощность ×${motorFactor().toFixed(1)} • Ход: ${maxWorkH().toFixed(1)} ч • Починка ${repairDur()}с`],
-        ["battery", "🔋 Батарея", `Ёмкость ${batCapH().toFixed(1)} ч • Тап +${tapCharge().toFixed(2)} ч`],
-        ["collector", "📦 Сборник", `Добыча ×${colMult().toFixed(2)}`],
-        ["cooler", "❄️ Охлаждение", `Нагрев +${heatGainSec().toFixed(1)}%/с • Охлад ${coolSec().toFixed(0)}%/с`],
-        ["storage", "🗄️ Хранилище", `Объём ${fmtMass(cap)} • Наценка +${Math.round((sellMult() - 1) * 100)}%`]
-      ];
-      const modList = document.getElementById("modList");
-      modList.innerHTML = "";
-      mods.forEach(([k, title, desc]) => {
-        const m = st.mod[k], lc = lvlCost(k), ti = tierInfo(k);
+      let sum = 0;
+      RES.forEach((r) => { if (st.inv[r.id] > 0) sum += resCoins(r, st.inv[r.id]); });
+      document.getElementById("storLvlTxt").textContent = ` • ${fmtMass(u)} / ${fmtMass(cap)} (+${Math.round((sellMult() - 1) * 100)}%)`;
+      const sAll = document.getElementById("sellAllBtn");
+      sAll.disabled = u <= 0;
+      sAll.textContent = u > 0 ? `Продать всё (${fmtCoins(sum)})` : "Продать всё";
+
+      const sList = document.getElementById("storList");
+      sList.innerHTML = "";
+      RES.forEach((r) => {
+        const kg = st.inv[r.id] || 0, pay = kg > 0 ? resCoins(r, kg) : 0;
         const card = document.createElement("div");
-        card.className = "item";
-        card.style.flexDirection = "column";
-        card.style.alignItems = "stretch";
-        card.innerHTML = `<div style="display:flex;justify-content:space-between;"><strong>${title} (Ур.${m.lvl})</strong><span class="sub">ТИР ${m.tier}</span></div><div class="sub" style="margin-top:3px;">${desc}</div><div class="m-act"><button class="btn u-lvl" ${st.coins >= lc ? "" : "disabled"}>Ур. (${fmtCoins(lc)})</button><button class="btn u-tier" ${m.level >= ti.req && st.coins >= ti.cost ? "" : "disabled"}>Тир ${m.tier + 1} с ${ti.req} ур. (${fmtCoins(ti.cost)})</button></div>`;
-        const [b1, b2] = card.querySelectorAll("button");
-        b1.onclick = () => { if (st.coins < lc) return; st.coins -= lc; m.lvl += 1; save(); render(); };
-        b2.onclick = () => { if (m.lvl < ti.req || st.coins < ti.cost) return; st.coins -= ti.cost; m.tier += 1; save(); render(); };
-        modList.appendChild(card);
+        card.className = "res-card";
+        card.innerHTML = `<div class="res-top"><span>${r.icon}</span><span>${r.name}</span><span class="sub" style="margin-left:auto;">${Math.round(r.perTon * sellMult())} / т</span></div><div class="sub" style="margin-bottom:8px;">${r.desc}</div><div class="res-bot"><span class="res-num">${fmtMass(kg)}</span><button class="res-sell" ${kg <= 0 ? "disabled" : ""}>Продать${kg > 0 ? ` (${fmtCoins(pay)})` : ""}</button></div>`;
+        card.querySelector("button").onclick = () => { st.coins += resCoins(r, kg); st.inv[r.id] = 0; save(); render(); };
+        sList.appendChild(card);
+      });
+
+      const dList = document.getElementById("drillsList");
+      dList.innerHTML = `<div class="sec-lbl">Доступные буры и рецепты</div>`;
+      DRILL_MODELS.forEach((m) => {
+        const owned = st.ownedDrills.includes(m.id);
+        const equipped = st.activeDrill === m.id;
+        const card = document.createElement("div");
+        card.className = `drill-card ${owned ? "" : "recipe"}`;
+        if (owned) {
+          card.innerHTML = `<div class="dc-head"><div><div class="dc-title">${m.code}</div><div class="dc-watt">${m.watt} Ватт • ×${m.mult.toFixed(1)}</div></div><button class="dc-badge">${equipped ? "установлен" : "установить"}</button></div>`;
+          card.querySelector("button").onclick = () => { st.activeDrill = m.id; save(); render(); };
+        } else {
+          const req = m.oreReq;
+          const haveKg = req ? (st.inv[req.id] || 0) : 0;
+          const resObj = req ? RES.find((x) => x.id === req.id) : null;
+          card.innerHTML = `<div class="dc-head"><div><div class="dc-title">${m.code}</div><div class="dc-watt">${m.watt} Ватт • ×${m.mult.toFixed(1)}</div></div></div>${req ? `<div class="sub" style="color:#44403c;margin-top:6px;">Рецепт: ${resObj.icon} ${resObj.name} — <strong>${fmtMass(haveKg)}</strong> / ${fmtMass(req.kg)}</div>` : ""}<div class="dc-actions"><button class="dc-btn coins" ${st.coins >= m.coinCost ? "" : "disabled"}>Купить • ${fmtCoins(m.coinCost)} 🪙</button><button class="dc-btn ore" ${req && haveKg >= req.kg ? "" : "disabled"}>Скрафтить (${req ? fmtMass(req.kg) : ""})</button></div>`;
+          const [bCoin, bOre] = card.querySelectorAll("button");
+          bCoin.onclick = () => { if (st.coins < m.coinCost) return; st.coins -= m.coinCost; st.ownedDrills.push(m.id); st.activeDrill = m.id; save(); render(); };
+          bOre.onclick = () => { if (!req || haveKg < req.kg) return; st.inv[req.id] -= req.kg; st.ownedDrills.push(m.id); st.activeDrill = m.id; save(); render(); };
+        }
+        dList.appendChild(card);
       });
     }
 
-    document.getElementById("toggleDrillBtn").onclick = () => { st.manualOff = !st.manualOff; save(); render(); };
-    document.getElementById("pwrSlider").oninput = (e) => { st.power = Number(e.target.value); save(); render(); };
-    document.getElementById("stage").onclick = () => { st.energy = Math.min(batCapH(), st.energy + tapCharge()); save(); render(); };
+    document.getElementById("chargeBtn").onclick = () => {
+      st.energy = Math.min(batCapH(), st.energy + tapCharge());
+      save();
+      render();
+    };
     document.getElementById("sellAllBtn").onclick = () => {
       RES.forEach((r) => { if (st.inv[r.id] > 0) { st.coins += resCoins(r, st.inv[r.id]); st.inv[r.id] = 0; } });
       save(); render();
@@ -312,30 +531,18 @@
     document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
       document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
       t.classList.add("active");
-      ["drill", "inv", "mod"].forEach((p) => document.getElementById(`p-${p}`).classList.toggle("hidden", p !== t.dataset.p));
+      ["mine", "rig", "stor", "drills"].forEach((p) => document.getElementById(`p-${p}`).classList.toggle("hidden", p !== t.dataset.t));
     });
 
     let tick = 0;
     setInterval(() => {
       const dt = 0.25; tick++;
-      if (st.brokenUntil > 0 && Date.now() >= st.brokenUntil) { st.brokenUntil = 0; st.overheated = false; st.heat = 0; save(); }
-      if (!isBroken()) {
-        const active = !st.overheated && !st.manualOff && st.energy > 0;
-        const fullBefore = isFull();
-        if (active) {
-          st.energy = Math.max(0, st.energy - drainPerSec() * dt);
-          st.heat = Math.min(100, st.heat + heatGainSec() * dt);
-          if (st.heat >= 100) {
-            if (fullBefore) { st.brokenUntil = Date.now() + repairDur() * 1000; st.overheated = true; st.heat = 100; }
-            else st.overheated = true;
-          }
-          const h = horizon();
-          st.depth = Number((st.depth + h.v * pwrRatio() * dt).toFixed(1));
-          addMass(h.kg * motorFactor() * colMult() * pwrRatio() * (1 + st.depth / 250) * dt);
-        } else if (st.heat > 0) {
-          st.heat = Math.max(0, st.heat - coolSec() * dt);
-          if (st.overheated && st.heat <= 20) st.overheated = false;
-        }
+      if (st.energy > 0) {
+        st.energy = Math.max(0, st.energy - drainPerSec() * dt);
+        const h = horizon();
+        st.depth = Number((st.depth + h.v * dt).toFixed(1));
+        const droppedId = addMass(h.kg * motorFactor() * bucketMult() * (1 + st.depth / 250) * dt);
+        if (tick % 3 === 0 && droppedId) spawnFallingOre(droppedId);
       }
       if (tick % 4 === 0) save();
       render();
