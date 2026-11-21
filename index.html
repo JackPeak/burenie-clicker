@@ -1,3 +1,4 @@
+в
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -28,7 +29,7 @@
 
     body {
       margin: 0;
-      padding: 12px;
+      padding: 10px 12px 84px;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: radial-gradient(circle at top, #1a202c 0%, var(--bg-dark) 65%);
       color: var(--text-main);
@@ -40,7 +41,7 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .top-stats {
@@ -69,46 +70,46 @@
       color: var(--accent-gold);
     }
 
-    .stat-value.cyan {
-      color: var(--accent-cyan);
+    .stat-value.cyan { color: var(--accent-cyan); }
+    .stat-value.orange { color: var(--accent-orange); }
+    .stat-value.green { color: var(--accent-green); }
+    .stat-value.red { color: var(--accent-red); }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      background: rgba(18, 22, 30, 0.96);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--panel-border);
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     }
 
-    .stat-value.orange {
-      color: var(--accent-orange);
-    }
-
-    .stat-value.green {
-      color: var(--accent-green);
-    }
-
-    .stat-value.red {
-      color: var(--accent-red);
-    }
-
-    .tabs {
+    .bottom-nav-inner {
+      max-width: 520px;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      background: var(--panel-bg);
-      padding: 6px;
-      border-radius: 12px;
-      border: 1px solid var(--panel-border);
+      gap: 8px;
     }
 
     .tab-btn {
-      background: transparent;
-      border: none;
+      background: var(--panel-bg-2);
+      border: 1px solid var(--panel-border);
       color: var(--text-muted);
-      padding: 9px 6px;
-      border-radius: 8px;
+      padding: 10px 6px;
+      border-radius: 10px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: 0.15s ease;
     }
 
     .tab-btn.active {
       background: var(--accent-orange);
+      border-color: var(--accent-orange);
       color: #fff;
     }
 
@@ -123,14 +124,13 @@
       display: none !important;
     }
 
-    /* Зона бурения */
     .drill-arena {
       position: relative;
       overflow: hidden;
       border-radius: 14px;
       border: 1px solid var(--panel-border);
-      background: linear-gradient(180deg, #151922 0%, #241914 42%, #3b2316 100%);
-      padding: 14px;
+      background: linear-gradient(180deg, #131822 0%, #1d1918 35%, #2f1d14 68%, #422617 100%);
+      padding: 12px;
     }
 
     .drill-arena.broken-state {
@@ -143,21 +143,31 @@
       justify-content: space-between;
       align-items: center;
       font-size: 13px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .layer-name {
       font-weight: 700;
     }
 
+    .rig-style-tag {
+      font-size: 11px;
+      color: #fcd34d;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
     .hp-bar-wrap {
       width: 100%;
-      height: 12px;
+      height: 11px;
       background: rgba(0, 0, 0, 0.45);
       border-radius: 999px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .hp-bar-fill {
@@ -181,7 +191,7 @@
       background: rgba(0, 0, 0, 0.45);
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .heat-bar-fill {
@@ -192,15 +202,15 @@
     }
 
     .warning-banner {
-      background: rgba(239, 68, 68, 0.18);
+      background: rgba(239, 68, 68, 0.2);
       border: 1px solid rgba(239, 68, 68, 0.55);
       color: #fecaca;
       border-radius: 10px;
-      padding: 8px 10px;
+      padding: 7px 10px;
       font-size: 12px;
       font-weight: 600;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .drill-stage {
@@ -208,89 +218,150 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 205px;
+      justify-content: flex-start;
+      height: 258px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(245, 158, 11, 0.12), transparent 60%),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.02) 0px,
+          rgba(255, 255, 255, 0.02) 24px,
+          rgba(0, 0, 0, 0.14) 24px,
+          rgba(0, 0, 0, 0.14) 48px
+        );
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
       cursor: pointer;
     }
 
-    .drill-rig {
-      font-size: 64px;
-      line-height: 1;
-      filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
-      transition: transform 0.08s ease;
-      z-index: 2;
+    .shaft-walls {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-left: 14px solid rgba(20, 14, 10, 0.65);
+      border-right: 14px solid rgba(20, 14, 10, 0.65);
     }
 
-    .drill-rig.drilling {
-      animation: drillShake 0.14s infinite alternate;
+    .drill-assembly {
+      position: relative;
+      z-index: 3;
+      margin-top: 6px;
+      transition: transform 0.09s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      transform-origin: top center;
     }
 
-    .drill-rig.broken {
-      filter: grayscale(0.4) drop-shadow(0 6px 12px rgba(239, 68, 68, 0.45));
-      transform: rotate(16deg);
+    .drill-assembly.drilling {
+      animation: plungeDrill 0.15s infinite alternate;
     }
 
-    @keyframes drillShake {
-      0% { transform: translate(-3px, 2px) rotate(-3deg) scale(1.04); }
-      100% { transform: translate(3px, -2px) rotate(3deg) scale(1.04); }
+    @keyframes plungeDrill {
+      0% { transform: translateY(14px) translateX(-2.5px) rotate(-1.5deg); }
+      100% { transform: translateY(23px) translateX(2.5px) rotate(1.5deg); }
     }
 
-    .rock-surface {
-      margin-top: 8px;
-      width: 100%;
-      max-width: 295px;
-      min-height: 54px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: repeating-linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.05),
-        rgba(255, 255, 255, 0.05) 10px,
-        rgba(0, 0, 0, 0.22) 10px,
-        rgba(0, 0, 0, 0.22) 20px
-      );
-      border: 1px solid rgba(255, 255, 255, 0.14);
+    .drill-assembly.broken {
+      transform: translateY(4px) rotate(12deg);
+      filter: grayscale(0.45);
+    }
+
+    .augur-blades {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .drill-assembly.drilling .augur-blades {
+      animation: spinBlades 0.13s linear infinite;
+    }
+
+    @keyframes spinBlades {
+      0% { transform: translateY(-6px); }
+      100% { transform: translateY(6px); }
+    }
+
+    .tip-glow {
+      opacity: 0.15;
+      transition: opacity 0.12s ease;
+    }
+
+    .drill-assembly.drilling .tip-glow {
+      opacity: 0.95;
+    }
+
+    .rock-bed {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 0;
+      height: 86px;
+      border-top: 3px solid #78350f;
+      border-radius: 14px 14px 0 0;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(251, 146, 60, 0.28), transparent 58%),
+        repeating-linear-gradient(
+          -35deg,
+          #452715,
+          #452715 12px,
+          #361e10 12px,
+          #361e10 24px
+        );
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: #fde68a;
+      justify-content: flex-end;
+      padding: 8px 10px 10px;
       z-index: 2;
     }
 
-    .rock-surface.broken {
-      border-color: rgba(239, 68, 68, 0.65);
-      color: #fca5a5;
+    .rock-bed.hit {
+      animation: bedShake 0.12s ease;
     }
 
-    .rock-surface.hit {
-      animation: rockPulse 0.12s ease;
+    @keyframes bedShake {
+      0% { transform: translateY(0) scaleY(1); }
+      50% { transform: translateY(4px) scaleY(0.95); }
+      100% { transform: translateY(0) scaleY(1); }
     }
 
-    @keyframes rockPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(0.96, 0.92); }
-      100% { transform: scale(1); }
+    .rock-crater {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 78px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1c110a;
+      border-bottom: 2px solid rgba(251, 146, 60, 0.45);
     }
 
-    .particle {
+    .rock-info {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fde68a;
+      text-align: center;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+    }
+
+    .falling-debris {
       position: absolute;
       pointer-events: none;
-      font-size: 14px;
       z-index: 4;
-      animation: flyParticle 0.55s ease-out forwards;
+      animation: debrisFall var(--dur, 0.75s) cubic-bezier(0.35, 0.05, 0.85, 0.6) forwards;
     }
 
-    @keyframes flyParticle {
+    @keyframes debrisFall {
       0% {
         opacity: 1;
-        transform: translate(0, 0) scale(1) rotate(0deg);
+        transform: translate(0, 0) rotate(0deg) scale(1);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(calc(var(--dx) * 0.45), var(--peakY, -22px)) rotate(calc(var(--rot) * 0.4)) scale(1.05);
       }
       100% {
         opacity: 0;
-        transform: translate(var(--dx), var(--dy)) scale(0.6) rotate(var(--rot));
+        transform: translate(var(--dx), var(--fallY, 120px)) rotate(var(--rot)) scale(0.7);
       }
     }
 
@@ -300,32 +371,41 @@
       font-weight: 800;
       font-size: 13px;
       color: #fef08a;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
-      z-index: 5;
-      max-width: 250px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+      z-index: 6;
+      max-width: 240px;
       text-align: center;
       animation: floatUp 0.8s ease-out forwards;
     }
 
     @keyframes floatUp {
-      0% {
-        opacity: 1;
-        transform: translate(-50%, 0);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -48px);
-      }
+      0% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -44px); }
     }
 
-    .hint {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 8px;
+    .main-drill-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 13px 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+      cursor: pointer;
     }
 
-    /* Инвентарь */
+    .main-drill-btn:active { transform: scale(0.97); }
+    .main-drill-btn:disabled {
+      background: #374151;
+      color: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
     .inv-summary {
       background: var(--panel-bg-2);
       border: 1px solid var(--panel-border);
@@ -341,9 +421,7 @@
       flex-wrap: wrap;
     }
 
-    .inv-summary strong {
-      color: var(--text-main);
-    }
+    .inv-summary strong { color: var(--text-main); }
 
     .sell-all-btn {
       width: 100%;
@@ -352,7 +430,7 @@
       border: 1px solid rgba(34, 197, 94, 0.5);
       color: #86efac;
       border-radius: 10px;
-      padding: 9px 12px;
+      padding: 10px 12px;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
@@ -363,7 +441,7 @@
       cursor: not-allowed;
     }
 
-    .inv-list {
+    .inv-list, .modules-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -379,38 +457,13 @@
       padding: 10px 12px;
     }
 
-    .inv-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .inv-left { display: flex; align-items: center; gap: 10px; }
+    .inv-icon { font-size: 22px; }
+    .inv-title { font-weight: 700; font-size: 14px; }
+    .inv-sub { font-size: 12px; color: var(--text-muted); }
 
-    .inv-icon {
-      font-size: 22px;
-    }
-
-    .inv-title {
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .inv-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .inv-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .inv-count {
-      font-weight: 700;
-      font-size: 14px;
-      min-width: 44px;
-      text-align: right;
-    }
+    .inv-right { display: flex; align-items: center; gap: 8px; }
+    .inv-count { font-weight: 700; font-size: 14px; min-width: 44px; text-align: right; }
 
     .sell-btn {
       background: rgba(34, 197, 94, 0.16);
@@ -423,17 +476,7 @@
       cursor: pointer;
     }
 
-    .sell-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-
-    /* Модули и тиры */
-    .modules-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .module-card {
       background: var(--panel-bg-2);
@@ -449,10 +492,7 @@
       margin-bottom: 6px;
     }
 
-    .module-name {
-      font-weight: 700;
-      font-size: 15px;
-    }
+    .module-name { font-weight: 700; font-size: 15px; }
 
     .tier-badge {
       background: rgba(245, 158, 11, 0.16);
@@ -487,28 +527,19 @@
       line-height: 1.25;
     }
 
-    .upg-btn.lvl {
-      background: var(--accent-cyan);
-      color: #061318;
-    }
-
-    .upg-btn.tier {
-      background: var(--accent-gold);
-      color: #1c1202;
-    }
-
-    .upg-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
+    .upg-btn.lvl { background: var(--accent-cyan); color: #061318; }
+    .upg-btn.tier { background: var(--accent-gold); color: #1c1202; }
+    .upg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .footer-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      margin-top: 8px;
+      margin-top: 10px;
     }
+
+    .hint { font-size: 12px; color: var(--text-muted); }
 
     .small-btn {
       background: transparent;
@@ -542,17 +573,14 @@
       </div>
     </div>
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="drill">⛏️ Бурение</button>
-      <button class="tab-btn" data-tab="inventory">🎒 Инвентарь</button>
-      <button class="tab-btn" data-tab="modules">⚙️ Модули</button>
-    </div>
-
-    <!-- ВКЛАДКА 1: БУРЕНИЕ -->
     <div class="panel" id="tab-drill">
       <div class="drill-arena" id="drillArena">
         <div class="layer-header">
           <span class="layer-name" id="layerName">Слой 1: Верхняя земля</span>
+          <span class="rig-style-tag" id="rigStyleTag">Стиль: Шнек I</span>
+        </div>
+        <div class="layer-header" style="margin-top:-2px; font-size:12px; color:var(--text-muted);">
+          <span>Прочность слоя</span>
           <span id="layerHpText">60 / 60</span>
         </div>
         <div class="hp-bar-wrap">
@@ -570,29 +598,77 @@
         <div class="warning-banner hidden" id="warningBanner"></div>
 
         <div class="drill-stage" id="drillStage">
-          <div class="drill-rig" id="drillRig">🔩</div>
-          <div class="rock-surface" id="rockSurface">Нажми, чтобы бурить</div>
+          <div class="shaft-walls"></div>
+
+          <div class="drill-assembly" id="drillAssembly">
+            <svg width="128" height="172" viewBox="0 0 128 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Опора и поршень -->
+              <rect x="48" y="0" width="32" height="16" rx="4" fill="#334155" stroke="#64748b" stroke-width="2"/>
+              <rect x="55" y="14" width="18" height="14" fill="#94a3b8"/>
+
+              <!-- Боковые резцы (появляются со 2-го тира) -->
+              <g id="sideCutters" opacity="0">
+                <polygon points="24,44 10,56 24,62" fill="#f59e0b" stroke="#fde68a" stroke-width="1.5"/>
+                <polygon points="104,44 118,56 104,62" fill="#f59e0b" stroke="#fde68a" stroke-width="1.5"/>
+              </g>
+
+              <!-- Корпус двигателя бура -->
+              <rect id="drillBody" x="28" y="26" width="72" height="38" rx="10" fill="#ea580c" stroke="#fdba74" stroke-width="2.5"/>
+              <line x1="38" y1="34" x2="90" y2="34" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+              <line x1="38" y1="43" x2="90" y2="43" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+              <line x1="38" y1="52" x2="90" y2="52" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+
+              <!-- Турбо-кольцо (появляется с 3-го тира) -->
+              <rect id="turboRing" x="34" y="64" width="60" height="12" rx="4" fill="#475569" stroke="#cbd5e1" stroke-width="1.5"/>
+
+              <!-- Конус бура -->
+              <polygon id="drillCone" points="38,76 90,76 64,158" fill="#94a3b8" stroke="#e2e8f0" stroke-width="2"/>
+
+              <!-- Спиральные витки шнека -->
+              <g class="augur-blades">
+                <path d="M39 84 L89 94 L85 102 L41 92 Z" fill="#334155"/>
+                <path d="M43 102 L84 112 L80 120 L46 110 Z" fill="#334155"/>
+                <path d="M48 120 L78 129 L74 136 L51 127 Z" fill="#334155"/>
+                <path d="M55 137 L71 143 L67 150 L57 144 Z" fill="#1e293b"/>
+              </g>
+
+              <!-- Искрящийся наконечник -->
+              <polygon points="59,145 69,145 64,162" fill="#fef08a"/>
+              <circle class="tip-glow" cx="64" cy="158" r="12" fill="#f97316"/>
+            </svg>
+          </div>
+
+          <div class="rock-bed" id="rockBed">
+            <div class="rock-crater"></div>
+            <div class="rock-info" id="rockSurface">Удар: 8 | Сбор: ×1.00 | Склад: 0/50</div>
+          </div>
         </div>
 
-        <div class="hint">При 100% заполнении склада бур начинает перегреваться и при 100% жара ломается — вовремя забирайте руду!</div>
+        <button class="main-drill-btn" id="mainDrillBtn">⛏️ БУРИТЬ ПОРОДУ</button>
       </div>
 
       <div class="footer-bar">
-        <span class="hint" id="saveStatus" style="margin:0;">Автосохранение активно</span>
-        <button class="small-btn" id="resetBtn">Сбросить прогресс</button>
+        <span class="hint">При 100% склада бур перегревается и ломается</span>
+        <button class="small-btn" id="resetBtn">Сброс</button>
       </div>
     </div>
 
-    <!-- ВКЛАДКА 2: ИНВЕНТАРЬ -->
     <div class="panel hidden" id="tab-inventory">
       <div class="inv-summary" id="invSummary"></div>
-      <button class="sell-all-btn" id="sellAllEverythingBtn">Разгрузить и продать всё</button>
+      <button class="sell-all-btn" id="sellAllEverythingBtn">Забрать и продать всё</button>
       <div class="inv-list" id="inventoryList"></div>
     </div>
 
-    <!-- ВКЛАДКА 3: МОДУЛИ И ТИРЫ -->
     <div class="panel hidden" id="tab-modules">
       <div class="modules-list" id="modulesList"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="tab-btn active" data-tab="drill">⛏️ Бурение</button>
+      <button class="tab-btn" data-tab="inventory">🎒 Инвентарь</button>
+      <button class="tab-btn" data-tab="modules">⚙️ Модули</button>
     </div>
   </div>
 
@@ -602,7 +678,7 @@
       window.Telegram.WebApp.expand();
     }
 
-    const STORAGE_KEY = "burenie_clicker_save_v3";
+    const STORAGE_KEY = "burenie_clicker_save_v5";
 
     const RESOURCES = [
       { id: "dirt", name: "Земля", icon: "🟫", value: 1 },
@@ -786,48 +862,89 @@
       }
     }
 
-    function spawnVisuals(clientX, clientY, labelText) {
+    function updateDrillStyle() {
+      const tier = state.modules.drill.tier;
+      const body = document.getElementById("drillBody");
+      const cone = document.getElementById("drillCone");
+      const sideCutters = document.getElementById("sideCutters");
+      const turboRing = document.getElementById("turboRing");
+      const styleTag = document.getElementById("rigStyleTag");
+
+      sideCutters.setAttribute("opacity", tier >= 2 ? "1" : "0");
+      turboRing.setAttribute("fill", tier >= 3 ? "#0284c7" : "#475569");
+      turboRing.setAttribute("stroke", tier >= 3 ? "#7dd3fc" : "#cbd5e1");
+
+      if (tier === 1) {
+        body.setAttribute("fill", "#ea580c");
+        cone.setAttribute("fill", "#94a3b8");
+        styleTag.textContent = "Стиль: Шнек I";
+      } else if (tier === 2) {
+        body.setAttribute("fill", "#d97706");
+        cone.setAttribute("fill", "#fbbf24");
+        styleTag.textContent = "Стиль: Резец II";
+      } else if (tier === 3) {
+        body.setAttribute("fill", "#0891b2");
+        cone.setAttribute("fill", "#38bdf8");
+        styleTag.textContent = "Стиль: Турбо III";
+      } else {
+        body.setAttribute("fill", "#7c3aed");
+        cone.setAttribute("fill", "#e879f9");
+        styleTag.textContent = `Стиль: Плазма ${tier}`;
+      }
+    }
+
+    function spawnVisuals(labelText) {
       const stage = document.getElementById("drillStage");
       const rect = stage.getBoundingClientRect();
-      const x = clientX ? clientX - rect.left : rect.width * 0.5;
-      const y = clientY ? clientY - rect.top : rect.height * 0.45;
+      const tipX = rect.width * 0.5;
+      const tipY = 165;
 
-      const rig = document.getElementById("drillRig");
-      const rock = document.getElementById("rockSurface");
-      rig.classList.remove("drilling");
-      rock.classList.remove("hit");
-      void rig.offsetWidth;
-      void rock.offsetWidth;
+      const assembly = document.getElementById("drillAssembly");
+      const bed = document.getElementById("rockBed");
+
       if (!isDrillBroken()) {
-        rig.classList.add("drilling");
+        assembly.classList.add("drilling");
+        clearTimeout(window._drillAnimTimer);
+        window._drillAnimTimer = setTimeout(() => {
+          assembly.classList.remove("drilling");
+        }, 280);
       }
-      rock.classList.add("hit");
 
-      clearTimeout(window._drillAnimTimer);
-      window._drillAnimTimer = setTimeout(() => {
-        rig.classList.remove("drilling");
-      }, 220);
+      bed.classList.remove("hit");
+      void bed.offsetWidth;
+      bed.classList.add("hit");
 
-      const particles = isDrillBroken() ? ["💥", "🔥", "⚠️"] : ["🪨", "🟫", "✨", "💥"];
-      for (let i = 0; i < 4; i++) {
-        const p = document.createElement("div");
-        p.className = "particle";
-        p.textContent = particles[Math.floor(Math.random() * particles.length)];
-        p.style.left = `${x}px`;
-        p.style.top = `${y}px`;
-        p.style.setProperty("--dx", `${(Math.random() - 0.5) * 120}px`);
-        p.style.setProperty("--dy", `${-20 - Math.random() * 75}px`);
-        p.style.setProperty("--rot", `${(Math.random() - 0.5) * 240}deg`);
-        stage.appendChild(p);
-        setTimeout(() => p.remove(), 560);
+      const debrisIcons = isDrillBroken() ? ["💥", "🔥", "⚠️"] : ["🪨", "🟫", "🔸", "✨", "🪨"];
+      for (let i = 0; i < 6; i++) {
+        const d = document.createElement("div");
+        d.className = "falling-debris";
+        d.textContent = debrisIcons[Math.floor(Math.random() * debrisIcons.length)];
+        d.style.fontSize = `${11 + Math.floor(Math.random() * 6)}px`;
+
+        const fromCeiling = i < 2;
+        const startX = fromCeiling
+          ? rect.width * (0.2 + Math.random() * 0.6)
+          : tipX + (Math.random() - 0.5) * 34;
+        const startY = fromCeiling ? 12 : tipY;
+
+        d.style.left = `${startX}px`;
+        d.style.top = `${startY}px`;
+        d.style.setProperty("--dx", `${(Math.random() - 0.5) * 95}px`);
+        d.style.setProperty("--peakY", fromCeiling ? "10px" : `${-14 - Math.random() * 24}px`);
+        d.style.setProperty("--fallY", `${fromCeiling ? 190 : 88}px`);
+        d.style.setProperty("--rot", `${(Math.random() - 0.5) * 320}deg`);
+        d.style.setProperty("--dur", `${0.55 + Math.random() * 0.35}s`);
+
+        stage.appendChild(d);
+        setTimeout(() => d.remove(), 920);
       }
 
       if (labelText) {
         const ft = document.createElement("div");
         ft.className = "floating-text";
         ft.textContent = labelText;
-        ft.style.left = `${Math.min(rect.width - 55, Math.max(55, x + (Math.random() - 0.5) * 30))}px`;
-        ft.style.top = `${Math.max(18, y - 12)}px`;
+        ft.style.left = `${tipX + (Math.random() - 0.5) * 46}px`;
+        ft.style.top = `${tipY - 24}px`;
         stage.appendChild(ft);
         setTimeout(() => ft.remove(), 810);
       }
@@ -862,26 +979,22 @@
       syncLayerHpMax();
       state.layerHp = state.layerMaxHp;
 
-      if (overflowed && summary.length === 0) {
-        return "Склад 100%! Бур греется!";
-      }
-      if (overflowed) {
-        return `${summary.join(" ")} (склад 100%!)`;
-      }
+      if (overflowed && summary.length === 0) return "Склад 100%! Бур греется!";
+      if (overflowed) return `${summary.join(" ")} (склад 100%!)`;
       return summary.join(" ");
     }
 
-    function applyDamage(amount, clientX, clientY, isManual) {
+    function applyDamage(amount, isManual) {
       if (isDrillBroken()) {
         if (isManual) {
-          spawnVisuals(clientX, clientY, `🛠️ Ремонт: ${getRepairRemainingSec().toFixed(1)} сек`);
+          spawnVisuals(`🛠️ Ремонт: ${getRepairRemainingSec().toFixed(1)} сек`);
           render();
         }
         return;
       }
 
       if (isManual && state.overheated) {
-        spawnVisuals(clientX, clientY, "🔥 ПЕРЕГРЕВ!");
+        spawnVisuals("🔥 ПЕРЕГРЕВ!");
         render();
         return;
       }
@@ -897,7 +1010,7 @@
       if (state.heat >= 100) {
         if (fullBeforeHit) {
           breakDrill();
-          spawnVisuals(clientX, clientY, `💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`);
+          spawnVisuals(`💥 ПОЛОМКА! Ремонт ${getRepairDurationSec()}с`);
           saveState();
           render();
           return;
@@ -916,8 +1029,8 @@
         lootLabel = lootText ? `Слой пройден! ${lootText}` : "Слой пройден!";
       }
 
-      if (isManual || Math.random() < 0.35) {
-        spawnVisuals(clientX, clientY, lootLabel);
+      if (isManual || Math.random() < 0.45) {
+        spawnVisuals(lootLabel);
       }
 
       saveState();
@@ -930,6 +1043,8 @@
       const cap = getStorageCapacity();
       const full = isStorageFull();
       const broken = isDrillBroken();
+
+      updateDrillStyle();
 
       document.getElementById("coinsVal").textContent = Math.floor(state.coins).toLocaleString("ru-RU");
       document.getElementById("depthVal").textContent = `${state.depth} м`;
@@ -962,32 +1077,36 @@
       }
 
       const arena = document.getElementById("drillArena");
-      const rig = document.getElementById("drillRig");
+      const assembly = document.getElementById("drillAssembly");
       const rock = document.getElementById("rockSurface");
       const warn = document.getElementById("warningBanner");
+      const drillBtn = document.getElementById("mainDrillBtn");
 
       arena.classList.toggle("broken-state", broken);
-      rig.classList.toggle("broken", broken);
-      rock.classList.toggle("broken", broken);
+      assembly.classList.toggle("broken", broken);
+      if (broken) assembly.classList.remove("drilling");
 
       if (broken) {
-        rig.textContent = "🛠️";
         warn.classList.remove("hidden");
-        warn.textContent = `Бур заклинило из-за переполненного склада! Ремонт: ${getRepairRemainingSec().toFixed(1)} сек (длительность зависит от уровня бура).`;
+        warn.textContent = `Бур заклинило из-за переполненного склада! Ремонт: ${getRepairRemainingSec().toFixed(1)} сек.`;
         rock.textContent = `Ожидание починки (${getRepairRemainingSec().toFixed(1)} сек)...`;
+        drillBtn.disabled = true;
+        drillBtn.textContent = `🛠️ РЕМОНТ БУРА (${getRepairRemainingSec().toFixed(1)} сек)`;
       } else if (full) {
-        rig.textContent = "🔩";
         warn.classList.remove("hidden");
-        warn.textContent = "Склад заполнен на 100%! Заберите руду в инвентаре, иначе бур перегреется и сломается.";
+        warn.textContent = "Склад заполнен на 100%! Заберите руду в инвентаре, иначе бур сломается.";
         rock.textContent = state.overheated
           ? "Ждите охлаждения мотора..."
-          : `ОПАСНОСТЬ ПОЛОМКИ! Разгрузите склад (${used}/${cap})`;
+          : `ОПАСНОСТЬ ПОЛОМКИ! Склад: ${used}/${cap}`;
+        drillBtn.disabled = state.overheated;
+        drillBtn.textContent = state.overheated ? "🔥 ОХЛАЖДЕНИЕ МОТОРА..." : "⚠️ БУРИТЬ (СКЛАД ПОЛОН!)";
       } else {
-        rig.textContent = "🔩";
         warn.classList.add("hidden");
         rock.textContent = state.overheated
           ? "Ждите охлаждения мотора..."
           : `Удар: ${Math.round(getDrillPower())} | Сбор: ×${getCollectorBonus().toFixed(2)} | Склад: ${used}/${cap}`;
+        drillBtn.disabled = state.overheated;
+        drillBtn.textContent = state.overheated ? "🔥 ОХЛАЖДЕНИЕ МОТОРА..." : "⛏️ БУРИТЬ ПОРОДУ";
       }
 
       renderInventory();
@@ -1004,8 +1123,7 @@
         <span>Наценка склада: <strong>+${bonusPct}%</strong></span>
       `;
 
-      const sellAllEverythingBtn = document.getElementById("sellAllEverythingBtn");
-      sellAllEverythingBtn.disabled = used <= 0;
+      document.getElementById("sellAllEverythingBtn").disabled = used <= 0;
 
       const container = document.getElementById("inventoryList");
       container.innerHTML = "";
@@ -1028,8 +1146,7 @@
             <button class="sell-btn" ${count <= 0 ? "disabled" : ""}>Забрать</button>
           </div>
         `;
-        const btn = row.querySelector(".sell-btn");
-        btn.addEventListener("click", () => {
+        row.querySelector(".sell-btn").addEventListener("click", () => {
           if (count <= 0) return;
           state.coins += count * unitPrice;
           state.inventory[res.id] = 0;
@@ -1048,22 +1165,22 @@
         {
           key: "drill",
           title: "⛏️ Бур",
-          desc: `Урон за удар: ${Math.round(getDrillPower())} | Время ремонта при поломке: ${getRepairDurationSec()} сек.`
+          desc: `Урон за удар: ${Math.round(getDrillPower())} | Ремонт при поломке: ${getRepairDurationSec()} сек. Меняет стиль на каждом тире.`
         },
         {
           key: "collector",
           title: "📦 Сборник руды",
-          desc: `Множитель добычи: ×${getCollectorBonus().toFixed(2)} | Автобурение: ${getAutoDps().toFixed(1)}/сек. Собирает больше породы и руды.`
+          desc: `Множитель добычи: ×${getCollectorBonus().toFixed(2)} | Автобурение: ${getAutoDps().toFixed(1)}/сек.`
         },
         {
           key: "cooler",
           title: "❄️ Мотор охлаждения",
-          desc: `Нагрев за клик: +${getHeatPerHit().toFixed(1)}% | Охлаждение: ${getCoolingPerSec().toFixed(0)}%/сек. Защищает от перегрева.`
+          desc: `Нагрев за клик: +${getHeatPerHit().toFixed(1)}% | Охлаждение: ${getCoolingPerSec().toFixed(0)}%/сек.`
         },
         {
           key: "storage",
           title: "🗄️ Хранилище на буре",
-          desc: `Вместимость: ${getStorageCapacity()} ед. | Наценка продажи: +${Math.round((getSellBonusMult() - 1) * 100)}%. Позволяет бурить дольше без переполнения.`
+          desc: `Вместимость: ${getStorageCapacity()} ед. | Наценка продажи: +${Math.round((getSellBonusMult() - 1) * 100)}%.`
         }
       ];
 
@@ -1140,8 +1257,12 @@
       });
     });
 
-    document.getElementById("drillStage").addEventListener("click", (e) => {
-      applyDamage(getDrillPower(), e.clientX, e.clientY, true);
+    document.getElementById("drillStage").addEventListener("click", () => {
+      applyDamage(getDrillPower(), true);
+    });
+
+    document.getElementById("mainDrillBtn").addEventListener("click", () => {
+      applyDamage(getDrillPower(), true);
     });
 
     document.getElementById("resetBtn").addEventListener("click", () => {
@@ -1177,7 +1298,7 @@
 
       const dps = getAutoDps();
       if (dps > 0) {
-        applyDamage(dps * 0.25, null, null, false);
+        applyDamage(dps * 0.25, false);
         changed = false;
       }
 
