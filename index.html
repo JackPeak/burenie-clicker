@@ -462,6 +462,7 @@
 
       <div class="balance-strip">
         <span class="bal-badge">🪙 <span id="top-coins">20</span></span>
+        <span class="bal-badge">🌾 Корм: <span id="top-feed-kg">10 кг</span></span>
         <span class="bal-badge">🥚 Склад: <span id="top-eggs">0</span></span>
         <span class="bal-badge">🐣 Редкие: <span id="top-chick-eggs">0</span></span>
         <span class="bal-badge">🐔 <span id="top-hens">2</span> · 🐓 <span id="top-roosters">0</span></span>
@@ -482,10 +483,10 @@
           <button type="button" class="btn btn-gray btn-sm" id="close-guide-btn">Скрыть</button>
         </div>
         <ol class="guide-steps">
-          <li><strong>Следи за кормом:</strong> сытые птицы несут яйца (простая раз в 10 мин, несушка раз в 5 мин). Без корма более 9 ч понадобится лекарство (100 🪙), а через 12 ч птицы могут погибнуть.</li>
-          <li><strong>Собирай яйца и продавай или копи:</strong> нажми <em>«Собирать»</em> в гнезде или <em>«Собрать все яйца»</em> — обычные яйца идут на склад (продажа по 2 🪙), а редкие (1% шанс) попадают в кликер <em>«Разбей яйцо»</em>.</li>
-          <li><strong>Выводи петухов:</strong> разбей редкое яйцо за 1000 кликов — с шансом 50/50 вылупится курица или петух. Петуха можно выставить в <strong>Гонки 1×1 / 1×4</strong> или сдать на мясо (220–800 🪙).</li>
-          <li><strong>Зови друзей и поддерживай идеи:</strong> в разделе <em>«Склад и Топ»</em> есть твой код приглашения (награда за 2 яйца с цыплёнком у друга) и блок <em>«Донат на идею»</em> (значок мецената без поломки баланса).</li>
+          <li><strong>Покупай корм на склад:</strong> в магазине можно взять 1 кг (9 🪙) или мешок 25 кг (200 🪙). Корм лежит на складе и не теряется — списывается только точный объём при кормлении двора.</li>
+          <li><strong>Следи за состоянием птиц:</strong> пока птицы сыты, простая курица несёт 1 яйцо раз в 10 мин, несушка — раз в 5 мин. Если не кормить 19 часов — птицы заболеют (нужно лекарство за 100 🪙), но не умирают даже через 24 часа.</li>
+          <li><strong>Собирай яйца и выводи петухов:</strong> жми <em>«Собрать все яйца»</em> или <em>«Собирать»</em> в гнезде (редкое яйцо с цыплёнком — 1% шанс, 1000 кликов).</li>
+          <li><strong>Участвуй в гонках и топе:</strong> петухи бегают в комнатах 1×1 и 1×4 или сдаются на мясо (220–800 🪙), а баланс отображается в рейтинге.</li>
         </ol>
         <button type="button" class="btn btn-green btn-sm" id="got-it-guide-btn">Понятно, погнали!</button>
       </div>
@@ -493,9 +494,9 @@
       <div class="notice" id="status-notice">Подключаемся к защищённой сессии двора...</div>
 
       <div class="card" id="medicine-box" style="display: none; border: 1px solid #fca5a5; background: #fef2f2;">
-        <strong style="color: #991b1b;">⚠️ Птицы заболели от голода (прошло более 9 часов без корма)!</strong>
+        <strong style="color: #991b1b;">⚠️ Птицы заболели (прошло 19+ часов без корма)!</strong>
         <div style="font-size: 12px; color: #7f1d1d;">
-          Без лечения птицы погибнут через 12 часов голода. Сначала вылечите двор лекарством за 100 монет, затем покормите.
+          Птицы не погибнут даже через 24 часа, но для продолжения кладки и кормления сначала купите лекарство за 100 монет.
         </div>
         <button type="button" class="btn btn-red" id="buy-medicine-btn">💊 Купить лекарство (100 🪙)</button>
       </div>
@@ -507,11 +508,11 @@
             <div class="nest-art" style="font-size: 30px;">🌾</div>
           </div>
           <div>
-            <div class="nest-title">Общий корм двора</div>
+            <div class="nest-title">Склад корма и кормление</div>
             <div class="nest-meta">
-              Цена: <strong>9 🪙 / 1 кг</strong> · Расход: <strong><span id="hourly-need-kg">2</span> кг/ч</strong><br />
+              На складе: <strong><span id="feed-stock-txt">10 кг</span></strong> · Расход: <strong><span id="hourly-need-kg">2</span> кг/ч</strong><br />
               Птиц в дворе: <strong id="total-birds-count">2</strong> (куры + петухи)<br />
-              Хватает: <strong id="feed-left-txt">4 ч 00 мин</strong>
+              Сытость двора: <strong id="feed-left-txt">4 ч 00 мин</strong>
             </div>
           </div>
           <div class="nest-right" id="feed-arc-holder"></div>
@@ -519,7 +520,7 @@
 
         <div class="card">
           <div class="row" style="justify-content: space-between;">
-            <strong style="font-size: 13px;">Покормить весь двор (запас до 4 ч):</strong>
+            <strong style="font-size: 13px;">Покормить двор со склада (до 4 ч):</strong>
             <select id="feed-hours-select">
               <option value="1">На 1 час</option>
               <option value="2">На 2 часа</option>
@@ -528,8 +529,11 @@
             </select>
           </div>
           <div class="row">
-            <button type="button" class="btn btn-green" style="flex: 1;" id="feed-all-btn">Накормить всех</button>
+            <button type="button" class="btn btn-green" style="flex: 1;" id="feed-all-btn">Покормить со склада</button>
             <button type="button" class="btn btn-amber" id="collect-all-eggs-btn">🥚 Собрать все яйца</button>
+          </div>
+          <div style="font-size: 11px; color: #526075;">
+            Точный учёт до грамма — без лишних списаний при повторном нажатии. Без корма 19 ч птицы заболевают, но не гибнут даже через 24 ч.
           </div>
         </div>
 
@@ -540,6 +544,20 @@
       <div class="page" id="page-shop">
         <div class="card">
           <strong>🏪 Магазин двора</strong>
+          <div class="list-item">
+            <div>
+              <strong>🌾 Корм (1 кг на склад)</strong><br />
+              <span style="font-size: 12px; color: #526075;">Пополняет склад корма без потерь</span>
+            </div>
+            <button type="button" class="btn btn-green" id="buy-feed-1kg-btn">9 🪙</button>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>🌾 Мешок корма (25 кг на склад)</strong><br />
+              <span style="font-size: 12px; color: #526075;">Выгодный мешок сразу на 25 кг</span>
+            </div>
+            <button type="button" class="btn btn-green" id="buy-feed-25kg-btn">200 🪙</button>
+          </div>
           <div class="list-item">
             <div>
               <strong>🐔 Курица (магазин)</strong><br />
@@ -574,7 +592,7 @@
         <div class="card">
           <strong>🐓 Мои петухи (гонки и сдача на мясо)</strong>
           <div style="font-size: 12px; color: #526075;">
-            Каждый петух ест 1 кг корма в час. Можно выставить в забег или сдать на мясо (220–800 🪙 по редкости).
+            Каждый петух учитывается при кормлении (1 кг в час). Можно выставить в забег или сдать на мясо (220–800 🪙 по редкости).
           </div>
           <div id="roosters-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
@@ -775,16 +793,16 @@
     const db = getDatabase(app);
 
     const HOUR_MS = 3600 * 1000;
-    const FEED_PRICE_PER_KG = 9;
+    const FEED_1KG_PRICE = 9;
+    const FEED_25KG_PRICE = 200;
     const EGG_SELL_PRICE = 2;
     const MAX_FEED_HOURS = 4;
-    const SICK_AFTER_HOURS = 18;
-    const DEATH_AFTER_HOURS = 24;
+    const SICK_AFTER_HOURS = 19;
     const MEDICINE_COST = 100;
     const MAX_NEST_EGGS = 48;
     const CHICK_EGG_CHANCE = 0.01;
     const REF_TARGET_CHICK_EGGS = 2;
-    const REF_REWARD_FEED_HOURS = 4;
+    const REF_REWARD_FEED_KG = 4;
 
     const CHICKEN_ART = {
       simple: "./chicken_simple.png",
@@ -828,10 +846,12 @@
         avatarType: keepProfile?.avatarType || "emoji",
         avatarValue: keepProfile?.avatarValue || "🐓",
         coins: 20,
+        feedStockKg: 10,
+        feedRemainderKg: 0,
         warehouseEggs: 0,
         releasedCount: 0,
-        hungryWarned: false,
         sickNeedsMedicine: false,
+        sickWarned: false,
         lastTickAt: now,
         fedUntil: now + 4 * HOUR_MS,
         hens: [createHen(false, 1), createHen(false, 2)],
@@ -867,6 +887,8 @@
         state = createDefaultState(uid);
       }
       if (!state.refCode) state.refCode = makeRefCodeFromSeed(uid);
+      if (typeof state.feedStockKg !== "number") state.feedStockKg = 10;
+      if (typeof state.feedRemainderKg !== "number") state.feedRemainderKg = 0;
       saveState();
     }
 
@@ -889,6 +911,30 @@
       return (state.hens?.length || 0) + (state.roosters?.length || 0);
     }
 
+    // Отображение в кг и граммах, например: 9.967 кг или 10 кг
+    function formatKgWithGrams(kg) {
+      const val = Math.max(0, Number(kg || 0));
+      const gramsTotal = Math.round(val * 1000);
+      const wholeKg = Math.floor(gramsTotal / 1000);
+      const grams = gramsTotal % 1000;
+      if (grams === 0) return `${wholeKg} кг`;
+      return `${wholeKg}.${String(grams).padStart(3, "0")} кг`;
+    }
+
+    // Точный расчёт корма без округления вверх и потерь при повторном нажатии
+    function computeExactFeedCostKg(now, selHours, birds) {
+      if (birds <= 0) return { rawKg: 0, chargeableKg: 0, nextRemainderKg: Number(state.feedRemainderKg || 0) };
+      const targetMs = now + selHours * HOUR_MS;
+      const effectiveUntil = Math.max(now, state.fedUntil || now);
+      const addMs = Math.max(0, targetMs - effectiveUntil);
+      const addHours = addMs / HOUR_MS;
+      const rawKg = addHours * birds;
+      const totalWithCarry = rawKg + Number(state.feedRemainderKg || 0);
+      const chargeableKg = Math.floor(totalWithCarry * 1000) / 1000;
+      const nextRemainderKg = Math.max(0, totalWithCarry - chargeableKg);
+      return { rawKg, chargeableKg, nextRemainderKg };
+    }
+
     function rollRarity() {
       const total = RARITIES.reduce((s, r) => s + r.weight, 0);
       let roll = Math.random() * total;
@@ -897,17 +943,6 @@
         if (roll <= 0) return r;
       }
       return RARITIES[0];
-    }
-
-    function addFeedHoursToYard(hours) {
-      const now = Date.now();
-      const birds = Math.max(1, totalBirdsCount());
-      const addMs = hours * HOUR_MS;
-      const base = Math.max(now, state.fedUntil || now);
-      state.fedUntil = Math.min(now + MAX_FEED_HOURS * HOUR_MS, base + addMs);
-      state.sickNeedsMedicine = false;
-      state.hungryWarned = false;
-      return birds;
     }
 
     function renderArcSvg(percent, subText) {
@@ -943,42 +978,26 @@
       if (birds === 0) {
         state.fedUntil = now;
         state.sickNeedsMedicine = false;
-        state.hungryWarned = false;
+        state.sickWarned = false;
         state.lastTickAt = now;
         return;
       }
 
       const hungryMs = Math.max(0, now - (state.fedUntil || now));
-
-      if (hungryMs >= DEATH_AFTER_HOURS * HOUR_MS) {
-        state.hens = [];
-        state.roosters = [];
-        state.selectedRoosterId = "";
-        state.sickNeedsMedicine = false;
-        state.hungryWarned = false;
-        state.fedUntil = now;
-        state.lastTickAt = now;
-        saveState();
-        notify("Прошло 12 часов без корма — птицы погибли от голода!", true);
-        syncFirebaseBalance().catch(() => {});
-        return;
-      }
-
       if (hungryMs >= SICK_AFTER_HOURS * HOUR_MS && !state.sickNeedsMedicine) {
         state.sickNeedsMedicine = true;
-        notify("Прошло более 9 часов без корма! Купите лекарство за 100 монет.", true);
+        if (!state.sickWarned) {
+          state.sickWarned = true;
+          notify("Прошло 19 часов без корма — птицы заболели! Купите лекарство за 100 монет (они не умрут даже через 24 ч).", true);
+        }
       }
 
-      if (hungryMs > 0 && !state.hungryWarned) {
-        state.hungryWarned = true;
-        notify("Корм закончился! Курицы хотят кушать — покормите двор.", true);
-      }
-
-      const activeProductionEnd = Math.min(now, state.fedUntil || now);
+      const canLayNow = !state.sickNeedsMedicine && now <= (state.fedUntil || now);
+      const activeProductionEnd = state.sickNeedsMedicine ? 0 : Math.min(now, state.fedUntil || now);
       let changed = false;
 
       for (const hen of state.hens) {
-        if (activeProductionEnd > hen.lastLayAt && hen.storedEggs < MAX_NEST_EGGS) {
+        if (canLayNow && activeProductionEnd > hen.lastLayAt && hen.storedEggs < MAX_NEST_EGGS) {
           const elapsed = activeProductionEnd - hen.lastLayAt;
           const laid = Math.floor(elapsed / hen.intervalMs);
           if (laid > 0) {
@@ -988,10 +1007,10 @@
             changed = true;
           }
         }
-        if (now > (state.fedUntil || now) && hen.lastLayAt < now && hen.storedEggs < MAX_NEST_EGGS) {
-          const hungryDelta = now - Math.max(state.lastTickAt || now, state.fedUntil || now);
-          if (hungryDelta > 0) {
-            hen.lastLayAt += hungryDelta;
+        if (!canLayNow && hen.lastLayAt < now && hen.storedEggs < MAX_NEST_EGGS) {
+          const pausedDelta = now - Math.max(state.lastTickAt || now, state.fedUntil || now);
+          if (pausedDelta > 0) {
+            hen.lastLayAt += pausedDelta;
             changed = true;
           }
         }
@@ -1045,6 +1064,8 @@
     function renderAll() {
       const now = Date.now();
       const birds = totalBirdsCount();
+      const stockKg = Number(state.feedStockKg || 0);
+      const stockFormatted = formatKgWithGrams(stockKg);
 
       document.getElementById("header-nick").textContent = state.nick || "Фермер";
       document.getElementById("header-supporter-badge").style.display = state.ideaSupporter ? "inline-block" : "none";
@@ -1053,28 +1074,28 @@
       applyAvatarToElement(document.getElementById("profile-avatar-preview"));
 
       document.getElementById("top-coins").textContent = Number(state.coins || 0).toLocaleString("ru-RU");
+      document.getElementById("top-feed-kg").textContent = stockFormatted;
       document.getElementById("top-eggs").textContent = Number(state.warehouseEggs || 0);
       document.getElementById("top-chick-eggs").textContent = Number(state.chickQueue.length || 0);
       document.getElementById("top-hens").textContent = state.hens.length;
       document.getElementById("top-roosters").textContent = state.roosters.length;
 
       const fedRemainingMs = Math.max(0, (state.fedUntil || now) - now);
-      const hungryMs = Math.max(0, now - (state.fedUntil || now));
       const statusBadge = document.getElementById("header-feed-status");
 
       if (birds === 0) {
         statusBadge.textContent = "🌾 Двор пуст";
       } else if (state.sickNeedsMedicine) {
-        statusBadge.textContent = "💊 Нужна помощь!";
+        statusBadge.textContent = "💊 Болеют (19ч+)";
       } else if (fedRemainingMs > 0) {
         statusBadge.textContent = "🌾 Сыты";
       } else {
-        const leftDeathH = Math.max(0, DEATH_AFTER_HOURS - hungryMs / HOUR_MS);
-        statusBadge.textContent = `⚠️ Голод (${leftDeathH.toFixed(1)}ч)`;
+        statusBadge.textContent = stockKg > 0 ? "🌾 Ожидают корма" : "🌾 Нет корма";
       }
 
       document.getElementById("medicine-box").style.display = state.sickNeedsMedicine && birds > 0 ? "flex" : "none";
 
+      document.getElementById("feed-stock-txt").textContent = stockFormatted;
       document.getElementById("hourly-need-kg").textContent = birds;
       document.getElementById("total-birds-count").textContent = birds;
 
@@ -1083,10 +1104,9 @@
       const remH = Math.floor(fedHoursLeft);
       const remM = Math.floor((fedHoursLeft - remH) * 60);
       document.getElementById("feed-left-txt").textContent =
-        birds === 0 ? "нет птиц" : fedRemainingMs > 0 ? `${remH} ч ${String(remM).padStart(2, "0")} мин` : "0 ч (голод)";
+        birds === 0 ? "нет птиц" : fedRemainingMs > 0 ? `${remH} ч ${String(remM).padStart(2, "0")} мин` : "не покормлены";
 
-      const totalFeedKgLeft = Number((fedHoursLeft * birds).toFixed(1));
-      document.getElementById("feed-arc-holder").innerHTML = renderArcSvg(feedPct, `${totalFeedKgLeft} кг`);
+      document.getElementById("feed-arc-holder").innerHTML = renderArcSvg(feedPct, stockFormatted);
 
       const totalNestEggs = state.hens.reduce((sum, h) => sum + Number(h.storedEggs || 0), 0);
       const collectAllBtn = document.getElementById("collect-all-eggs-btn");
@@ -1094,21 +1114,23 @@
       collectAllBtn.textContent = totalNestEggs > 0 ? `🥚 Собрать все (${totalNestEggs})` : "🥚 Собрать все яйца";
 
       const selHours = Number(document.getElementById("feed-hours-select").value) || 1;
-      const targetMs = now + selHours * HOUR_MS;
-      const addMs = Math.max(0, targetMs - Math.max(now, state.fedUntil || now));
-      const addHours = addMs / HOUR_MS;
-      const needKg = Math.ceil(addHours * birds * 10) / 10;
-      const needCoins = Math.ceil(needKg * FEED_PRICE_PER_KG);
+      const { rawKg, chargeableKg } = computeExactFeedCostKg(now, selHours, birds);
       const feedBtn = document.getElementById("feed-all-btn");
 
       if (birds === 0) {
         feedBtn.textContent = "Нет птиц для кормления";
         feedBtn.disabled = true;
-      } else if (needKg <= 0) {
+      } else if (state.sickNeedsMedicine) {
+        feedBtn.textContent = "Сначала купите лекарство (100 🪙)";
+        feedBtn.disabled = true;
+      } else if (rawKg <= 0.0001) {
         feedBtn.textContent = `Уже накормлены на ≥ ${selHours} ч`;
         feedBtn.disabled = true;
+      } else if (stockKg + 1e-9 < chargeableKg) {
+        feedBtn.textContent = `Нужно ${formatKgWithGrams(chargeableKg)} (на складе ${stockFormatted})`;
+        feedBtn.disabled = true;
       } else {
-        feedBtn.textContent = `Накормить всех на ${selHours} ч · ${needKg} кг (${needCoins} 🪙)`;
+        feedBtn.textContent = `Покормить на ${selHours} ч (списать ${formatKgWithGrams(chargeableKg)})`;
         feedBtn.disabled = false;
       }
 
@@ -1124,10 +1146,10 @@
               ? `<span class="tag tag-gold">Несушка</span>`
               : `<span class="tag">Простая</span>`;
             const moodText = state.sickNeedsMedicine
-              ? `<span style="color:#dc2626;font-weight:700;">Больна — нужно лекарство</span>`
+              ? `<span style="color:#dc2626;font-weight:700;">Болеет (19ч+ без корма)</span>`
               : fedRemainingMs > 0
               ? `<span style="color:#16873b;font-weight:700;">Сыта · несёт яйца</span>`
-              : `<span style="color:#d97706;font-weight:700;">Хочет кушать!</span>`;
+              : `<span style="color:#d97706;font-weight:700;">Ожидает кормления со склада</span>`;
 
             return `
               <div class="nest-card">
@@ -1139,7 +1161,7 @@
                   <div class="nest-title">${escapeHtml(hen.name)} ${typeTag}</div>
                   <div class="nest-meta">
                     Кладка: <strong>${layText}</strong> · Макс: <strong>${MAX_NEST_EGGS}</strong><br />
-                    Корм: <strong>1 кг в час</strong><br />
+                    Расход при кормлении: <strong>1 кг / ч</strong><br />
                     ${moodText}
                   </div>
                 </div>
@@ -1248,7 +1270,6 @@
       b.addEventListener("click", () => openPage(b.getAttribute("data-nav")));
     });
 
-    // Модалка сброса прогресса (Да / Нет)
     const resetModal = document.getElementById("reset-confirm-modal");
     document.getElementById("open-reset-modal-btn").addEventListener("click", () => {
       resetModal.classList.add("open");
@@ -1275,7 +1296,6 @@
       notify("Прогресс сброшен до стартового состояния.");
     });
 
-    // Управление ознакомлением
     document.getElementById("toggle-guide-btn").addEventListener("click", () => {
       const box = document.getElementById("onboarding-box");
       setGuideVisible(box.style.display === "none");
@@ -1295,7 +1315,6 @@
       setGuideVisible(false);
     });
 
-    // Рефералка
     document.getElementById("copy-ref-code-btn").addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(state.refCode);
@@ -1338,20 +1357,20 @@
       if (state.refChickEggsHatched >= REF_TARGET_CHICK_EGGS) {
         state.refRewardClaimed = true;
         state.hens.push(createHen(false, state.nextNestNum++));
-        addFeedHoursToYard(REF_REWARD_FEED_HOURS);
+        state.feedStockKg = Number(state.feedStockKg || 0) + REF_REWARD_FEED_KG;
 
         await runTransaction(ref(db, `referralRewards/${state.referredByUid}/${authUid}`), (curr) => {
           if (curr) return curr;
           return {
             fromUid: authUid,
             rewardLayerHen: 1,
-            rewardFeedHours: REF_REWARD_FEED_HOURS,
+            rewardFeedKg: REF_REWARD_FEED_KG,
             claimed: false,
             createdAt: Date.now()
           };
         });
 
-        notify("Поздравляем! За 2 яйца с цыплёнком вы получили 1 простую курицу + 4 кг корма, а друг — 1 несушку + 4 кг корма!");
+        notify("Поздравляем! За 2 яйца с цыплёнком вы получили 1 простую курицу + 4 кг корма на склад, а друг — 1 несушку + 4 кг корма!");
       }
       saveState();
     }
@@ -1368,7 +1387,7 @@
           for (let i = 0; i < (Number(item.rewardLayerHen) || 1); i++) {
             state.hens.push(createHen(true, state.nextNestNum++));
           }
-          addFeedHoursToYard(Number(item.rewardFeedHours) || REF_REWARD_FEED_HOURS);
+          state.feedStockKg = Number(state.feedStockKg || 0) + (Number(item.rewardFeedKg) || REF_REWARD_FEED_KG);
           updates[`referralRewards/${authUid}/${ch.key}/claimed`] = true;
           claimedAny = true;
         }
@@ -1378,11 +1397,10 @@
         saveState();
         renderAll();
         await syncFirebaseBalance();
-        notify("Реферальная награда за друга зачислена: +1 курица-несушка и +4 кг корма!");
+        notify("Реферальная награда за друга зачислена: +1 курица-несушка и +4 кг корма на склад!");
       }
     }
 
-    // Донат на идею
     document.getElementById("send-idea-donation-btn").addEventListener("click", async () => {
       if (!authUid) return;
       const ideaText = document.getElementById("idea-donation-text").value.trim();
@@ -1406,9 +1424,6 @@
       notify("Спасибо за идею и поддержку! В профиле появился бейдж «Идейный меценат».");
     });
 
-    // Кормление и лекарство
-    document.getElementById("feed-hours-select").addEventListener("change", renderAll);
-
     document.getElementById("buy-medicine-btn").addEventListener("click", async () => {
       if (!state.sickNeedsMedicine) return;
       if (state.coins < MEDICINE_COST) {
@@ -1417,12 +1432,31 @@
       }
       state.coins -= MEDICINE_COST;
       state.sickNeedsMedicine = false;
+      state.sickWarned = false;
       state.fedUntil = Date.now();
       saveState();
       renderAll();
       await syncFirebaseBalance();
-      notify("Двор вылечен! Теперь покормите птиц.");
+      notify("Птицы вылечены! Теперь можете покормить двор со склада.");
     });
+
+    async function buyFeedToWarehouse(kgAmount, priceCoins) {
+      if (state.coins < priceCoins) {
+        notify(`Не хватает монет: нужно ${priceCoins} 🪙 за ${kgAmount} кг корма.`, true);
+        return;
+      }
+      state.coins -= priceCoins;
+      state.feedStockKg = Number(state.feedStockKg || 0) + kgAmount;
+      saveState();
+      renderAll();
+      await syncFirebaseBalance();
+      notify(`Куплено ${kgAmount} кг корма на склад (всего на складе: ${formatKgWithGrams(state.feedStockKg)}). Корм не пропадёт!`);
+    }
+
+    document.getElementById("buy-feed-1kg-btn").addEventListener("click", () => buyFeedToWarehouse(1, FEED_1KG_PRICE));
+    document.getElementById("buy-feed-25kg-btn").addEventListener("click", () => buyFeedToWarehouse(25, FEED_25KG_PRICE));
+
+    document.getElementById("feed-hours-select").addEventListener("change", renderAll);
 
     document.getElementById("feed-all-btn").addEventListener("click", async () => {
       processSimulation();
@@ -1432,26 +1466,27 @@
         notify("Сначала купите лекарство за 100 монет!", true);
         return;
       }
+
       const now = Date.now();
       const selHours = Number(document.getElementById("feed-hours-select").value) || 1;
-      const targetMs = now + selHours * HOUR_MS;
-      const addMs = Math.max(0, targetMs - Math.max(now, state.fedUntil || now));
-      const needKg = Math.ceil((addMs / HOUR_MS) * birds * 10) / 10;
-      const needCoins = Math.ceil(needKg * FEED_PRICE_PER_KG);
+      const { rawKg, chargeableKg, nextRemainderKg } = computeExactFeedCostKg(now, selHours, birds);
 
-      if (needKg <= 0) return;
-      if (state.coins < needCoins) {
-        notify(`Не хватает монет: нужно ${needCoins} 🪙 за ${needKg} кг корма.`, true);
+      if (rawKg <= 0.0001) {
+        notify(`Двор уже накормлен на ${selHours} ч — списывать ничего не нужно.`);
+        return;
+      }
+      if (Number(state.feedStockKg || 0) + 1e-9 < chargeableKg) {
+        notify(`На складе не хватает корма: нужно ${formatKgWithGrams(chargeableKg)}, есть ${formatKgWithGrams(state.feedStockKg || 0)}.`, true);
         return;
       }
 
-      state.coins -= needCoins;
-      state.fedUntil = targetMs;
-      state.hungryWarned = false;
+      state.feedStockKg = Math.max(0, Number(((state.feedStockKg || 0) - chargeableKg).toFixed(6)));
+      state.feedRemainderKg = nextRemainderKg;
+      state.fedUntil = now + selHours * HOUR_MS;
+      state.sickWarned = false;
       saveState();
       renderAll();
-      await syncFirebaseBalance();
-      notify(`Все птицы (${birds} шт.) накормлены на ${selHours} ч! Потрачено ${needKg} кг (${needCoins} 🪙).`);
+      notify(`Двор накормлен на ${selHours} ч! Списано ровно ${formatKgWithGrams(chargeableKg)} (на складе: ${formatKgWithGrams(state.feedStockKg)}), потерь нет.`);
     });
 
     function distributeEggsFromCount(count, baseSeed = "") {
@@ -1994,7 +2029,7 @@
       renderAll();
       await claimPendingReferrerRewards().catch(() => {});
       await syncFirebaseBalance().catch(() => {});
-      notify("Сессия активна. На старте у вас 2 простые курицы, корм на 4 часа и 20 монет.");
+      notify("Сессия активна. На старте у вас 2 курицы, 10 кг корма на складе и 20 монет.");
     });
 
     signInAnonymously(auth).catch(() => {
