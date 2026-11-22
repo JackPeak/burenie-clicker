@@ -429,6 +429,23 @@
     .reel-label { font-size: 11px; font-weight: 800; line-height: 1.15; }
     .reel-chance { font-size: 9px; color: #94a3b8; font-weight: 700; }
 
+    .egg-smash-hero {
+      background: radial-gradient(circle at 50% 35%, #fffbeb 0%, #fef3c7 65%, #fde68a 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 16px;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .egg-smash-ico {
+      font-size: 54px;
+      line-height: 1.1;
+      user-select: none;
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -532,18 +549,19 @@
 
       <div class="balance-strip">
         <span class="bal-badge">🪙 <span id="top-coins">20</span></span>
-        <span class="bal-badge">🌾 Корм: <span id="top-feed-kg">10 кг</span></span>
-        <span class="bal-badge">🥚 Склад: <span id="top-eggs">0</span></span>
+        <span class="bal-badge">🌾 У кур: <span id="top-given-feed">4 кг</span></span>
+        <span class="bal-badge">📦 Склад: <span id="top-feed-stock">10 кг</span></span>
+        <span class="bal-badge">🥚 Яиц: <span id="top-eggs">0</span></span>
         <span class="bal-badge">🐣 Редкие: <span id="top-chick-eggs">0</span></span>
         <span class="bal-badge">⚡ Буст: <span id="top-boosters">0</span></span>
         <span class="bal-badge">🐔 <span id="top-hens">2</span> · 🐓 <span id="top-roosters">0</span></span>
       </div>
 
       <div class="quick-grid">
-        <button type="button" class="quick-btn" data-open-page="nests">🪺 Гнёзда и корм</button>
         <button type="button" class="quick-btn" data-open-page="roulette">🎡 Рулетка</button>
-        <button type="button" class="quick-btn" data-open-page="shop">🏪 Магазин и кликер</button>
-        <button type="button" class="quick-btn" data-open-page="race">🏁 Гонки 1×1 / 1×4</button>
+        <button type="button" class="quick-btn" data-open-page="egg-smash">🐣 Разбей яйцо</button>
+        <button type="button" class="quick-btn" data-open-page="race">🏁 Гонки</button>
+        <button type="button" class="quick-btn" data-open-page="top">🏆 Топ</button>
       </div>
     </div>
 
@@ -554,10 +572,10 @@
           <button type="button" class="btn btn-gray btn-sm" id="close-guide-btn">Скрыть</button>
         </div>
         <ol class="guide-steps">
-          <li><strong>Покупай корм на склад:</strong> в магазине можно взять 1 кг (9 🪙) или мешок 25 кг (200 🪙). Корм лежит на складе и списывается только точный объём при кормлении.</li>
+          <li><strong>Покупай корм на склад и выдавай курям:</strong> в магазине можно взять 1 кг (9 🪙) или мешок 25 кг (200 🪙). На «Складе» или в «Гнёздах» выдавай нужную порцию курам — там показывается именно сколько корма дано курям.</li>
           <li><strong>Следи за состоянием птиц:</strong> без корма после <strong>19 ч</strong> птицы заболевают (лечатся за 100 🪙 или сами за 9 ч). Если покормить после 19 ч — от голода не умрут, но болезнь останется. Смерть наступает на <strong>24-м часу</strong> без кормления.</li>
-          <li><strong>Собирай яйца и выводи петухов:</strong> жми <em>«Собрать все яйца»</em> или <em>«Собирать»</em> в гнезде (редкое яйцо с цыплёнком — 1% шанс, 1000 кликов).</li>
-          <li><strong>Крути рулетку и гоняй:</strong> на отдельной странице <em>«Рулетка»</em> есть 1 бесплатный спин раз в 24 ч и до 3 платных по 100 🪙 в день.</li>
+          <li><strong>Собирай яйца и разбивай редкие:</strong> жми <em>«Собрать все яйца»</em> или <em>«Собирать»</em> в гнезде, а редкое яйцо (1% шанс) открывай на отдельном экране <em>«Разбей яйцо»</em> (1000 кликов).</li>
+          <li><strong>Крути рулетку и смотри топ:</strong> в шапке доступны <em>«Рулетка»</em> (1 бесплатный спин раз в 24 ч + до 3 платных по 100 🪙), <em>«Разбей яйцо»</em>, <em>«Гонки»</em> и <em>«Топ»</em>.</li>
         </ol>
         <button type="button" class="btn btn-green btn-sm" id="got-it-guide-btn">Понятно, погнали!</button>
       </div>
@@ -572,18 +590,18 @@
         <button type="button" class="btn btn-red" id="buy-medicine-btn">💊 Вылечить сейчас (100 🪙)</button>
       </div>
 
-      <!-- ВКЛАДКА 1: ГНЁЗДА И ОБЩИЙ КОРМ -->
+      <!-- 1. ГНЁЗДА И КОРМ У КУР -->
       <div class="page active" id="page-nests">
         <div class="nest-card" style="grid-template-columns: 64px 1fr 104px;">
           <div class="nest-left">
             <div class="nest-art" style="font-size: 30px;">🌾</div>
           </div>
           <div>
-            <div class="nest-title">Склад корма и кормление</div>
+            <div class="nest-title">Корм у кур</div>
             <div class="nest-meta">
-              На складе: <strong><span id="feed-stock-txt">10 кг</span></strong> · Расход: <strong><span id="hourly-need-kg">2</span> кг/ч</strong><br />
-              Птиц в дворе: <strong id="total-birds-count">2</strong> (куры + петухи)<br />
-              Сытость двора: <strong id="feed-left-txt">4 ч 00 мин</strong>
+              Выдано курям: <strong><span id="given-feed-txt">4 кг</span></strong> · На складе: <strong><span id="stock-feed-inline-txt">10 кг</span></strong><br />
+              Расход: <strong><span id="hourly-need-kg">2</span> кг/ч</strong> · Птиц: <strong id="total-birds-count">2</strong><br />
+              Хватит на: <strong id="feed-left-txt">2 ч 00 мин</strong>
             </div>
           </div>
           <div class="nest-right" id="feed-arc-holder"></div>
@@ -591,62 +609,57 @@
 
         <div class="card">
           <div class="row" style="justify-content: space-between;">
-            <strong style="font-size: 13px;">Покормить двор со склада (до 4 ч):</strong>
+            <strong style="font-size: 13px;">Выдать корм курям со склада (до 4 ч):</strong>
             <select id="feed-hours-select">
               <option value="1">На 1 час</option>
-              <option value="2">На 2 часа</option>
+              <option value="2" selected>На 2 часа</option>
               <option value="3">На 3 часа</option>
-              <option value="4" selected>На 4 часа</option>
+              <option value="4">На 4 часа</option>
             </select>
           </div>
           <div class="row">
-            <button type="button" class="btn btn-green" style="flex: 1;" id="feed-all-btn">Покормить со склада</button>
+            <button type="button" class="btn btn-green" style="flex: 1;" id="feed-all-btn">Выдать корм курям</button>
             <button type="button" class="btn btn-amber" id="collect-all-eggs-btn">🥚 Собрать все яйца</button>
           </div>
           <div style="font-size: 11px; color: #526075;">
-            Точный учёт до грамма. 19 ч без корма = болезнь (лечение 100 🪙 или 9 ч самолечения; кормление после 19 ч спасает от смерти от голода, но болезнь остаётся). 24 ч без кормления = гибель.
+            Показывается именно сколько корма сейчас выдано курям. 19 ч без корма = болезнь (лечение 100 🪙 или 9 ч самолечения). 24 ч без кормления = гибель.
           </div>
         </div>
 
         <div id="nests-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
       </div>
 
-      <!-- ОТДЕЛЬНАЯ СТРАНИЦА: РУЛЕТКА УДАЧИ -->
-      <div class="page" id="page-roulette">
+      <!-- 2. СКЛАД -->
+      <div class="page" id="page-warehouse">
         <div class="card">
-          <div class="row" style="justify-content: space-between;">
-            <strong>🎡 Рулетка двора</strong>
-            <span class="tag tag-gold" id="roulette-status-badge">Бесплатный спин готов</span>
-          </div>
-          <div style="font-size: 12px; color: #526075; line-height: 1.4;">
-            Лента крутится <strong>вправо</strong> до стрелки по центру. Доступен <strong>1 бесплатный прокрут раз в 24 ч</strong> и до <strong>3 платных прокрутов в день по 100 🪙</strong>.
-          </div>
-
-          <div class="roulette-stage">
-            <div class="roulette-pointer-top">▼</div>
-            <div class="roulette-center-line"></div>
-            <div class="roulette-viewport">
-              <div class="roulette-track" id="roulette-track"></div>
+          <strong>📦 Склад корма и яиц</strong>
+          <div class="list-item">
+            <div>
+              <strong>🌾 Корм на складе: <span id="wh-feed-stock">10 кг</span></strong><br />
+              <span style="font-size: 12px; color: #526075;">Сейчас выдано курям: <strong><span id="wh-given-feed">4 кг</span></strong></span>
             </div>
+            <button type="button" class="btn btn-green btn-sm" id="wh-give-feed-btn">Выдать курям</button>
           </div>
-
-          <button type="button" class="btn btn-green" id="spin-roulette-btn">Крутить</button>
-          <div id="roulette-limits-txt" style="font-size: 12px; color: #526075;"></div>
-          <div id="roulette-last-prize" class="notice" style="display: none;"></div>
+          <div class="list-item">
+            <span>🥚 Обычные яйца на складе: <strong id="warehouse-eggs">0</strong> шт. (по 2 🪙)</span>
+            <button type="button" class="btn btn-green" id="sell-eggs-btn">Продать все</button>
+          </div>
+          <div class="list-item">
+            <span>🐣 Редких яиц в очереди: <strong id="wh-chick-eggs">0</strong> · ⚡ Бустеров в запасе: <strong id="wh-boosters">0</strong></span>
+            <button type="button" class="btn btn-amber btn-sm" data-open-page="egg-smash">Открыть кликер</button>
+          </div>
         </div>
 
         <div class="card">
-          <strong>📊 Шансы наград (сумма 100%)</strong>
-          <div style="font-size: 12px; color: #526075; line-height: 1.5;">
-            • <strong>1%</strong> — Яйцо с цыплёнком<br />
-            • <strong>5%</strong> — 100 монет · <strong>5%</strong> — 50 монет · <strong>5%</strong> — 10 кг корма<br />
-            • <strong>5%</strong> — Бустер (+200 кликов к яйцу в очереди; если очередь пуста — сохраняется в запас и сработает на следующем яйце)<br />
-            • <strong>79%</strong> — другие призы: 5 кг корма (14%), 2 кг корма (16%), 3 кг корма (4%), 25 монет (13%), 15 монет (12%), 20 обычных яиц (10%), 8 обычных яиц (8%), анти-болезнь / 15 монет (4%).
+          <strong>🐓 Мои петухи (гонки и сдача на мясо)</strong>
+          <div style="font-size: 12px; color: #526075;">
+            Каждый петух учитывается при кормлении (1 кг в час). Можно выставить в забег или сдать на мясо (220–800 🪙 по редкости).
           </div>
+          <div id="roosters-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
       </div>
 
-      <!-- ВКЛАДКА 2: МАГАЗИН, КЛИКЕР И ПЕТУХИ -->
+      <!-- 3. МАГАЗИН -->
       <div class="page" id="page-shop">
         <div class="card">
           <strong>🏪 Магазин двора</strong>
@@ -674,40 +687,14 @@
           <div class="list-item">
             <div>
               <strong>🐣 Яйцо с цыплёнком</strong><br />
-              <span style="font-size: 12px; color: #526075;">Сразу в «Разбей яйцо» (1000 кликов)</span>
+              <span style="font-size: 12px; color: #526075;">Отправляется в «Разбей яйцо» (1000 кликов)</span>
             </div>
             <button type="button" class="btn btn-green" id="buy-chick-egg-btn">400 🪙</button>
           </div>
         </div>
-
-        <div class="card">
-          <div class="row" style="justify-content: space-between;">
-            <strong>🥚 Разбей яйцо с цыплёнком (1000 кликов)</strong>
-            <span class="tag tag-gold" id="chick-queue-badge">В очереди: 0</span>
-          </div>
-          <div id="active-chick-egg-info" style="font-size: 12px; color: #526075;">
-            Редкие яйца (1% шанс при сборе из гнёзд, в рулетке или за 400 🪙 в магазине) попадают сюда. После 1000 кликов: 50% курица / 50% петух.
-          </div>
-          <div class="bar-bg"><div class="bar-fill" id="chick-click-bar"></div></div>
-          <div class="row" style="justify-content: space-between;">
-            <span style="font-size: 12px; font-weight: 700;">Кликов: <span id="chick-clicks-txt">0</span> / 1000</span>
-            <div class="row">
-              <button type="button" class="btn btn-purple btn-sm" id="use-booster-btn" style="display: none;">⚡ Буст (+200)</button>
-              <button type="button" class="btn btn-green" id="chick-click-btn">Ударить по яйцу (+1)</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <strong>🐓 Мои петухи (гонки и сдача на мясо)</strong>
-          <div style="font-size: 12px; color: #526075;">
-            Каждый петух учитывается при кормлении (1 кг в час). Можно выставить в забег или сдать на мясо (220–800 🪙 по редкости).
-          </div>
-          <div id="roosters-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
-        </div>
       </div>
 
-      <!-- ВКЛАДКА 3: ГОНКИ 1x1 / 1x4 -->
+      <!-- 4. ГОНКИ -->
       <div class="page" id="page-race">
         <div class="card">
           <strong>🏁 Создать комнату гонки</strong>
@@ -750,7 +737,74 @@
         </div>
       </div>
 
-      <!-- ВКЛАДКА 4: ПРОФИЛЬ, РЕФЕРАЛКА, ДОНАТ НА ИДЕЮ, СКЛАД, ДОСТИЖЕНИЯ И ТОП -->
+      <!-- ОТДЕЛЬНЫЙ ЭКРАН: РУЛЕТКА -->
+      <div class="page" id="page-roulette">
+        <div class="card">
+          <div class="row" style="justify-content: space-between;">
+            <strong>🎡 Рулетка двора</strong>
+            <span class="tag tag-gold" id="roulette-status-badge">Бесплатный спин готов</span>
+          </div>
+          <div style="font-size: 12px; color: #526075; line-height: 1.4;">
+            Лента крутится <strong>вправо</strong> до стрелки по центру. Доступен <strong>1 бесплатный прокрут раз в 24 ч</strong> и до <strong>3 платных прокрутов в день по 100 🪙</strong>.
+          </div>
+
+          <div class="roulette-stage">
+            <div class="roulette-pointer-top">▼</div>
+            <div class="roulette-center-line"></div>
+            <div class="roulette-viewport">
+              <div class="roulette-track" id="roulette-track"></div>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-green" id="spin-roulette-btn">Крутить</button>
+          <div id="roulette-limits-txt" style="font-size: 12px; color: #526075;"></div>
+          <div id="roulette-last-prize" class="notice" style="display: none;"></div>
+        </div>
+
+        <div class="card">
+          <strong>📊 Шансы наград (сумма 100%)</strong>
+          <div style="font-size: 12px; color: #526075; line-height: 1.5;">
+            • <strong>1%</strong> — Яйцо с цыплёнком<br />
+            • <strong>5%</strong> — 100 монет · <strong>5%</strong> — 50 монет · <strong>5%</strong> — 10 кг корма<br />
+            • <strong>5%</strong> — Бустер (+200 кликов к яйцу в очереди; если очередь пуста — сохраняется в запас и сработает на следующем яйце)<br />
+            • <strong>79%</strong> — другие призы: 5 кг корма (14%), 2 кг корма (16%), 3 кг корма (4%), 25 монет (13%), 15 монет (12%), 20 обычных яиц (10%), 8 обычных яиц (8%), анти-болезнь / 15 монет (4%).
+          </div>
+        </div>
+      </div>
+
+      <!-- ОТДЕЛЬНЫЙ ЭКРАН: РАЗБЕЙ ЯЙЦО -->
+      <div class="page" id="page-egg-smash">
+        <div class="card">
+          <div class="row" style="justify-content: space-between;">
+            <strong>🐣 Разбей яйцо с цыплёнком</strong>
+            <span class="tag tag-gold" id="chick-queue-badge">В очереди: 0</span>
+          </div>
+          <div class="egg-smash-hero">
+            <div class="egg-smash-ico" id="egg-smash-icon">🥚</div>
+            <div id="active-chick-egg-info" style="font-size: 12px; color: #475569; max-width: 340px;">
+              Редкие яйца (1% шанс при сборе из гнёзд, в рулетке или за 400 🪙 в магазине) попадают сюда. После 1000 кликов: 50% курица / 50% петух.
+            </div>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="chick-click-bar"></div></div>
+          <div class="row" style="justify-content: space-between;">
+            <span style="font-size: 12px; font-weight: 700;">Кликов: <span id="chick-clicks-txt">0</span> / 1000</span>
+            <div class="row">
+              <button type="button" class="btn btn-purple btn-sm" id="use-booster-btn" style="display: none;">⚡ Буст (+200)</button>
+              <button type="button" class="btn btn-green" id="chick-click-btn">Ударить по яйцу (+1)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ОТДЕЛЬНЫЙ ЭКРАН: ТОП -->
+      <div class="page" id="page-top">
+        <div class="card">
+          <strong>🏆 Топ игроков по балансу</strong>
+          <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+        </div>
+      </div>
+
+      <!-- ПРОФИЛЬ, РЕФЕРАЛКА, ДОНАТ И ДОСТИЖЕНИЯ -->
       <div class="page" id="page-profile">
         <div class="card">
           <div class="row" style="justify-content: space-between;">
@@ -822,14 +876,6 @@
         </div>
 
         <div class="card">
-          <strong>📦 Склад обычных яиц</strong>
-          <div class="list-item">
-            <span>🥚 На складе: <strong id="warehouse-eggs">0</strong> шт. (по 2 🪙)</span>
-            <button type="button" class="btn btn-green" id="sell-eggs-btn">Продать все</button>
-          </div>
-        </div>
-
-        <div class="card">
           <strong>🎖 Достижения</strong>
           <div class="list-item">
             <span>🌿 <strong>Добряк</strong> — отпустить 1 курицу на волю</span>
@@ -840,11 +886,6 @@
             <span id="ach-rich-status" class="tag">0 / 10</span>
           </div>
         </div>
-
-        <div class="card">
-          <strong>🏆 Топ по балансу</strong>
-          <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
-        </div>
       </div>
     </div>
   </div>
@@ -854,6 +895,10 @@
       <span class="nav-ico">🪺</span>
       <span>Гнёзда</span>
     </button>
+    <button type="button" class="nav-btn" data-nav="warehouse">
+      <span class="nav-ico">📦</span>
+      <span>Склад</span>
+    </button>
     <button type="button" class="nav-btn" data-nav="shop">
       <span class="nav-ico">🏪</span>
       <span>Магазин</span>
@@ -861,10 +906,6 @@
     <button type="button" class="nav-btn" data-nav="race">
       <span class="nav-ico">🏁</span>
       <span>Гонки</span>
-    </button>
-    <button type="button" class="nav-btn" data-nav="profile">
-      <span class="nav-ico">🏆</span>
-      <span>Склад и Топ</span>
     </button>
   </nav>
 
@@ -920,8 +961,6 @@
     const ROULETTE_PAID_DAILY_LIMIT = 3;
     const BOOSTER_CLICKS = 200;
 
-    // Шансы рулетки (ровно 100%):
-    // 1% яйцо с цыплёнком + по 5% на 100 монет, 50 монет, 10 кг корма и бустер + 79% остальные призы
     const ROULETTE_PRIZES = [
       { id: "chick_egg", label: "Яйцо цыплёнка", short: "Цыплёнок", ico: "🐣", chance: 1, tier: "rare" },
       { id: "coins_100", label: "100 монет", short: "100 🪙", ico: "🪙", chance: 5, tier: "big" },
@@ -954,7 +993,7 @@
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || null;
     const tgId = tgUser?.id ? String(tgUser.id) : null;
     let authUid = null;
-    let SAVE_KEY = "yard_v4_guest";
+    let SAVE_KEY = "yard_v5_guest";
 
     function makeRefCodeFromSeed(seed) {
       const clean = String(seed || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
@@ -981,6 +1020,7 @@
         avatarValue: keepProfile?.avatarValue || "🐓",
         coins: 20,
         feedStockKg: 10,
+        givenFeedKg: 4,
         feedRemainderKg: 0,
         warehouseEggs: 0,
         boosterCharges: 0,
@@ -990,7 +1030,7 @@
         lastFedAt: now,
         sickWarned: false,
         lastTickAt: now,
-        fedUntil: now + 4 * HOUR_MS,
+        fedUntil: now + 2 * HOUR_MS,
         lastFreeSpinAt: 0,
         paidSpinsCount: 0,
         paidSpinsWindowStart: now,
@@ -1016,7 +1056,7 @@
     let isSpinning = false;
 
     function loadLocalStateForUid(uid) {
-      SAVE_KEY = `yard_v4_state_${uid}`;
+      SAVE_KEY = `yard_v5_state_${uid}`;
       try {
         const raw = localStorage.getItem(SAVE_KEY);
         if (raw) {
@@ -1030,6 +1070,7 @@
       const now = Date.now();
       if (!state.refCode) state.refCode = makeRefCodeFromSeed(uid);
       if (typeof state.feedStockKg !== "number") state.feedStockKg = 10;
+      if (typeof state.givenFeedKg !== "number") state.givenFeedKg = 0;
       if (typeof state.feedRemainderKg !== "number") state.feedRemainderKg = 0;
       if (typeof state.boosterCharges !== "number") state.boosterCharges = 0;
       if (!state.lastFedAt) state.lastFedAt = now;
@@ -1126,6 +1167,8 @@
     function processSimulation() {
       const now = Date.now();
       const birds = totalBirdsCount();
+      const prevTick = Number(state.lastTickAt || now);
+      const elapsedSec = Math.max(0, (now - prevTick) / 1000);
 
       if (now - Number(state.paidSpinsWindowStart || now) >= DAY_MS) {
         state.paidSpinsCount = 0;
@@ -1133,12 +1176,24 @@
       }
 
       if (birds === 0) {
+        state.givenFeedKg = 0;
         state.fedUntil = now;
         state.sickNeedsMedicine = false;
         state.sickStartedAt = null;
         state.sickWarned = false;
         state.lastTickAt = now;
         return;
+      }
+
+      // Расходуем корм, выданный курям, пока длится кормление
+      if ((state.fedUntil || 0) > prevTick && Number(state.givenFeedKg || 0) > 0 && elapsedSec > 0) {
+        const activeEatEnd = Math.min(now, Number(state.fedUntil || now));
+        const activeEatSec = Math.max(0, (activeEatEnd - prevTick) / 1000);
+        const eatenKg = (activeEatSec / 3600) * birds;
+        state.givenFeedKg = Math.max(0, Number((Number(state.givenFeedKg || 0) - eatenKg).toFixed(6)));
+      }
+      if ((state.fedUntil || 0) <= now) {
+        state.givenFeedKg = 0;
       }
 
       const isCurrentlyFed = (state.fedUntil || 0) > now;
@@ -1149,6 +1204,7 @@
         state.hens = [];
         state.roosters = [];
         state.selectedRoosterId = "";
+        state.givenFeedKg = 0;
         state.sickNeedsMedicine = false;
         state.sickStartedAt = null;
         state.sickWarned = false;
@@ -1253,7 +1309,9 @@
       const now = Date.now();
       const birds = totalBirdsCount();
       const stockKg = Number(state.feedStockKg || 0);
+      const givenKg = Number(state.givenFeedKg || 0);
       const stockFormatted = formatKgWithGrams(stockKg);
+      const givenFormatted = formatKgWithGrams(givenKg);
 
       document.getElementById("header-nick").textContent = state.nick || "Фермер";
       document.getElementById("header-supporter-badge").style.display = state.ideaSupporter ? "inline-block" : "none";
@@ -1262,7 +1320,8 @@
       applyAvatarToElement(document.getElementById("profile-avatar-preview"));
 
       document.getElementById("top-coins").textContent = Number(state.coins || 0).toLocaleString("ru-RU");
-      document.getElementById("top-feed-kg").textContent = stockFormatted;
+      document.getElementById("top-given-feed").textContent = givenFormatted;
+      document.getElementById("top-feed-stock").textContent = stockFormatted;
       document.getElementById("top-eggs").textContent = Number(state.warehouseEggs || 0);
       document.getElementById("top-chick-eggs").textContent = Number(state.chickQueue.length || 0);
       document.getElementById("top-boosters").textContent = Number(state.boosterCharges || 0);
@@ -1279,7 +1338,7 @@
       } else if (fedRemainingMs > 0) {
         statusBadge.textContent = "🌾 Сыты";
       } else {
-        statusBadge.textContent = stockKg > 0 ? "🌾 Ожидают корма" : "🌾 Нет корма";
+        statusBadge.textContent = givenKg > 0 ? "🌾 Выдано" : "🌾 Нет корма у кур";
       }
 
       const medBox = document.getElementById("medicine-box");
@@ -1289,7 +1348,8 @@
         document.getElementById("heal-timer-txt").textContent = formatDurationHm(healLeft);
       }
 
-      document.getElementById("feed-stock-txt").textContent = stockFormatted;
+      document.getElementById("given-feed-txt").textContent = givenFormatted;
+      document.getElementById("stock-feed-inline-txt").textContent = stockFormatted;
       document.getElementById("hourly-need-kg").textContent = birds;
       document.getElementById("total-birds-count").textContent = birds;
 
@@ -1298,9 +1358,9 @@
       const remH = Math.floor(fedHoursLeft);
       const remM = Math.floor((fedHoursLeft - remH) * 60);
       document.getElementById("feed-left-txt").textContent =
-        birds === 0 ? "нет птиц" : fedRemainingMs > 0 ? `${remH} ч ${String(remM).padStart(2, "0")} мин` : "не покормлены";
+        birds === 0 ? "нет птиц" : fedRemainingMs > 0 ? `${remH} ч ${String(remM).padStart(2, "0")} мин` : "не выдано";
 
-      document.getElementById("feed-arc-holder").innerHTML = renderArcSvg(feedPct, stockFormatted);
+      document.getElementById("feed-arc-holder").innerHTML = renderArcSvg(feedPct, givenFormatted);
 
       const totalNestEggs = state.hens.reduce((sum, h) => sum + Number(h.storedEggs || 0), 0);
       const collectAllBtn = document.getElementById("collect-all-eggs-btn");
@@ -1315,13 +1375,13 @@
         feedBtn.textContent = "Нет птиц для кормления";
         feedBtn.disabled = true;
       } else if (rawKg <= 0.0001) {
-        feedBtn.textContent = `Уже накормлены на ≥ ${selHours} ч`;
+        feedBtn.textContent = `Курам уже выдано на ≥ ${selHours} ч`;
         feedBtn.disabled = true;
       } else if (stockKg + 1e-9 < chargeableKg) {
         feedBtn.textContent = `Нужно ${formatKgWithGrams(chargeableKg)} (на складе ${stockFormatted})`;
         feedBtn.disabled = true;
       } else {
-        feedBtn.textContent = `Покормить на ${selHours} ч (списать ${formatKgWithGrams(chargeableKg)})`;
+        feedBtn.textContent = `Выдать курям на ${selHours} ч (${formatKgWithGrams(chargeableKg)})`;
         feedBtn.disabled = false;
       }
 
@@ -1337,10 +1397,10 @@
               ? `<span class="tag tag-gold">Несушка</span>`
               : `<span class="tag">Простая</span>`;
             const moodText = state.sickNeedsMedicine
-              ? `<span style="color:#dc2626;font-weight:700;">Болеет (${fedRemainingMs > 0 ? "сыта, ждёт лечения" : "не покормлена"})</span>`
+              ? `<span style="color:#dc2626;font-weight:700;">Болеет (${fedRemainingMs > 0 ? "корм выдан, ждёт лечения" : "корм не выдан"})</span>`
               : fedRemainingMs > 0
-              ? `<span style="color:#16873b;font-weight:700;">Сыта · несёт яйца</span>`
-              : `<span style="color:#d97706;font-weight:700;">Ожидает кормления со склада</span>`;
+              ? `<span style="color:#16873b;font-weight:700;">Корм выдан · несёт яйца</span>`
+              : `<span style="color:#d97706;font-weight:700;">Ожидает выдачи корма</span>`;
 
             return `
               <div class="nest-card">
@@ -1352,7 +1412,7 @@
                   <div class="nest-title">${escapeHtml(hen.name)} ${typeTag}</div>
                   <div class="nest-meta">
                     Кладка: <strong>${layText}</strong> · Макс: <strong>${MAX_NEST_EGGS}</strong><br />
-                    Расход при кормлении: <strong>1 кг / ч</strong><br />
+                    Расход при выдаче: <strong>1 кг / ч</strong><br />
                     ${moodText}
                   </div>
                 </div>
@@ -1373,6 +1433,15 @@
         });
       }
 
+      // Экран «Склад»
+      document.getElementById("wh-feed-stock").textContent = stockFormatted;
+      document.getElementById("wh-given-feed").textContent = givenFormatted;
+      document.getElementById("warehouse-eggs").textContent = state.warehouseEggs;
+      document.getElementById("wh-chick-eggs").textContent = state.chickQueue.length;
+      document.getElementById("wh-boosters").textContent = state.boosterCharges;
+      document.getElementById("wh-give-feed-btn").disabled = feedBtn.disabled;
+
+      // Рулетка UI
       const freeReady = isFreeSpinAvailable(now);
       const paidLeft = Math.max(0, ROULETTE_PAID_DAILY_LIMIT - Number(state.paidSpinsCount || 0));
       const spinBtn = document.getElementById("spin-roulette-btn");
@@ -1395,21 +1464,25 @@
         ? `Бесплатный спин доступен сейчас · Платных спинов осталось: ${paidLeft} из ${ROULETTE_PAID_DAILY_LIMIT} (по ${ROULETTE_SPIN_COST} 🪙)`
         : `Следующий бесплатный спин через ${formatDurationHm(freeRemMs)} · Платных спинов осталось: ${paidLeft} из ${ROULETTE_PAID_DAILY_LIMIT}`;
 
+      // Экран «Разбей яйцо»
       document.getElementById("chick-queue-badge").textContent = `В очереди: ${state.chickQueue.length}`;
       const currEgg = state.chickQueue[0] || null;
       const clickBtn = document.getElementById("chick-click-btn");
       const boostBtn = document.getElementById("use-booster-btn");
+      const eggIconEl = document.getElementById("egg-smash-icon");
       boostBtn.style.display = state.boosterCharges > 0 ? "inline-block" : "none";
       boostBtn.textContent = `⚡ Буст (${state.boosterCharges}) +${BOOSTER_CLICKS}`;
       boostBtn.disabled = !currEgg || state.boosterCharges < 1;
 
       if (!currEgg) {
+        eggIconEl.textContent = "🥚";
         document.getElementById("chick-clicks-txt").textContent = "0";
         document.getElementById("chick-click-bar").style.width = "0%";
         document.getElementById("active-chick-egg-info").innerHTML =
-          `Сейчас редких яиц в очереди нет.${state.boosterCharges > 0 ? ` В запасе на складе лежит бустеров: <strong>${state.boosterCharges}</strong> — они сработают, как появится яйцо!` : ""}`;
+          `Сейчас редких яиц в очереди нет.${state.boosterCharges > 0 ? ` В запасе лежит бустеров: <strong>${state.boosterCharges}</strong> — они сработают, как появится яйцо!` : ""}`;
         clickBtn.disabled = true;
       } else {
+        eggIconEl.textContent = currEgg.clicks >= 500 ? "🐣" : "🥚";
         document.getElementById("chick-clicks-txt").textContent = currEgg.clicks;
         document.getElementById("chick-click-bar").style.width = `${Math.min(100, (currEgg.clicks / 1000) * 100)}%`;
         document.getElementById("active-chick-egg-info").innerHTML =
@@ -1460,7 +1533,6 @@
       document.getElementById("ref-chick-eggs-progress").textContent =
         state.refRewardClaimed ? `${REF_TARGET_CHICK_EGGS} / ${REF_TARGET_CHICK_EGGS} (награда получена)` : `${progEggs} / ${REF_TARGET_CHICK_EGGS}`;
 
-      document.getElementById("warehouse-eggs").textContent = state.warehouseEggs;
       const rel = Number(state.releasedCount || 0);
       document.getElementById("ach-kind-status").textContent = rel >= 1 ? "Выполнено!" : `${rel} / 1`;
       document.getElementById("ach-rich-status").textContent = rel >= 10 ? "Выполнено!" : `${rel} / 10`;
@@ -1473,7 +1545,7 @@
       });
     }
 
-    // Инициализация ленты рулетки
+    // Рулетка с точным выравниванием по центру
     const trackEl = document.getElementById("roulette-track");
     const TOTAL_REEL_CARDS = 48;
     const WIN_INDEX = 36;
@@ -1867,7 +1939,7 @@
       saveState();
       renderAll();
       await syncFirebaseBalance();
-      notify(`Куплено ${kgAmount} кг корма на склад (всего на складе: ${formatKgWithGrams(state.feedStockKg)}). Корм не пропадёт!`);
+      notify(`Куплено ${kgAmount} кг корма на склад (на складе: ${formatKgWithGrams(state.feedStockKg)}). Выдайте курям в «Гнёздах» или на «Складе».`);
     }
 
     document.getElementById("buy-feed-1kg-btn").addEventListener("click", () => buyFeedToWarehouse(1, FEED_1KG_PRICE));
@@ -1875,7 +1947,7 @@
 
     document.getElementById("feed-hours-select").addEventListener("change", renderAll);
 
-    document.getElementById("feed-all-btn").addEventListener("click", async () => {
+    async function giveFeedToChickens() {
       processSimulation();
       const birds = totalBirdsCount();
       if (birds === 0) return;
@@ -1885,7 +1957,7 @@
       const { rawKg, chargeableKg, nextRemainderKg } = computeExactFeedCostKg(now, selHours, birds);
 
       if (rawKg <= 0.0001) {
-        notify(`Двор уже накормлен на ${selHours} ч — списывать ничего не нужно.`);
+        notify(`Курам уже выдано корма на ${selHours} ч.`);
         return;
       }
       if (Number(state.feedStockKg || 0) + 1e-9 < chargeableKg) {
@@ -1894,6 +1966,7 @@
       }
 
       state.feedStockKg = Math.max(0, Number(((state.feedStockKg || 0) - chargeableKg).toFixed(6)));
+      state.givenFeedKg = Number(((Number(state.givenFeedKg || 0) + chargeableKg)).toFixed(6));
       state.feedRemainderKg = nextRemainderKg;
       state.fedUntil = now + selHours * HOUR_MS;
       state.lastFedAt = now;
@@ -1902,11 +1975,14 @@
       renderAll();
 
       if (state.sickNeedsMedicine) {
-        notify(`Двор накормлен на ${selHours} ч (списано ${formatKgWithGrams(chargeableKg)}) — от голода птицы не умрут, но болезнь останется до лечения (100 🪙 или 9 ч).`);
+        notify(`Курам выдано ${formatKgWithGrams(chargeableKg)} (на ${selHours} ч) — от голода не умрут, но болезнь останется до лечения (100 🪙 или 9 ч).`);
       } else {
-        notify(`Двор накормлен на ${selHours} ч! Списано ровно ${formatKgWithGrams(chargeableKg)} (на складе: ${formatKgWithGrams(state.feedStockKg)}).`);
+        notify(`Курам выдано ${formatKgWithGrams(chargeableKg)} корма на ${selHours} ч! На складе осталось: ${formatKgWithGrams(state.feedStockKg)}.`);
       }
-    });
+    }
+
+    document.getElementById("feed-all-btn").addEventListener("click", giveFeedToChickens);
+    document.getElementById("wh-give-feed-btn").addEventListener("click", giveFeedToChickens);
 
     function distributeEggsFromCount(count, baseSeed = "") {
       let normalGot = 0;
@@ -1946,7 +2022,7 @@
       await syncFirebaseBalance();
 
       if (chickGot > 0) {
-        notify(`Собрано: ${normalGot} обычных яиц на склад и ${chickGot} редких с цыплёнком (в мини-игру)!`);
+        notify(`Собрано: ${normalGot} обычных яиц на склад и ${chickGot} редких с цыплёнком (в «Разбей яйцо»)!`);
       } else {
         notify(`Собрано ${normalGot} обычных яиц на склад.`);
       }
@@ -2026,7 +2102,7 @@
       saveState();
       renderAll();
       await syncFirebaseBalance();
-      notify(`Куплено яйцо с цыплёнком (${rar.label})! Разбейте его за 1000 кликов.`);
+      notify(`Куплено яйцо с цыплёнком (${rar.label})! Разбейте его на экране «Разбей яйцо» (1000 кликов).`);
     });
 
     async function finishHatchedChickEgg() {
@@ -2468,7 +2544,7 @@
       renderAll();
       await claimPendingReferrerRewards().catch(() => {});
       await syncFirebaseBalance().catch(() => {});
-      notify("Сессия активна. На старте у вас 2 курицы, 10 кг корма на складе и 20 монет.");
+      notify("Сессия активна. На старте у вас 2 курицы, 4 кг корма выдано курям, 10 кг на складе и 20 монет.");
     });
 
     signInAnonymously(auth).catch(() => {
