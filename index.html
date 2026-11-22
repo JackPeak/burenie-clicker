@@ -1003,29 +1003,34 @@
 
     async function syncFirebaseBalance() {
       if (!authUid) return;
-      const activeR = state.roosters.find((r) => r.id === state.selectedRoosterId) || state.roosters[0] || null;
-      await update(ref(db), {
-        [`refCodes/${state.refCode}`]: authUid,
-        [`players/${authUid}/profile`]: {
+      const safeNick = String(state.nick || "Фермер").slice(0, 40);
+      const safeAvatar = state.avatarType === "emoji"
+        ? String(state.avatarValue || "🐓").slice(0, 40)
+        : "🐓";
+      const safeBalance = Math.max(0, Math.min(100000000, Number(state.coins || 0)));
+      const safeEggs = Math.max(0, Math.min(1000000, Number(state.warehouseEggs || 0)));
+
+      try {
+        await set(ref(db, `refCodes/${state.refCode}`), authUid);
+      } catch (_) {}
+
+      await update(ref(db, `players/${authUid}`), {
+        balance: safeBalance,
+        eggs: safeEggs,
+        profile: {
           id: authUid,
           tgId: tgId || null,
-          name: state.nick || "Фермер",
+          name: safeNick,
           refCode: state.refCode,
           ideaSupporter: Boolean(state.ideaSupporter),
           updatedAt: Date.now()
-        },
-        [`players/${authUid}/balance`]: Number(state.coins || 0),
-        [`players/${authUid}/eggs`]: Number(state.warehouseEggs || 0),
-        [`leaderboard/${authUid}`]: {
-          id: authUid,
-          name: state.nick || "Фермер",
-          avatarEmoji: state.avatarType === "emoji" ? state.avatarValue : "🐓",
-          ideaSupporter: Boolean(state.ideaSupporter),
-          balance: Number(state.coins || 0),
-          eggs: Number(state.warehouseEggs || 0),
-          roosterRarity: activeR?.rarityLabel || "",
-          updatedAt: Date.now()
         }
+      });
+
+      await set(ref(db, `leaderboard/${authUid}`), {
+        balance: safeBalance,
+        nick: safeNick,
+        avatar: safeAvatar
       });
     }
 
@@ -1963,8 +1968,7 @@
         .map((p, i) => `
           <div class="list-item">
             <span>
-              <strong>#${i + 1}</strong> ${escapeHtml(p.avatarEmoji || "🐓")} <strong>${escapeHtml(p.name || "Игрок")}</strong>
-              ${p.ideaSupporter ? `<span class="tag tag-purple">💡 Меценат</span>` : ""}
+              <strong>#${i + 1}</strong> ${escapeHtml(p.avatar || p.avatarEmoji || "🐓")} <strong>${escapeHtml(p.nick || p.name || "Игрок")}</strong>
             </span>
             <strong>🪙 ${Number(p.balance || 0).toLocaleString("ru-RU")}</strong>
           </div>
