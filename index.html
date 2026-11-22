@@ -1127,7 +1127,6 @@
       const now = Date.now();
       const birds = totalBirdsCount();
 
-      // Сброс дневного окна платных прокрутов рулетки раз в 24 часа
       if (now - Number(state.paidSpinsWindowStart || now) >= DAY_MS) {
         state.paidSpinsCount = 0;
         state.paidSpinsWindowStart = now;
@@ -1142,11 +1141,9 @@
         return;
       }
 
-      // Время без кормления: если покормили (обновили lastFedAt и fedUntil > now), голодная смерть на 24ч не наступает
       const isCurrentlyFed = (state.fedUntil || 0) > now;
       const sinceFeedMs = isCurrentlyFed ? 0 : Math.max(0, now - Number(state.lastFedAt || state.lastTickAt || now));
 
-      // Смерть на 24-м часу без кормления
       if (!isCurrentlyFed && sinceFeedMs >= DEATH_AFTER_HOURS * HOUR_MS) {
         const diedCount = birds;
         state.hens = [];
@@ -1161,7 +1158,6 @@
         return;
       }
 
-      // Болезнь после 19 часов без корма
       if (!isCurrentlyFed && sinceFeedMs >= SICK_AFTER_HOURS * HOUR_MS && !state.sickNeedsMedicine) {
         state.sickNeedsMedicine = true;
         state.sickStartedAt = now;
@@ -1171,7 +1167,6 @@
         }
       }
 
-      // Самолечение через 9 часов болезни (работает даже если птицы уже покормлены после 19ч)
       if (state.sickNeedsMedicine && state.sickStartedAt) {
         if (now - state.sickStartedAt >= AUTO_HEAL_HOURS * HOUR_MS) {
           state.sickNeedsMedicine = false;
@@ -1378,7 +1373,6 @@
         });
       }
 
-      // Рулетка UI
       const freeReady = isFreeSpinAvailable(now);
       const paidLeft = Math.max(0, ROULETTE_PAID_DAILY_LIMIT - Number(state.paidSpinsCount || 0));
       const spinBtn = document.getElementById("spin-roulette-btn");
@@ -1401,7 +1395,6 @@
         ? `Бесплатный спин доступен сейчас · Платных спинов осталось: ${paidLeft} из ${ROULETTE_PAID_DAILY_LIMIT} (по ${ROULETTE_SPIN_COST} 🪙)`
         : `Следующий бесплатный спин через ${formatDurationHm(freeRemMs)} · Платных спинов осталось: ${paidLeft} из ${ROULETTE_PAID_DAILY_LIMIT}`;
 
-      // Кликер яйца с цыплёнком + запас бустеров
       document.getElementById("chick-queue-badge").textContent = `В очереди: ${state.chickQueue.length}`;
       const currEgg = state.chickQueue[0] || null;
       const clickBtn = document.getElementById("chick-click-btn");
@@ -1482,9 +1475,6 @@
 
     // Инициализация ленты рулетки
     const trackEl = document.getElementById("roulette-track");
-    const CARD_W = 78;
-    const GAP_W = 8;
-    const STEP_W = CARD_W + GAP_W;
     const TOTAL_REEL_CARDS = 48;
     const WIN_INDEX = 36;
 
@@ -1517,6 +1507,25 @@
         if (r <= 0) return p;
       }
       return ROULETTE_PRIZES[ROULETTE_PRIZES.length - 1];
+    }
+
+    function getTargetTranslateXForWinner() {
+      const cardEl = trackEl.children[WIN_INDEX];
+      const stageEl = trackEl.closest(".roulette-stage");
+      const pointerEl = stageEl?.querySelector(".roulette-center-line");
+      if (!cardEl || !stageEl || !pointerEl) return 0;
+
+      const stageRect = stageEl.getBoundingClientRect();
+      const pointerRect = pointerEl.getBoundingClientRect();
+      const cardRect = cardEl.getBoundingClientRect();
+
+      const pointerCenterX = pointerRect.left + pointerRect.width / 2 - stageRect.left;
+      const cardCenterX = cardRect.left + cardRect.width / 2 - stageRect.left;
+
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(trackEl).transform);
+      const currentTx = matrix.m41 || 0;
+
+      return currentTx + (pointerCenterX - cardCenterX);
     }
 
     async function applyRoulettePrize(prize) {
@@ -1598,7 +1607,6 @@
           msg = "Выпало: +15 монет!";
       }
 
-      // Проверяем, не добило ли яйцо 1000 кликов от бустера
       if (state.chickQueue[0] && state.chickQueue[0].clicks >= 1000) {
         await finishHatchedChickEgg();
       }
@@ -1640,19 +1648,20 @@
       buildReelCards(prize);
       renderAll();
 
-      // Лента едет ВПРАВО: стартуем со смещения влево и двигаем translateX вправо до 0 (где WIN_INDEX встаёт под центр)
-      const viewportW = trackEl.parentElement.clientWidth || 320;
-      const winCenterOffset = WIN_INDEX * STEP_W + CARD_W / 2;
-      const jitter = Math.round((Math.random() - 0.5) * 28);
-      const startX = -(winCenterOffset - viewportW / 2 + jitter);
+      const firstCard = trackEl.children[0];
+      const cardRect0 = firstCard ? firstCard.getBoundingClientRect() : { width: 78 };
+      const computedGap = parseFloat(getComputedStyle(trackEl).gap) || 8;
+      const stepW = (cardRect0.width || 78) + computedGap;
+      const startX = -(WIN_INDEX * stepW);
 
       trackEl.style.transition = "none";
       trackEl.style.transform = `translateX(${startX}px)`;
 
       requestAnimationFrame(() => {
+        const finalX = getTargetTranslateXForWinner();
         requestAnimationFrame(() => {
           trackEl.style.transition = "transform 3.4s cubic-bezier(0.12, 0.82, 0.2, 1)";
-          trackEl.style.transform = "translateX(0px)";
+          trackEl.style.transform = `translateX(${finalX}px)`;
         });
       });
 
