@@ -358,6 +358,43 @@
       letter-spacing: 1px;
       font-size: 13px;
     }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-box {
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      text-align: center;
+    }
+    .modal-text {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1c2430;
+      line-height: 1.45;
+    }
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
     .bottom-nav {
       position: fixed;
       left: 0;
@@ -398,6 +435,17 @@
     </defs>
   </svg>
 
+  <!-- Модальное окно подтверждения сброса (текст можно поменять в .modal-text) -->
+  <div id="reset-confirm-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <p class="modal-text" id="reset-modal-text">Вы точно хотите сбросить свой прогресс?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-red" id="confirm-reset-yes-btn">Да</button>
+        <button type="button" class="btn btn-gray" id="confirm-reset-no-btn">Нет</button>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="green-header">
       <div class="top-profile-bar">
@@ -435,7 +483,7 @@
         </div>
         <ol class="guide-steps">
           <li><strong>Следи за кормом:</strong> сытые птицы несут яйца (простая раз в 10 мин, несушка раз в 5 мин). Без корма более 9 ч понадобится лекарство (100 🪙), а через 12 ч птицы могут погибнуть.</li>
-          <li><strong>Собирай яйца и продавай или копи:</strong> нажми <em>«Собирать»</em> в гнезде — обычные яйца идут на склад (продажа по 2 🪙), а редкие (~10%) попадают в кликер <em>«Разбей яйцо»</em>.</li>
+          <li><strong>Собирай яйца и продавай или копи:</strong> нажми <em>«Собирать»</em> в гнезде или <em>«Собрать все яйца»</em> — обычные яйца идут на склад (продажа по 2 🪙), а редкие (1% шанс) попадают в кликер <em>«Разбей яйцо»</em>.</li>
           <li><strong>Выводи петухов:</strong> разбей редкое яйцо за 1000 кликов — с шансом 50/50 вылупится курица или петух. Петуха можно выставить в <strong>Гонки 1×1 / 1×4</strong> или сдать на мясо (220–800 🪙).</li>
           <li><strong>Зови друзей и поддерживай идеи:</strong> в разделе <em>«Склад и Топ»</em> есть твой код приглашения (награда за 2 яйца с цыплёнком у друга) и блок <em>«Донат на идею»</em> (значок мецената без поломки баланса).</li>
         </ol>
@@ -479,7 +527,10 @@
               <option value="4" selected>На 4 часа</option>
             </select>
           </div>
-          <button type="button" class="btn btn-green" id="feed-all-btn">Накормить всех</button>
+          <div class="row">
+            <button type="button" class="btn btn-green" style="flex: 1;" id="feed-all-btn">Накормить всех</button>
+            <button type="button" class="btn btn-amber" id="collect-all-eggs-btn">🥚 Собрать все яйца</button>
+          </div>
         </div>
 
         <div id="nests-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
@@ -511,7 +562,7 @@
             <span class="tag tag-gold" id="chick-queue-badge">В очереди: 0</span>
           </div>
           <div id="active-chick-egg-info" style="font-size: 12px; color: #526075;">
-            Редкие яйца (~10% при сборе из гнёзд или за 400 🪙 в магазине) попадают сюда. После 1000 кликов: 50% курица / 50% петух.
+            Редкие яйца (1% шанс при сборе из гнёзд или за 400 🪙 в магазине) попадают сюда. После 1000 кликов: 50% курица / 50% петух.
           </div>
           <div class="bar-bg"><div class="bar-fill" id="chick-click-bar"></div></div>
           <div class="row" style="justify-content: space-between;">
@@ -580,6 +631,7 @@
             <div class="row">
               <span id="profile-supporter-tag" class="tag tag-purple" style="display: none;">💡 Идейный меценат</span>
               <button type="button" class="btn btn-gray btn-sm" id="open-guide-profile-btn">❓ Инструкция</button>
+              <button type="button" class="btn btn-red btn-sm" id="open-reset-modal-btn">🔄 Сброс</button>
             </div>
           </div>
           <div class="row">
@@ -730,6 +782,7 @@
     const DEATH_AFTER_HOURS = 24;
     const MEDICINE_COST = 100;
     const MAX_NEST_EGGS = 48;
+    const CHICK_EGG_CHANCE = 0.01;
     const REF_TARGET_CHICK_EGGS = 2;
     const REF_REWARD_FEED_HOURS = 4;
 
@@ -768,12 +821,12 @@
       };
     }
 
-    function createDefaultState(uid = "") {
+    function createDefaultState(uid = "", keepProfile = null) {
       const now = Date.now();
       return {
-        nick: tgUser?.first_name ? String(tgUser.first_name).slice(0, 24) : "Фермер",
-        avatarType: "emoji",
-        avatarValue: "🐓",
+        nick: keepProfile?.nick || (tgUser?.first_name ? String(tgUser.first_name).slice(0, 24) : "Фермер"),
+        avatarType: keepProfile?.avatarType || "emoji",
+        avatarValue: keepProfile?.avatarValue || "🐓",
         coins: 20,
         warehouseEggs: 0,
         releasedCount: 0,
@@ -786,13 +839,13 @@
         selectedRoosterId: "",
         chickQueue: [],
         nextNestNum: 3,
-        refCode: makeRefCodeFromSeed(uid || tgId || now),
-        referredByCode: "",
-        referredByUid: "",
+        refCode: keepProfile?.refCode || makeRefCodeFromSeed(uid || tgId || now),
+        referredByCode: keepProfile?.referredByCode || "",
+        referredByUid: keepProfile?.referredByUid || "",
         refChickEggsHatched: 0,
         refRewardClaimed: false,
-        ideaSupporter: false,
-        guideSeen: false
+        ideaSupporter: Boolean(keepProfile?.ideaSupporter),
+        guideSeen: Boolean(keepProfile?.guideSeen)
       };
     }
 
@@ -1030,6 +1083,11 @@
       const totalFeedKgLeft = Number((fedHoursLeft * birds).toFixed(1));
       document.getElementById("feed-arc-holder").innerHTML = renderArcSvg(feedPct, `${totalFeedKgLeft} кг`);
 
+      const totalNestEggs = state.hens.reduce((sum, h) => sum + Number(h.storedEggs || 0), 0);
+      const collectAllBtn = document.getElementById("collect-all-eggs-btn");
+      collectAllBtn.disabled = totalNestEggs < 1;
+      collectAllBtn.textContent = totalNestEggs > 0 ? `🥚 Собрать все (${totalNestEggs})` : "🥚 Собрать все яйца";
+
       const selHours = Number(document.getElementById("feed-hours-select").value) || 1;
       const targetMs = now + selHours * HOUR_MS;
       const addMs = Math.max(0, targetMs - Math.max(now, state.fedUntil || now));
@@ -1104,7 +1162,7 @@
         document.getElementById("chick-clicks-txt").textContent = "0";
         document.getElementById("chick-click-bar").style.width = "0%";
         document.getElementById("active-chick-egg-info").textContent =
-          "Сейчас редких яиц в очереди нет. Они выпадают (~10%) при сборе из гнёзд или покупаются в магазине за 400 🪙.";
+          "Сейчас редких яиц в очереди нет. Они выпадают (1% шанс) при сборе из гнёзд или покупаются в магазине за 400 🪙.";
         clickBtn.disabled = true;
       } else {
         document.getElementById("chick-clicks-txt").textContent = currEgg.clicks;
@@ -1183,6 +1241,33 @@
     });
     document.querySelectorAll(".nav-btn").forEach((b) => {
       b.addEventListener("click", () => openPage(b.getAttribute("data-nav")));
+    });
+
+    // Модалка сброса прогресса (Да / Нет)
+    const resetModal = document.getElementById("reset-confirm-modal");
+    document.getElementById("open-reset-modal-btn").addEventListener("click", () => {
+      resetModal.classList.add("open");
+    });
+    document.getElementById("confirm-reset-no-btn").addEventListener("click", () => {
+      resetModal.classList.remove("open");
+    });
+    document.getElementById("confirm-reset-yes-btn").addEventListener("click", async () => {
+      resetModal.classList.remove("open");
+      const keepProfile = {
+        nick: state.nick,
+        avatarType: state.avatarType,
+        avatarValue: state.avatarValue,
+        refCode: state.refCode,
+        referredByCode: state.referredByCode,
+        referredByUid: state.referredByUid,
+        ideaSupporter: state.ideaSupporter,
+        guideSeen: state.guideSeen
+      };
+      state = createDefaultState(authUid, keepProfile);
+      saveState();
+      renderAll();
+      await syncFirebaseBalance().catch(() => {});
+      notify("Прогресс сброшен до стартового состояния.");
     });
 
     // Управление ознакомлением
@@ -1364,6 +1449,27 @@
       notify(`Все птицы (${birds} шт.) накормлены на ${selHours} ч! Потрачено ${needKg} кг (${needCoins} 🪙).`);
     });
 
+    function distributeEggsFromCount(count, baseSeed = "") {
+      let normalGot = 0;
+      let chickGot = 0;
+      for (let i = 0; i < count; i++) {
+        if (Math.random() < CHICK_EGG_CHANCE) {
+          const rar = rollRarity();
+          state.chickQueue.push({
+            id: "ce_" + Date.now().toString(36) + "_" + baseSeed + "_" + i,
+            rarity: rar.key,
+            rarityLabel: rar.label,
+            clicks: 0
+          });
+          chickGot++;
+        } else {
+          normalGot++;
+        }
+      }
+      state.warehouseEggs += normalGot;
+      return { normalGot, chickGot };
+    }
+
     async function collectFromNest(henId) {
       processSimulation();
       const hen = state.hens.find((h) => h.id === henId);
@@ -1375,23 +1481,7 @@
       const count = hen.storedEggs;
       hen.storedEggs = 0;
 
-      let normalGot = 0;
-      let chickGot = 0;
-      for (let i = 0; i < count; i++) {
-        if (Math.random() < 0.1) {
-          const rar = rollRarity();
-          state.chickQueue.push({
-            id: "ce_" + Date.now().toString(36) + "_" + i,
-            rarity: rar.key,
-            rarityLabel: rar.label,
-            clicks: 0
-          });
-          chickGot++;
-        } else {
-          normalGot++;
-        }
-      }
-      state.warehouseEggs += normalGot;
+      const { normalGot, chickGot } = distributeEggsFromCount(count, hen.id);
       saveState();
       renderAll();
       await syncFirebaseBalance();
@@ -1402,6 +1492,31 @@
         notify(`Собрано ${normalGot} обычных яиц на склад.`);
       }
     }
+
+    document.getElementById("collect-all-eggs-btn").addEventListener("click", async () => {
+      processSimulation();
+      let totalCount = 0;
+      for (const hen of state.hens) {
+        if (hen.storedEggs > 0) {
+          totalCount += hen.storedEggs;
+          hen.storedEggs = 0;
+        }
+      }
+      if (totalCount < 1) {
+        notify("Собирать пока нечего — во всех гнёздах 0 яиц.");
+        return;
+      }
+      const { normalGot, chickGot } = distributeEggsFromCount(totalCount, "all");
+      saveState();
+      renderAll();
+      await syncFirebaseBalance();
+
+      if (chickGot > 0) {
+        notify(`Собрано со всех гнёзд: ${normalGot} обычных яиц на склад и ${chickGot} редких с цыплёнком!`);
+      } else {
+        notify(`Собрано со всех гнёзд: ${normalGot} обычных яиц на склад.`);
+      }
+    });
 
     async function releaseHenToWild(henId) {
       const idx = state.hens.findIndex((h) => h.id === henId);
